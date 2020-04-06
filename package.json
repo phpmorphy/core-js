@@ -1,0 +1,27 @@
+{
+  "name": "@umi-top/umi-core-js",
+  "version": "0.0.3",
+  "description": "UMI Core JS Library",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/umi-top/umi-core-js"
+  },
+  "keywords": [
+    "UMI"
+  ],
+  "author": "Umi Dev <dev@umi.top>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/umi-top/umi-core-js/issues"
+  },
+  "homepage": "https://github.com/umi-top/umi-core-js#readme",
+  "dependencies": {
+    "bech32": "^1.1.3",
+    "bip39": "^3.0.2",
+    "sha3": "^2.1.2",
+    "tweetnacl": "^1.0.3"
+  }
+}
