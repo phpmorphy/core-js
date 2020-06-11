@@ -20,8 +20,8 @@ export interface TransactionInterface {
   version: TransactionVersions
   sender: AddressInterface
   recipient: AddressInterface
-  value: bigint
-  nonce: bigint
+  value: number
+  nonce: number
   signature: Uint8Array
 
   // structure
@@ -36,9 +36,9 @@ export interface TransactionInterface {
 
   setRecipient (address: AddressInterface): TransactionInterface
 
-  setValue (value: bigint): TransactionInterface
+  setValue (value: number): TransactionInterface
 
-  setNonce (nonce: bigint): TransactionInterface
+  setNonce (nonce: number): TransactionInterface
 
   setSignature (signature: Uint8Array): TransactionInterface
 

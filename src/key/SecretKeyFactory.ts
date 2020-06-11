@@ -1,7 +1,7 @@
-import crypto from 'crypto'
 import nacl from 'tweetnacl'
 import { SecretKeyInterface } from './SecretKeyInterface'
 import { SecretKey } from './ed25519/SecretKey'
+import { sha256 } from '../util'
 
 export class SecretKeyFactory {
   static fromSeed (seed: Uint8Array): SecretKeyInterface {
@@ -10,9 +10,7 @@ export class SecretKeyFactory {
     }
 
     return new SecretKey(
-      nacl.sign.keyPair.fromSeed(
-        new Uint8Array(crypto.createHash('sha256').update(seed).digest().buffer,
-        )).secretKey,
+      nacl.sign.keyPair.fromSeed(sha256(seed)).secretKey,
     )
   }
 }

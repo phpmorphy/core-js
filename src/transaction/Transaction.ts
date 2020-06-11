@@ -1,11 +1,10 @@
-import crypto from 'crypto'
 import {
   TransactionInterface,
   TransactionVersions,
 } from './TransactionInterface'
 import { SecretKeyInterface } from '../key'
 import { Address, AddressInterface } from '../address'
-import { Converter } from '../util'
+import { Converter, sha256 } from '../util'
 
 const UNSIGNED_OFFSET: number = 0
 const UNSIGNED_LENGTH: number = 85
@@ -50,9 +49,7 @@ export class Transaction implements TransactionInterface {
   }
 
   get hash (): Uint8Array {
-    return new Uint8Array(
-      crypto.createHash('sha256').update(this._bytes).digest().buffer,
-    )
+    return sha256(this._bytes)
   }
 
   get version (): TransactionVersions {
@@ -101,15 +98,35 @@ export class Transaction implements TransactionInterface {
     return this
   }
 
-  get value (): bigint {
-    return this._view.getBigUint64(VALUE_OFFSET)
+  get value (): number {
+    if (this._view.getUint16(VALUE_OFFSET) > 0x001f) {
+      throw new Error('value is not safe integer')
+    }
+
+    return this._view.getUint32(VALUE_OFFSET) * 0x1_0000_0000 +
+      this._view.getUint32(VALUE_OFFSET + 4)
   }
 
-  set value (value: bigint) {
-    this._view.setBigUint64(VALUE_OFFSET, value)
+  set value (value: number) {
+    if (typeof value !== 'number') {
+      throw new Error('value must be number')
+    }
+
+    if (Math.floor(value) !== value) {
+      throw new Error('value must be integer')
+    }
+
+    if (value < 1 || value > Number.MAX_SAFE_INTEGER) {
+      throw new Error('value must be between 1 and 9007199254740991')
+    }
+
+    // tslint:disable-next-line:no-bitwise
+    this._view.setInt32(VALUE_OFFSET + 4, value | 0)
+    this._view.setInt32(VALUE_OFFSET,
+      (value - this._view.getUint32(VALUE_OFFSET + 4)) / 0x1_0000_0000)
   }
 
-  setValue (value: bigint): this {
+  setValue (value: number): this {
     this.value = value
     return this
   }
@@ -176,15 +193,35 @@ export class Transaction implements TransactionInterface {
     return this
   }
 
-  get nonce (): bigint {
-    return this._view.getBigUint64(NONCE_OFFSET)
+  get nonce (): number {
+    if (this._view.getUint16(NONCE_OFFSET) > 0x001f) {
+      throw new Error('nonce is not safe integer')
+    }
+
+    return this._view.getUint32(NONCE_OFFSET) * 0x1_0000_0000 +
+      this._view.getUint32(NONCE_OFFSET + 4)
   }
 
-  set nonce (nonce: bigint) {
-    this._view.setBigUint64(NONCE_OFFSET, nonce)
+  set nonce (nonce: number) {
+    if (typeof nonce !== 'number') {
+      throw new Error('nonce must be number')
+    }
+
+    if (Math.floor(nonce) !== nonce) {
+      throw new Error('nonce must be integer')
+    }
+
+    if (nonce < 0 || nonce > Number.MAX_SAFE_INTEGER) {
+      throw new Error('nonce must be between 0 and 9007199254740991')
+    }
+
+    // tslint:disable-next-line:no-bitwise
+    this._view.setInt32(NONCE_OFFSET + 4, nonce | 0)
+    this._view.setInt32(NONCE_OFFSET,
+      (nonce - this._view.getUint32(NONCE_OFFSET + 4)) / 0x1_0000_0000)
   }
 
-  setNonce (nonce: bigint): this {
+  setNonce (nonce: number): this {
     this.nonce = nonce
     return this
   }

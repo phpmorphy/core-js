@@ -60,7 +60,7 @@ const tx1 = new umi.Transaction()
   .setVersion(umi.TransactionVersions.Basic)
   .setSender(sender)
   .setRecipient(recpient)
-  .setValue(BigInt('18446744073709551615'))
+  .setValue(9007199254740991)
   .sign(secKey)
 
 const tx2 = new umi.Transaction(tx1.bytes)
