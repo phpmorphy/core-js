@@ -1,15 +1,45 @@
-import bech32 from 'bech32'
-import { PublicKey, PublicKeyInterface } from '../key'
-import { AddressInterface } from './AddressInterface'
-import { Converter } from '../util'
+/**
+ * Copyright (c) 2020 UMI
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
-const ADDRESS_LENGTH: number = 34
-const VERSION_OFFSET: number = 0
-const PUBKEY_OFFSET: number = 2
-const FIFTEEN_BITS: number = 0x7FFF
+import { Bech32 } from '../util/Bech32'
+import { PublicKey } from '../key/ed25519/PublicKey'
+import { prefixToUint16, uint16ToPrefix } from '../util/Converter'
 
-export class Address implements AddressInterface {
-  private readonly _bytes: Uint8Array = new Uint8Array(ADDRESS_LENGTH)
+/**
+ * @class
+ * @classdesc This is a description of the Address class.
+ * @hideconstructor
+ */
+export class Address {
+  static get LENGTH(): number { return 34 }
+
+  /**
+   * @private
+   * @readonly
+   * @summary Summary.
+   * @description Desc
+   * @type Uint8Array
+   */
+  private readonly _bytes: Uint8Array = new Uint8Array(Address.LENGTH)
 
   constructor (bytes?: Uint8Array) {
     if (bytes === undefined) {
@@ -19,40 +49,66 @@ export class Address implements AddressInterface {
     }
   }
 
+  /**
+   * @summary Summary.
+   * @description Desc
+   * @readonly
+   * @type Uint8Array
+   */
   get bytes (): Uint8Array {
     const b = new Uint8Array(this._bytes.byteLength)
     b.set(this._bytes)
     return b
   }
 
+  /**
+   * @summary Summary.
+   * @description Desc
+   * @type number
+   */
   get version (): number {
-    return new DataView(this._bytes.buffer).getUint16(VERSION_OFFSET)
+    // version length = 2
+    // version offset = 0
+    return new DataView(this._bytes.buffer).getUint16(0)
   }
 
-  set version (ver: number) {
+  set version (version: number) {
     // tslint:disable-next-line:no-bitwise
-    new DataView(this._bytes.buffer).setUint16(0, (ver & FIFTEEN_BITS))
+    new DataView(this._bytes.buffer).setUint16(0, (version & 0x7FFF))
   }
 
-  get publicKey (): PublicKeyInterface {
-    return new PublicKey(this._bytes.subarray(PUBKEY_OFFSET))
+  /**
+   * @summary Summary.
+   * @description Desc
+   * @param {number} version
+   * @throws {Error} error
+   */
+  setVersion (version: number): this {
+    this.version = version
+    return this
   }
 
-  set publicKey (publicKey: PublicKeyInterface) {
-    this._bytes.set(publicKey.bytes, PUBKEY_OFFSET)
+  get publicKey (): PublicKey {
+    // public key begin = 2
+    return new PublicKey(this._bytes.subarray(2))
   }
 
-  setPublicKey (publicKey: PublicKeyInterface): this {
+  set publicKey (publicKey: PublicKey) {
+    // public key offset = 2
+    this._bytes.set(publicKey.bytes, 2)
+  }
+
+  setPublicKey (publicKey: PublicKey): this {
     this.publicKey = publicKey
     return this
   }
 
   get prefix (): string {
-    return Converter.uint16ToPrefix(this.version)
+    return uint16ToPrefix(this.version)
   }
 
   set prefix (prefix: string) {
-    this.version = Converter.prefixToUint16(prefix)
+    this.version = prefixToUint16(prefix)
   }
 
   setPrefix (prefix: string): this {
@@ -61,20 +117,16 @@ export class Address implements AddressInterface {
   }
 
   get bech32 (): string {
-    return bech32.encode(
-      this.prefix,
-      bech32.toWords(this._bytes.subarray(PUBKEY_OFFSET)),
-    )
+    return Bech32.encode(this._bytes)
   }
 
   set bech32 (adr: string) {
-    const raw = bech32.decode(adr)
-    this.version = Converter.prefixToUint16(raw.prefix)
-    this._bytes.set(new Uint8Array(bech32.fromWords(raw.words)), PUBKEY_OFFSET)
+    this._bytes.set(Bech32.decode(adr))
   }
 
-  fromBech32 (adr: string): this {
-    this.bech32 = adr
-    return this
+  static fromBech32 (adr: string): Address {
+    const a = new Address()
+    a.bech32 = adr
+    return a
   }
 }

@@ -1,17 +1,36 @@
-import {
-  TransactionInterface,
-  TransactionVersions,
-} from './TransactionInterface'
-import { SecretKeyInterface } from '../key'
-import { Address, AddressInterface } from '../address'
-import { Converter, sha256 } from '../util'
+/**
+ * Copyright (c) 2020 UMI
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+import { SecretKey } from '../key/ed25519/SecretKey'
+import { Address } from '../address/Address'
+import { sha256 } from '../util/Sha256'
+import { uint16ToPrefix, prefixToUint16 } from '../util/Converter'
 
 const UNSIGNED_OFFSET: number = 0
 const UNSIGNED_LENGTH: number = 85
-const SENDER_OFFSET: number = 1
-const SENDER_LENGTH: number = 34
-const RECIPIENT_OFFSET: number = 35
-const RECIPIENT_LENGTH: number = 34
+// const SENDER_OFFSET: number = 1
+// const SENDER_LENGTH: number = 34
+// const RECIPIENT_OFFSET: number = 35
+// const RECIPIENT_LENGTH: number = 34
 const PREFIX_OFFSET: number = 35
 const PREFIX_LENGTH: number = 2
 const PROFIT_OFFSET: number = 37
@@ -26,16 +45,45 @@ const NONCE_OFFSET: number = 77
 const NONCE_LENGTH: number = 8
 const SIGNATURE_OFFSET: number = 85
 const SIGNATURE_LENGTH: number = 64
-const TRANSACTION_LENGTH: number = 150
+// const TRANSACTION_LENGTH: number = 150
 
-export class Transaction implements TransactionInterface {
-  private readonly _bytes: Uint8Array = new Uint8Array(TRANSACTION_LENGTH)
+/**
+ * @class
+ * @classdesc This is a description of the Transaction class.
+ * @implements TransactionInterface
+ */
+export class Transaction {
+  /**
+   * @constant
+   * @type number
+   * @default 150
+   * @description Длина транзакции в байтах
+   */
+  static get LENGTH (): number { return 150 }
+
+  static get Genesis (): number { return 0 }
+
+  static get Basic (): number { return 1 }
+
+  static get CreateStructure (): number { return 2 }
+
+  static get UpdateStructure (): number { return 3 }
+
+  static get UpdateProfitAddress (): number { return 4 }
+
+  static get UpdateFeeAddress (): number { return 5 }
+
+  static get CreateTransitAddress (): number { return 6 }
+
+  static get DeleteTransitAddress (): number { return 7 }
+
+  private readonly _bytes: Uint8Array = new Uint8Array(Transaction.LENGTH)
   private readonly _view: DataView = new DataView(this._bytes.buffer)
 
   constructor (bytes?: Uint8Array) {
     if (bytes === undefined) {
-      this._bytes[0] = TransactionVersions.Basic
-    } else if (bytes.byteLength !== TRANSACTION_LENGTH) {
+      this._bytes[0] = Transaction.Basic
+    } else if (bytes.byteLength !== Transaction.LENGTH) {
       throw new Error('incorrect length')
     } else {
       this._bytes.set(bytes)
@@ -52,48 +100,51 @@ export class Transaction implements TransactionInterface {
     return sha256(this._bytes)
   }
 
-  get version (): TransactionVersions {
+  get version (): number {
     return this._bytes[0]
   }
 
-  set version (version: TransactionVersions) {
+  set version (version: number) {
     this._bytes[0] = version
   }
 
-  setVersion (version: TransactionVersions): this {
+  setVersion (version: number): this {
     this.version = version
     return this
   }
 
-  get sender (): AddressInterface {
-    return new Address(
-      this._bytes.subarray(SENDER_OFFSET, (SENDER_OFFSET + SENDER_LENGTH)),
-    )
+  get sender (): Address {
+    // sender length = 34
+    // sender begin = 1
+    // sender end = 35
+    return new Address(this._bytes.subarray(1, 35))
   }
 
-  set sender (address: AddressInterface) {
-    this._bytes.set(address.bytes, SENDER_OFFSET)
+  set sender (address: Address) {
+    // sender length = 34
+    // sender begin = 1
+    this._bytes.set(address.bytes, 1)
   }
 
-  setSender (address: AddressInterface): this {
+  setSender (address: Address): this {
     this.sender = address
     return this
   }
 
-  get recipient (): AddressInterface {
-    return new Address(
-      this._bytes.subarray(
-        RECIPIENT_OFFSET,
-        (RECIPIENT_OFFSET + RECIPIENT_LENGTH),
-      ),
-    )
+  get recipient (): Address {
+    // recipient length = 34
+    // recipient begin = 35
+    // recipient enf = 69
+    return new Address(this._bytes.subarray(35, 69))
   }
 
-  set recipient (address: AddressInterface) {
-    this._bytes.set(address.bytes, RECIPIENT_OFFSET)
+  set recipient (address: Address) {
+    // recipient length = 34
+    // recipient begin = 35
+    this._bytes.set(address.bytes, 35)
   }
 
-  setRecipient (address: AddressInterface): this {
+  setRecipient (address: Address): this {
     this.recipient = address
     return this
   }
@@ -132,11 +183,11 @@ export class Transaction implements TransactionInterface {
   }
 
   get prefix (): string {
-    return Converter.uint16ToPrefix(this._view.getUint16(PREFIX_OFFSET))
+    return uint16ToPrefix(this._view.getUint16(PREFIX_OFFSET))
   }
 
   set prefix (prefix: string) {
-    this._view.setUint16(PREFIX_OFFSET, Converter.prefixToUint16(prefix))
+    this._view.setUint16(PREFIX_OFFSET, prefixToUint16(prefix))
   }
 
   setPrefix (prefix: string): this {
@@ -242,7 +293,7 @@ export class Transaction implements TransactionInterface {
     return this
   }
 
-  sign (secretKey: SecretKeyInterface): this {
+  sign (secretKey: SecretKey): this {
     const msg = this._bytes.subarray(UNSIGNED_OFFSET, UNSIGNED_LENGTH)
     this.signature = secretKey.sign(msg)
     return this

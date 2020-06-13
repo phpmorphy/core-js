@@ -1,10 +1,40 @@
-import nacl from 'tweetnacl'
-import { PublicKeyInterface } from '../PublicKeyInterface'
+/**
+ * Copyright (c) 2020 UMI
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
-export class PublicKey implements PublicKeyInterface {
-  private readonly _bytes: Uint8Array = new Uint8Array(
-    nacl.sign.publicKeyLength)
+import { Ed25519 } from '../../util/Ed25519'
 
+/**
+ * @class
+ * @classdesc This is a description of the PublicKey class.
+ */
+export class PublicKey {
+  private readonly _bytes: Uint8Array = new Uint8Array(Ed25519.PUBLIC_KEY_BYTES)
+
+  /**
+   * @summary Summary for constructor.
+   * @description Desc
+   * @param {Uint8Array} [bytes] transaction bytes
+   * @throws {Error} free-form description
+   */
   constructor (bytes: Uint8Array) {
     this._bytes.set(bytes)
   }
@@ -16,6 +46,6 @@ export class PublicKey implements PublicKeyInterface {
   }
 
   verifySignature (message: Uint8Array, signature: Uint8Array): boolean {
-    return nacl.sign.detached.verify(message, signature, this._bytes)
+    return Ed25519.verify(message, signature, this._bytes)
   }
 }
