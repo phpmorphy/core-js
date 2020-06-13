@@ -20,36 +20,84 @@
  * SOFTWARE.
  */
 
+// tslint:disable:no-bitwise
+
 /**
  * @function
  * @param {number} version version
  * @returns {string} prefix
+ * @throws {Error}
  */
 export function uint16ToPrefix (version: number): string {
+  if (typeof version !== 'number') {
+    throw new Error('version must be number')
+  }
+
+  if (Math.floor(version) !== version) {
+    throw new Error('version must be integer')
+  }
+
   if (version === 0) {
     return 'genesis'
   }
 
-  // tslint:disable:no-bitwise
-  return String.fromCharCode(
-    (((version & 0x7C00) >> 10) + 96),
-    (((version & 0x03E0) >> 5) + 96),
-    ((version & 0x001F) + 96),
-  )
+  if ((version & 0x8000) === 0x8000) {
+    throw new Error('incorrect version - first bit must be zero')
+  }
+
+  const a = (version & 0x7C00) >> 10
+  const b = (version & 0x03E0) >> 5
+  const c = (version & 0x001F)
+
+  if (a < 1 || a > 26) {
+    throw new Error('incorrect version - first char')
+  }
+
+  if (b < 1 || b > 26) {
+    throw new Error('incorrect version - second char')
+  }
+
+  if (c < 1 || c > 26) {
+    throw new Error('incorrect version - third char')
+  }
+
+  return String.fromCharCode((a + 96), (b + 96), (c + 96))
 }
 
 /**
  * @function
  * @param {string} prefix prefix
  * @returns {number} version
+ * @throws {Error}
  */
 export function prefixToUint16 (prefix: string): number {
+  if (typeof prefix !== 'string') {
+    throw new Error('prefix must be string')
+  }
+
   if (prefix === 'genesis') {
     return 0
   }
 
-  // tslint:disable:no-bitwise
-  return ((prefix.charCodeAt(0) - 96) << 10) +
-    ((prefix.charCodeAt(1) - 96) << 5) +
-    ((prefix.charCodeAt(2) - 96))
+  if (prefix.length !== 3) {
+    throw new Error('prefix must be 3 bytes ling')
+  }
+
+  const a = prefix.charCodeAt(0) - 96
+  const b = prefix.charCodeAt(1) - 96
+  const c = prefix.charCodeAt(2) - 96
+
+  if (a < 1 || a > 26) {
+    throw new Error('incorrect prefix - first char')
+  }
+
+  if (b < 1 || b > 26) {
+    throw new Error('incorrect prefix - second char')
+  }
+
+  if (c < 1 || c > 26) {
+    throw new Error('incorrect prefix - third char')
+  }
+
+  return (a << 10) + (b << 5) + c
 }

@@ -26,3 +26,5 @@ export { Transaction } from './transaction/Transaction'
 
 export { sha256 } from './util/Sha256'
 export { Ed25519 } from './util/Ed25519'
+export { Bech32 } from './util/Bech32'
+export { uint16ToPrefix, prefixToUint16 } from './util/Converter'
