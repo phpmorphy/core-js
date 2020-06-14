@@ -20,11 +20,12 @@
  * SOFTWARE.
  */
 
-export { SecretKeyFactory } from './key/SecretKeyFactory'
+export { SecretKey } from './key/ed25519/SecretKey'
+export { PublicKey } from './key/ed25519/PublicKey'
 export { Address } from './address/Address'
 export { Transaction } from './transaction/Transaction'
 
-export { sha256 } from './util/Sha256'
-export { Ed25519 } from './util/Ed25519'
 export { Bech32 } from './util/Bech32'
+export { Ed25519 } from './util/Ed25519'
+export { sha256 } from './util/Sha256'
 export { uint16ToPrefix, prefixToUint16 } from './util/Converter'

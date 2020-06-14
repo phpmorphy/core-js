@@ -24,13 +24,13 @@
 
 /**
  * @function
- * @param {Uint8Array} msg message
+ * @param {Uint8Array} message message
  * @returns {Uint8Array} hash
- * @throws {Error} описание ошибки
+ * @throws {Error}
  */
-export function sha256 (msg: Uint8Array): Uint8Array {
-  if (msg instanceof Uint8Array === false) {
-    throw new Error('Параметр msg должен иметь тип Uint8Array')
+export function sha256 (message: Uint8Array): Uint8Array {
+  if (message instanceof Uint8Array === false) {
+    throw new Error('message must be Uint8Array')
   }
 
   const hh = new Int32Array([
@@ -106,19 +106,19 @@ export function sha256 (msg: Uint8Array): Uint8Array {
     0x90BEFFFA,
     0xA4506CEB,
     0xBEF9A3F7,
-    0xC67178F2,
+    0xC67178F2
   ])
   const w = new Int32Array(64)
 
   // padding
   let l
-  if (msg.byteLength < 56) {
+  if (message.byteLength < 56) {
     l = 64
-  } else if (msg.byteLength < 120) {
+  } else if (message.byteLength < 120) {
     l = 128
-  } else if (msg.byteLength < 184) {
+  } else if (message.byteLength < 184) {
     l = 192
-  } else if (msg.byteLength < 248) {
+  } else if (message.byteLength < 248) {
     l = 256
   } else {
     throw new Error('Максимальная длина сообщения 247 байт')
@@ -127,10 +127,10 @@ export function sha256 (msg: Uint8Array): Uint8Array {
   const m = new Uint8Array(l)
   const q = new DataView(m.buffer)
 
-  m.set(msg)
-  m[msg.byteLength] = 0x80
+  m.set(message)
+  m[message.byteLength] = 0x80
 
-  q.setUint32(q.byteLength - 4, msg.byteLength * 8)
+  q.setUint32(q.byteLength - 4, message.byteLength * 8)
 
   // chunks
   for (let j = 0; j < m.byteLength; j += 64) {
@@ -185,11 +185,11 @@ export function sha256 (msg: Uint8Array): Uint8Array {
     hh[7] += h
   }
 
-  const res = new DataView(hh.buffer)
+  const hash = new DataView(hh.buffer)
 
   for (let i = 0; i < 8; i++) {
-    res.setUint32(i * 4, hh[i])
+    hash.setUint32(i * 4, hh[i])
   }
 
-  return new Uint8Array(res.buffer)
+  return new Uint8Array(hash.buffer)
 }

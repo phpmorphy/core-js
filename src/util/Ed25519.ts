@@ -36,73 +36,82 @@
 
 /**
  * @class
- * @classdesc This is a description of the Ed25519 class.
  * @hideconstructor
  */
 export class Ed25519 {
   /**
+   * @description Длина публичного ключа в байтах.
    * @constant
-   * @type number
+   * @type {number}
    * @default 32
-   * @description Длина в байтах
    */
   static get PUBLIC_KEY_BYTES (): number { return 32 }
 
   /**
-   * Длина
+   * @description Длина приватного ключа в байтах.
    * @constant {number}
+   * @type {number}
+   * @default 64
    */
   static get SECRET_KEY_BYTES (): number { return 64 }
 
+  /**
+   * @description Длина seed в байтах.
+   * @constant {number}
+   * @type {number}
+   * @default 32
+   */
   static get SEED_BYTES (): number { return 32 }
 
+  /**
+   * @description Длина подписи в байтах.
+   * @constant {number}
+   * @type {number}
+   * @default 64
+   */
   static get SIGNATURE_BYTES (): number { return 64 }
 
   /**
    * @static
-   * @summary Sum
-   * @description Desc
-   * @param {Uint8Array} msg msg
-   * @param {Uint8Array} secretKey secretKey
+   * @param {Uint8Array} message
+   * @param {Uint8Array} secretKey
    * @returns {Uint8Array}
+   * @throws {Error}
    */
-  static sign (msg: Uint8Array, secretKey: Uint8Array): Uint8Array {
-    const signedMsg = new Uint8Array(this.SIGNATURE_BYTES + msg.length)
-    this._crypto_sign(signedMsg, msg, msg.length, secretKey)
+  static sign (message: Uint8Array, secretKey: Uint8Array): Uint8Array {
+    const signedMsg = new Uint8Array(this.SIGNATURE_BYTES + message.length)
+    this._cryptoSign(signedMsg, message, message.length, secretKey)
 
     return new Uint8Array(signedMsg.buffer, 0, this.SIGNATURE_BYTES)
   }
 
   /**
    * @static
-   * @summary Sum
-   * @description Desc
-   * @param {Uint8Array} msg msg
-   * @param {Uint8Array} sig sig
-   * @param {Uint8Array} publicKey publicKey
+   * @param {Uint8Array} message
+   * @param {Uint8Array} signature
+   * @param {Uint8Array} publicKey
    * @returns {boolean}
    */
   static verify (
-    msg: Uint8Array, sig: Uint8Array, publicKey: Uint8Array): boolean {
-    const sm = new Uint8Array(this.SIGNATURE_BYTES + msg.length)
-    const m = new Uint8Array(this.SIGNATURE_BYTES + msg.length)
+    message: Uint8Array, signature: Uint8Array,
+    publicKey: Uint8Array): boolean {
+    const sm = new Uint8Array(this.SIGNATURE_BYTES + message.length)
+    const m = new Uint8Array(this.SIGNATURE_BYTES + message.length)
 
     let i
     for (i = 0; i < this.SIGNATURE_BYTES; i++) {
-      sm[i] = sig[i]
+      sm[i] = signature[i]
     }
-    for (i = 0; i < msg.length; i++) {
-      sm[i + this.SIGNATURE_BYTES] = msg[i]
+    for (i = 0; i < message.length; i++) {
+      sm[i + this.SIGNATURE_BYTES] = message[i]
     }
 
-    return (this._crypto_sign_open(m, sm, sm.length, publicKey) >= 0)
+    return (this._cryptoSignOpen(m, sm, sm.length, publicKey) >= 0)
   }
 
   /**
    * @static
-   * @summary Sum
-   * @description Desc
-   * @param {Uint8Array} seed seed
+   * @param {Uint8Array} seed
    * @returns {Uint8Array}
    */
   static secretKeyFromSeed (seed: Uint8Array): Uint8Array {
@@ -113,16 +122,14 @@ export class Ed25519 {
       sk[i] = seed[i]
     }
 
-    this._crypto_sign_keypair(pk, sk)
+    this._cryptoSignKeypair(pk, sk)
 
     return sk
   }
 
   /**
    * @static
-   * @summary Sum
-   * @description Desc
-   * @param {Uint8Array} secretKey secretKey
+   * @param {Uint8Array} secretKey
    * @returns {Uint8Array}
    */
   static publicKeyFromSecretKey (secretKey: Uint8Array): Uint8Array {
@@ -746,7 +753,7 @@ export class Ed25519 {
     this._pack25519(c, a)
     this._pack25519(d, b)
 
-    return this._crypto_verify_32(c, 0, d, 0)
+    return this._cryptoVerify32(c, 0, d, 0)
   }
 
   private static _sel25519 (p: Float64Array, q: Float64Array, b: number): void {
@@ -1041,12 +1048,13 @@ export class Ed25519 {
     return (1 & ((d - 1) >>> 8)) - 1
   }
 
-  private static _crypto_verify_32 (
+  private static _cryptoVerify32 (
     x: Uint8Array, xi: number, y: Uint8Array, yi: number): number {
     return this._vn(x, xi, y, yi, 32)
   }
 
-  private static _crypto_hashblocks_hl (hh: Int32Array, hl: Int32Array, m: Uint8Array, n: number): number {
+  private static _cryptoHashBlocksHl (
+    hh: Int32Array, hl: Int32Array, m: Uint8Array, n: number): number {
     const wh = new Int32Array(16)
     const wl = new Int32Array(16)
     const K = [
@@ -1089,7 +1097,7 @@ export class Ed25519 {
       0x28db77f5, 0x23047d84, 0x32caab7b, 0x40c72493,
       0x3c9ebe0a, 0x15c9bebc, 0x431d67c4, 0x9c100d4c,
       0x4cc5d4be, 0xcb3e42b6, 0x597f299c, 0xfc657e2a,
-      0x5fcb6fab, 0x3ad6faec, 0x6c44198c, 0x4a475817,
+      0x5fcb6fab, 0x3ad6faec, 0x6c44198c, 0x4a475817
     ]
 
     let bh0
@@ -1549,7 +1557,8 @@ export class Ed25519 {
     return n
   }
 
-  private static _crypto_hash (out: Uint8Array, m: Uint8Array, n: number): number {
+  private static _cryptoHash (
+    out: Uint8Array, m: Uint8Array, n: number): number {
     const hh = new Int32Array(8)
     const hl = new Int32Array(8)
     const x = new Uint8Array(256)
@@ -1574,7 +1583,7 @@ export class Ed25519 {
     hl[6] = 0xfb41bd6b
     hl[7] = 0x137e2179
 
-    this._crypto_hashblocks_hl(hh, hl, m, n)
+    this._cryptoHashBlocksHl(hh, hl, m, n)
     n %= 128
 
     for (i = 0; i < n; i++) {
@@ -1586,7 +1595,7 @@ export class Ed25519 {
     n = 256 - 128 * (n < 112 ? 1 : 0)
     x[n - 9] = 0
     this._ts64(x, n - 8, (b / 0x20000000) | 0, b << 3)
-    this._crypto_hashblocks_hl(hh, hl, x, n)
+    this._cryptoHashBlocksHl(hh, hl, x, n)
 
     for (i = 0; i < 8; i++) {
       this._ts64(out, 8 * i, hh[i], hl[i])
@@ -1595,7 +1604,7 @@ export class Ed25519 {
     return 0
   }
 
-  private static _crypto_sign_keypair (pk: Uint8Array, sk: Uint8Array): number {
+  private static _cryptoSignKeypair (pk: Uint8Array, sk: Uint8Array): number {
     const d = new Uint8Array(64)
     const p = [
       new Float64Array(16),
@@ -1603,7 +1612,7 @@ export class Ed25519 {
       new Float64Array(16),
       new Float64Array(16)]
 
-    this._crypto_hash(d, sk, 32)
+    this._cryptoHash(d, sk, 32)
     d[0] &= 248
     d[31] &= 127
     d[31] |= 64
@@ -1619,7 +1628,7 @@ export class Ed25519 {
   }
 
   // Note: difference from C - smlen returned, not passed as argument.
-  private static _crypto_sign (
+  private static _cryptoSign (
     sm: Uint8Array, m: Uint8Array, n: number, sk: Uint8Array): number {
     const d = new Uint8Array(64)
     const h = new Uint8Array(64)
@@ -1633,7 +1642,7 @@ export class Ed25519 {
       new Float64Array(16),
       new Float64Array(16)]
 
-    this._crypto_hash(d, sk, 32)
+    this._cryptoHash(d, sk, 32)
     d[0] &= 248
     d[31] &= 127
     d[31] |= 64
@@ -1646,7 +1655,7 @@ export class Ed25519 {
       sm[32 + i] = d[32 + i]
     }
 
-    this._crypto_hash(r, sm.subarray(32), n + 32)
+    this._cryptoHash(r, sm.subarray(32), n + 32)
     this._reduce(r)
     this._scalarbase(p, r)
     this._pack(sm, p)
@@ -1654,7 +1663,7 @@ export class Ed25519 {
     for (i = 32; i < 64; i++) {
       sm[i] = sk[i]
     }
-    this._crypto_hash(h, sm, n + 64)
+    this._cryptoHash(h, sm, n + 64)
     this._reduce(h)
 
     for (i = 0; i < 64; i++) {
@@ -1674,7 +1683,7 @@ export class Ed25519 {
     return smlen
   }
 
-  private static _crypto_sign_open (
+  private static _cryptoSignOpen (
     m: Uint8Array, sm: Uint8Array, n: number, pk: Uint8Array): number {
     let i
     const t = new Uint8Array(32)
@@ -1704,7 +1713,7 @@ export class Ed25519 {
     for (i = 0; i < 32; i++) {
       m[i + 32] = pk[i]
     }
-    this._crypto_hash(h, m, n)
+    this._cryptoHash(h, m, n)
     this._reduce(h)
     this._scalarmult(p, q, h)
 
@@ -1713,7 +1722,7 @@ export class Ed25519 {
     this._pack(t, p)
 
     n -= 64
-    if (this._crypto_verify_32(sm, 0, t, 0)) {
+    if (this._cryptoVerify32(sm, 0, t, 0)) {
       for (i = 0; i < n; i++) {
         m[i] = 0
       }

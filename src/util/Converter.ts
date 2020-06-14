@@ -24,8 +24,8 @@
 
 /**
  * @function
- * @param {number} version version
- * @returns {string} prefix
+ * @param {number} version
+ * @returns {string}
  * @throws {Error}
  */
 export function uint16ToPrefix (version: number): string {
@@ -66,8 +66,8 @@ export function uint16ToPrefix (version: number): string {
 
 /**
  * @function
- * @param {string} prefix prefix
- * @returns {number} version
+ * @param {string} prefix
+ * @returns {number}
  * @throws {Error}
  */
 export function prefixToUint16 (prefix: string): number {
