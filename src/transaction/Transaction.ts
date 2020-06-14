@@ -59,6 +59,16 @@ export class Transaction {
    * @constant
    * @type {number}
    * @default 1
+   * @example
+   * let secKey = SecretKey.fromSeed(new Uint8Array(32))
+   * let sender = Address.fromKey(secKey).setPrefix('umi')
+   * let recipient = Address.fromKey(secKey).setPrefix('aaa')
+   * let tx = new Transaction().
+   *   setVersion(Transaction.Basic).
+   *   setSender(sender).
+   *   setRecipient(recipient).
+   *   setValue(42).
+   *   sign(secKey)
    */
   static get Basic (): number { return 1 }
 
@@ -67,6 +77,17 @@ export class Transaction {
    * @constant
    * @type {number}
    * @default 2
+   * @example
+   * let secKey = SecretKey.fromSeed(new Uint8Array(32))
+   * let sender = Address.fromKey(secKey).setPrefix('umi')
+   * let tx = new Transaction().
+   *   setVersion(Transaction.CreateStructure).
+   *   setSender(sender).
+   *   setPrefix('aaa').
+   *   setName('🙂').
+   *   setProfitPercent(100).
+   *   setFeePercent(0).
+   *   sign(secKey)
    */
   static get CreateStructure (): number { return 2 }
 
@@ -75,6 +96,17 @@ export class Transaction {
    * @constant
    * @type {number}
    * @default 3
+   * @example
+   * let secKey = SecretKey.fromSeed(new Uint8Array(32))
+   * let sender = Address.fromKey(secKey).setPrefix('umi')
+   * let tx = new Transaction().
+   *   setVersion(Transaction.UpdateStructure).
+   *   setSender(sender).
+   *   setPrefix('aaa').
+   *   setName('🙂').
+   *   setProfitPercent(500).
+   *   setFeePercent(2000).
+   *   sign(secKey)
    */
   static get UpdateStructure (): number { return 3 }
 
@@ -83,14 +115,32 @@ export class Transaction {
    * @constant
    * @type {number}
    * @default 4
+   * @example
+   * let secKey = SecretKey.fromSeed(new Uint8Array(32))
+   * let sender = Address.fromKey(secKey).setPrefix('umi')
+   * let newPrf = Address.fromBech32('aaa18d4z00xwk6jz6c4r4rgz5mcdwdjny9thrh3y8f36cpy2rz6emg5svsuw66')
+   * let tx = new Transaction().
+   *   setVersion(Transaction.UpdateProfitAddress).
+   *   setSender(sender).
+   *   setRecipient(newPrf).
+   *   sign(secKey)
    */
   static get UpdateProfitAddress (): number { return 4 }
 
   /**
-   * @description Изменение адреса для перевода комиссии.
+   * @description Изменение адреса на который переводоится комиссия.
    * @constant
    * @type {number}
    * @default 5
+   * @example
+   * let secKey = SecretKey.fromSeed(new Uint8Array(32))
+   * let sender = Address.fromKey(secKey).setPrefix('umi')
+   * let newFee = Address.fromBech32('aaa18d4z00xwk6jz6c4r4rgz5mcdwdjny9thrh3y8f36cpy2rz6emg5svsuw66')
+   * let tx = new Transaction().
+   *   setVersion(Transaction.UpdateFeeAddress).
+   *   setSender(sender).
+   *   setRecipient(newFee).
+   *   sign(secKey)
    */
   static get UpdateFeeAddress (): number { return 5 }
 
@@ -99,6 +149,15 @@ export class Transaction {
    * @constant
    * @type {number}
    * @default 6
+   * @example
+   * let secKey = SecretKey.fromSeed(new Uint8Array(32))
+   * let sender = Address.fromKey(secKey).setPrefix('umi')
+   * let transit = Address.fromBech32('aaa18d4z00xwk6jz6c4r4rgz5mcdwdjny9thrh3y8f36cpy2rz6emg5svsuw66')
+   * let tx = new Transaction().
+   *   setVersion(Transaction.CreateTransitAddress).
+   *   setSender(sender).
+   *   setRecipient(transit).
+   *   sign(secKey)
    */
   static get CreateTransitAddress (): number { return 6 }
 
@@ -107,6 +166,15 @@ export class Transaction {
    * @constant
    * @type {number}
    * @default 7
+   * @example
+   * let secKey = SecretKey.fromSeed(new Uint8Array(32))
+   * let sender = Address.fromKey(secKey).setPrefix('umi')
+   * let transit = Address.fromBech32('aaa18d4z00xwk6jz6c4r4rgz5mcdwdjny9thrh3y8f36cpy2rz6emg5svsuw66')
+   * let tx = new Transaction().
+   *   setVersion(Transaction.DeleteTransitAddress).
+   *   setSender(sender).
+   *   setRecipient(transit).
+   *   sign(secKey)
    */
   static get DeleteTransitAddress (): number { return 7 }
 
@@ -126,20 +194,31 @@ export class Transaction {
    */
   private readonly _view: DataView = new DataView(this._bytes.buffer)
 
+  private _isVersionSet: boolean = false
+  private _isSenderSet: boolean = false
+  private _isRecipientSet: boolean = false
+  private _isValueSet: boolean = false
+  private _isPrefixSet: boolean = false
+  private _isNameSet: boolean = false
+  private _isProfitPercentSet: boolean = false
+  private _isFeePercentSet: boolean = false
+  private _isNonceSet: boolean = false
+  private _isSignatureSet: boolean = false
+
   /**
    * @constructor
    * @param {Uint8Array} [bytes] Транзакция в бинарном виде, 150 байт.
    * @throws {Error}
    */
   constructor (bytes?: Uint8Array) {
-    if (bytes === undefined) {
-      this.version = Transaction.Basic
-    } else if (bytes instanceof Uint8Array === false) {
-      throw new Error('bytes type must be Uint8Array')
-    } else if (bytes.byteLength !== Transaction.LENGTH) {
-      throw new Error('incorrect length')
-    } else {
-      this._bytes.set(bytes)
+    if (bytes !== undefined) {
+      if (bytes instanceof Uint8Array === false) {
+        throw new Error('bytes type must be Uint8Array')
+      } else if (bytes.byteLength !== Transaction.LENGTH) {
+        throw new Error('incorrect length')
+      } else {
+        this._bytes.set(bytes)
+      }
     }
   }
 
@@ -175,6 +254,9 @@ export class Transaction {
    * @see Transaction.DeleteTransitAddress
    */
   get version (): number {
+    if (!this._isVersionSet) {
+      throw new Error('must set version first')
+    }
     return this._bytes[0]
   }
 
@@ -193,6 +275,7 @@ export class Transaction {
     }
 
     this._bytes[0] = version
+    this._isVersionSet = true
   }
 
   /**
@@ -218,6 +301,10 @@ export class Transaction {
    * @throws {Error}
    */
   get sender (): Address {
+    if (!this._isSenderSet) {
+      throw new Error('must set sender first')
+    }
+
     // sender length = 34
     // sender begin = 1
     // sender end = 35
@@ -225,8 +312,20 @@ export class Transaction {
   }
 
   set sender (address: Address) {
+    if (!this._isVersionSet) {
+      throw new Error('must set version first')
+    }
+
     if (address instanceof Address === false) {
       throw new Error('address type must be Address')
+    }
+
+    if (this.version === 0 && address.version !== 0) {
+      throw new Error('address version must be genesis')
+    }
+
+    if (this.version !== 0 && address.version === 0) {
+      throw new Error('address version must not be genesis')
     }
 
     // sender length = 34
@@ -249,6 +348,19 @@ export class Transaction {
    * @throws {Error}
    */
   get recipient (): Address {
+    if (!this._isVersionSet) {
+      throw new Error('must set version first')
+    }
+
+    if (this.version === Transaction.CreateStructure ||
+      this.version === Transaction.UpdateStructure) {
+      throw new Error('recipient unavailable for this transaction type')
+    }
+
+    if (!this._isRecipientSet) {
+      throw new Error('must set recipient first')
+    }
+
     // recipient length = 34
     // recipient begin = 35
     // recipient enf = 69
@@ -256,8 +368,21 @@ export class Transaction {
   }
 
   set recipient (address: Address) {
+    if (!this._isVersionSet) {
+      throw new Error('must set version first')
+    }
+
+    if (this.version === Transaction.CreateStructure ||
+      this.version === Transaction.UpdateStructure) {
+      throw new Error('recipient unavailable for this transaction type')
+    }
+
     if (address instanceof Address === false) {
       throw new Error('address type must be Address')
+    }
+
+    if (address.version === 0) {
+      throw new Error('address version must not be genesis')
     }
 
     // recipient length = 34
@@ -280,6 +405,19 @@ export class Transaction {
    * @throws {Error}
    */
   get value (): number {
+    if (!this._isVersionSet) {
+      throw new Error('must set version first')
+    }
+
+    if (this.version !== Transaction.Genesis &&
+      this.version !== Transaction.Basic) {
+      throw new Error('value unavailable for this transaction type')
+    }
+
+    if (!this._isValueSet) {
+      throw new Error('must set value first')
+    }
+
     // value offset = 69
     if (this._view.getUint16(69) > 0x001f) {
       throw new Error('value is not safe integer')
@@ -290,6 +428,15 @@ export class Transaction {
   }
 
   set value (value: number) {
+    if (!this._isVersionSet) {
+      throw new Error('must set version first')
+    }
+
+    if (this.version !== Transaction.Genesis &&
+      this.version !== Transaction.Basic) {
+      throw new Error('value unavailable for this transaction type')
+    }
+
     if (typeof value !== 'number') {
       throw new Error('value must be number')
     }
@@ -325,11 +472,33 @@ export class Transaction {
    * @throws {Error}
    */
   get prefix (): string {
+    if (!this._isVersionSet) {
+      throw new Error('must set version first')
+    }
+
+    if (this.version !== Transaction.CreateStructure &&
+      this.version !== Transaction.UpdateStructure) {
+      throw new Error('prefix unavailable for this transaction type')
+    }
+
+    if (!this._isPrefixSet) {
+      throw new Error('must set prefix first')
+    }
+
     // prefix offset = 35
     return uint16ToPrefix(this._view.getUint16(35))
   }
 
   set prefix (prefix: string) {
+    if (!this._isVersionSet) {
+      throw new Error('must set version first')
+    }
+
+    if (this.version !== Transaction.CreateStructure &&
+      this.version !== Transaction.UpdateStructure) {
+      throw new Error('prefix unavailable for this transaction type')
+    }
+
     // prefix offset = 35
     this._view.setUint16(35, prefixToUint16(prefix))
   }
@@ -350,12 +519,34 @@ export class Transaction {
    * @throws {Error}
    */
   get name (): string {
+    if (!this._isVersionSet) {
+      throw new Error('must set version first')
+    }
+
+    if (this.version !== Transaction.CreateStructure &&
+      this.version !== Transaction.UpdateStructure) {
+      throw new Error('name unavailable for this transaction type')
+    }
+
+    if (!this._isNameSet) {
+      throw new Error('must set name first')
+    }
+
     // name offset = 41
     const txt = this._bytes.subarray(41 + 1, 41 + 1 + this._bytes[41])
     return new TextDecoder().decode(txt)
   }
 
   set name (name: string) {
+    if (!this._isVersionSet) {
+      throw new Error('must set version first')
+    }
+
+    if (this.version !== Transaction.CreateStructure &&
+      this.version !== Transaction.UpdateStructure) {
+      throw new Error('name unavailable for this transaction type')
+    }
+
     if (typeof name !== 'string') {
       throw new Error('name type must be a string')
     }
@@ -388,11 +579,33 @@ export class Transaction {
    * @throws {Error}
    */
   get profitPercent (): number {
+    if (!this._isVersionSet) {
+      throw new Error('must set version first')
+    }
+
+    if (this.version !== Transaction.CreateStructure &&
+      this.version !== Transaction.UpdateStructure) {
+      throw new Error('profitPercent unavailable for this transaction type')
+    }
+
+    if (!this._isProfitPercentSet) {
+      throw new Error('must set profitPercent first')
+    }
+
     // profit offset = 37
     return this._view.getUint16(37)
   }
 
   set profitPercent (percent: number) {
+    if (!this._isVersionSet) {
+      throw new Error('must set version first')
+    }
+
+    if (this.version !== Transaction.CreateStructure &&
+      this.version !== Transaction.UpdateStructure) {
+      throw new Error('profitPercent unavailable for this transaction type')
+    }
+
     if (typeof percent !== 'number') {
       throw new Error('percent must be number')
     }
@@ -425,11 +638,33 @@ export class Transaction {
    * @throws {Error}
    */
   get feePercent (): number {
+    if (!this._isVersionSet) {
+      throw new Error('must set version first')
+    }
+
+    if (this.version !== Transaction.CreateStructure &&
+      this.version !== Transaction.UpdateStructure) {
+      throw new Error('feePercent unavailable for this transaction type')
+    }
+
+    if (!this._isFeePercentSet) {
+      throw new Error('must set feePercent first')
+    }
+
     // fee offset = 39
     return this._view.getUint16(39)
   }
 
   set feePercent (percent: number) {
+    if (!this._isVersionSet) {
+      throw new Error('must set version first')
+    }
+
+    if (this.version !== Transaction.CreateStructure &&
+      this.version !== Transaction.UpdateStructure) {
+      throw new Error('feePercent unavailable for this transaction type')
+    }
+
     if (typeof percent !== 'number') {
       throw new Error('percent must be number')
     }
@@ -462,6 +697,14 @@ export class Transaction {
    * @throws {Error}
    */
   get nonce (): number {
+    if (!this._isVersionSet) {
+      throw new Error('must set version first')
+    }
+
+    if (!this._isNonceSet) {
+      throw new Error('must set nonce first')
+    }
+
     // nonce offset = 77
     if (this._view.getUint16(77) > 0x001f) {
       throw new Error('nonce is not safe integer')
@@ -472,6 +715,10 @@ export class Transaction {
   }
 
   set nonce (nonce: number) {
+    if (!this._isVersionSet) {
+      throw new Error('must set version first')
+    }
+
     if (typeof nonce !== 'number') {
       throw new Error('nonce must be number')
     }
@@ -506,6 +753,14 @@ export class Transaction {
    * @throws {Error}
    */
   get signature (): Uint8Array {
+    if (!this._isVersionSet) {
+      throw new Error('must set version first')
+    }
+
+    if (!this._isSignatureSet) {
+      throw new Error('must set signature first')
+    }
+
     // signature offset = 85
     // signature length = 64
     const len = 64
@@ -515,6 +770,10 @@ export class Transaction {
   }
 
   set signature (signature: Uint8Array) {
+    if (!this._isVersionSet) {
+      throw new Error('must set version first')
+    }
+
     if (signature instanceof Uint8Array === false) {
       throw new Error('signature must be Uint8Array')
     }
@@ -543,6 +802,10 @@ export class Transaction {
    * @throws {Error}
    */
   sign (secretKey: SecretKey): this {
+    if (!this._isVersionSet) {
+      throw new Error('must set version first')
+    }
+
     if (secretKey instanceof SecretKey === false) {
       throw new Error('secretKey type must be SecretKey')
     }
@@ -559,6 +822,10 @@ export class Transaction {
    * @returns {boolean}
    */
   verify (): boolean {
+    if (!this._isVersionSet) {
+      throw new Error('must set version first')
+    }
+
     // unsigned begin = 0
     // unsigned end = 85
     const msg = this._bytes.subarray(0, 85)
