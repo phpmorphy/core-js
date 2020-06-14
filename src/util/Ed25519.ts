@@ -93,8 +93,8 @@ export class Ed25519 {
    * @returns {boolean}
    */
   static verify (
-    message: Uint8Array, signature: Uint8Array,
-    publicKey: Uint8Array): boolean {
+    message: Uint8Array, signature: Uint8Array, publicKey: Uint8Array
+  ): boolean {
     const sm = new Uint8Array(this.SIGNATURE_BYTES + message.length)
     const m = new Uint8Array(this.SIGNATURE_BYTES + message.length)
 
@@ -741,7 +741,8 @@ export class Ed25519 {
   }
 
   private static _cswap (
-    p: Float64Array[], q: Float64Array[], b: number): void {
+    p: Float64Array[], q: Float64Array[], b: number
+  ): void {
     for (let i = 0; i < 4; i++) {
       this._sel25519(p[i], q[i], b)
     }
@@ -861,7 +862,8 @@ export class Ed25519 {
   }
 
   private static _scalarmult (
-    p: Float64Array[], q: Float64Array[], s: Uint8Array): void {
+    p: Float64Array[], q: Float64Array[], s: Uint8Array
+  ): void {
     const gf0 = new Float64Array(16)
     const gf1 = new Float64Array(
       [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
@@ -1039,7 +1041,8 @@ export class Ed25519 {
   }
 
   private static _vn (
-    x: Uint8Array, xi: number, y: Uint8Array, yi: number, n: number): number {
+    x: Uint8Array, xi: number, y: Uint8Array, yi: number, n: number
+  ): number {
     let d = 0
     for (let i = 0; i < n; i++) {
       d |= x[xi + i] ^ y[yi + i]
@@ -1049,12 +1052,14 @@ export class Ed25519 {
   }
 
   private static _cryptoVerify32 (
-    x: Uint8Array, xi: number, y: Uint8Array, yi: number): number {
+    x: Uint8Array, xi: number, y: Uint8Array, yi: number
+  ): number {
     return this._vn(x, xi, y, yi, 32)
   }
 
   private static _cryptoHashBlocksHl (
-    hh: Int32Array, hl: Int32Array, m: Uint8Array, n: number): number {
+    hh: Int32Array, hl: Int32Array, m: Uint8Array, n: number
+  ): number {
     const wh = new Int32Array(16)
     const wl = new Int32Array(16)
     const K = [

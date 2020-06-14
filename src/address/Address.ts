@@ -146,6 +146,12 @@ export class Address {
   }
 
   set bech32 (bech32: string) {
+    const regexp = /^(genesis|[a-z]{3})1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]{58}$/
+
+    if (!regexp.test(bech32)) {
+      throw new Error('incorrect address')
+    }
+
     this._bytes.set(Bech32.decode(bech32))
   }
 
