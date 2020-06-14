@@ -134,6 +134,8 @@ export class Transaction {
   constructor (bytes?: Uint8Array) {
     if (bytes === undefined) {
       this.version = Transaction.Basic
+    } else if (bytes instanceof Uint8Array === false) {
+      throw new Error('bytes type must be Uint8Array')
     } else if (bytes.byteLength !== Transaction.LENGTH) {
       throw new Error('incorrect length')
     } else {
@@ -162,12 +164,34 @@ export class Transaction {
 
   /**
    * @type {number}
+   * @throws {Error}
+   * @see Transaction.Genesis
+   * @see Transaction.Basic
+   * @see Transaction.CreateStructure
+   * @see Transaction.UpdateStructure
+   * @see Transaction.UpdateProfitAddress
+   * @see Transaction.UpdateFeeAddress
+   * @see Transaction.CreateTransitAddress
+   * @see Transaction.DeleteTransitAddress
    */
   get version (): number {
     return this._bytes[0]
   }
 
   set version (version: number) {
+    if (typeof version !== 'number') {
+      throw new Error('version must be number')
+    }
+
+    if (Math.floor(version) !== version) {
+      throw new Error('version must be integer')
+    }
+
+    if (version < Transaction.Genesis ||
+      version > Transaction.DeleteTransitAddress) {
+      throw new Error('incorrect version')
+    }
+
     this._bytes[0] = version
   }
 
@@ -191,6 +215,7 @@ export class Transaction {
 
   /**
    * @type {Address}
+   * @throws {Error}
    */
   get sender (): Address {
     // sender length = 34
@@ -200,6 +225,10 @@ export class Transaction {
   }
 
   set sender (address: Address) {
+    if (address instanceof Address === false) {
+      throw new Error('address type must be Address')
+    }
+
     // sender length = 34
     // sender begin = 1
     this._bytes.set(address.bytes, 1)
@@ -217,6 +246,7 @@ export class Transaction {
 
   /**
    * @type {Address}
+   * @throws {Error}
    */
   get recipient (): Address {
     // recipient length = 34
@@ -226,6 +256,10 @@ export class Transaction {
   }
 
   set recipient (address: Address) {
+    if (address instanceof Address === false) {
+      throw new Error('address type must be Address')
+    }
+
     // recipient length = 34
     // recipient begin = 35
     this._bytes.set(address.bytes, 35)
@@ -243,6 +277,7 @@ export class Transaction {
 
   /**
    * @type {number}
+   * @throws {Error}
    */
   get value (): number {
     // value offset = 69
@@ -285,7 +320,9 @@ export class Transaction {
   }
 
   /**
+   * @description Префикс для адресов, принадлежащих структуре.
    * @type {string}
+   * @throws {Error}
    */
   get prefix (): string {
     // prefix offset = 35
@@ -298,7 +335,7 @@ export class Transaction {
   }
 
   /**
-   * @param {string} prefix
+   * @param {string} prefix Префикс для адресов, принадлежащих структуре.
    * @returns {Transaction}
    * @throws {Error}
    */
@@ -308,7 +345,9 @@ export class Transaction {
   }
 
   /**
+   * @description Название структуры в UTF-8.
    * @type {string}
+   * @throws {Error}
    */
   get name (): string {
     // name offset = 41
@@ -317,12 +356,16 @@ export class Transaction {
   }
 
   set name (name: string) {
+    if (typeof name !== 'string') {
+      throw new Error('name type must be a string')
+    }
+
     // name offset = 41
     // name length = 36
     const txt = new TextEncoder().encode(name)
 
     if (txt.byteLength >= 36) {
-      throw new Error('too long')
+      throw new Error('name is too long')
     }
 
     this._bytes[41] = txt.byteLength
@@ -330,7 +373,7 @@ export class Transaction {
   }
 
   /**
-   * @param {string} name
+   * @param {string} name Название структуры в UTF-8.
    * @returns {Transaction}
    * @throws {Error}
    */
@@ -340,7 +383,9 @@ export class Transaction {
   }
 
   /**
+   * @description Процент профита в сотых долях процента с шагом в 0.01%. Валидные значения от 100 до 500 (соотвественно от 1% до 5%).
    * @type {number}
+   * @throws {Error}
    */
   get profitPercent (): number {
     // profit offset = 37
@@ -348,12 +393,24 @@ export class Transaction {
   }
 
   set profitPercent (percent: number) {
+    if (typeof percent !== 'number') {
+      throw new Error('percent must be number')
+    }
+
+    if (Math.floor(percent) !== percent) {
+      throw new Error('percent must be integer')
+    }
+
+    if (percent < 100 || percent > 500) {
+      throw new Error('percent value must be between 100 and 500')
+    }
+
     // profit offset = 37
     this._view.setUint16(37, percent)
   }
 
   /**
-   * @param {number} percent
+   * @param {number} percent Процент профита в сотых долях процента с шагом в 0.01%. Валидные значения от 100 до 500 (соотвественно от 1% до 5%).
    * @returns {Transaction}
    * @throws {Error}
    */
@@ -363,30 +420,46 @@ export class Transaction {
   }
 
   /**
+   * @description Процент комиссии в сотых долях процента с шагом в 0.01%. Валидные значения от 0 до 2000 (соотвественно от 0% до 20%).
    * @type {number}
+   * @throws {Error}
    */
   get feePercent (): number {
     // fee offset = 39
     return this._view.getUint16(39)
   }
 
-  set feePercent (value: number) {
+  set feePercent (percent: number) {
+    if (typeof percent !== 'number') {
+      throw new Error('percent must be number')
+    }
+
+    if (Math.floor(percent) !== percent) {
+      throw new Error('percent must be integer')
+    }
+
+    if (percent < 0 || percent > 2000) {
+      throw new Error('percent value must be between 100 and 500')
+    }
+
     // fee offset = 39
-    this._view.setUint16(39, value)
+    this._view.setUint16(39, percent)
   }
 
   /**
-   * @param {number} value
+   * @param {number} percent Процент комиссии в сотых долях процента с шагом в 0.01%. Валидные значения от 0 до 2000 (соотвественно от 0% до 20%).
    * @returns {Transaction}
    * @throws {Error}
    */
-  setFeePercent (value: number): this {
-    this.feePercent = value
+  setFeePercent (percent: number): this {
+    this.feePercent = percent
     return this
   }
 
   /**
+   * @description Nonce, в данном случае просто случайное целое положительное число.
    * @type {number}
+   * @throws {Error}
    */
   get nonce (): number {
     // nonce offset = 77
@@ -419,7 +492,7 @@ export class Transaction {
   }
 
   /**
-   * @param {number} nonce
+   * @param {number} nonce Nonce, в данном случае просто случайное целое положительное число.
    * @returns {Transaction}
    * @throws {Error}
    */
@@ -430,6 +503,7 @@ export class Transaction {
 
   /**
    * @type {Uint8Array}
+   * @throws {Error}
    */
   get signature (): Uint8Array {
     // signature offset = 85
@@ -441,6 +515,14 @@ export class Transaction {
   }
 
   set signature (signature: Uint8Array) {
+    if (signature instanceof Uint8Array === false) {
+      throw new Error('signature must be Uint8Array')
+    }
+
+    if (signature.byteLength !== 64) {
+      throw new Error('signature must be 64 bytes length')
+    }
+
     // signature offset = 85
     this._bytes.set(signature, 85)
   }
@@ -461,6 +543,10 @@ export class Transaction {
    * @throws {Error}
    */
   sign (secretKey: SecretKey): this {
+    if (secretKey instanceof SecretKey === false) {
+      throw new Error('secretKey type must be SecretKey')
+    }
+
     // unsigned begin = 0
     // unsigned end = 85
     const msg = this._bytes.subarray(0, 85)

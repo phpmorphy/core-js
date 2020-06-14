@@ -50,6 +50,10 @@ export class Address {
   constructor (bytes?: Uint8Array) {
     if (bytes === undefined) {
       this.prefix = 'umi'
+    } else if (bytes instanceof Uint8Array === false) {
+      throw new Error('bytes must be Uint8Array')
+    } else if (bytes.byteLength !== Address.LENGTH) {
+      throw new Error('bytes must be 34 bytes length')
     } else {
       this._bytes.set(bytes)
     }
@@ -69,6 +73,7 @@ export class Address {
   /**
    * @description Версия адреса.
    * @type {number}
+   * @throws {Error}
    */
   get version (): number {
     // version length = 2
@@ -77,6 +82,8 @@ export class Address {
   }
 
   set version (version: number) {
+    uint16ToPrefix(version) // validation
+
     // tslint:disable-next-line:no-bitwise
     new DataView(this._bytes.buffer).setUint16(0, (version & 0x7FFF))
   }
@@ -94,6 +101,7 @@ export class Address {
   /**
    * @description Публиный ключ.
    * @type {PublicKey}
+   * @throws {Error}
    */
   get publicKey (): PublicKey {
     // public key begin = 2
@@ -101,6 +109,10 @@ export class Address {
   }
 
   set publicKey (publicKey: PublicKey) {
+    if (publicKey instanceof PublicKey === false) {
+      throw new Error('publicKey type must be PublicKey')
+    }
+
     // public key offset = 2
     this._bytes.set(publicKey.bytes, 2)
   }
@@ -118,6 +130,7 @@ export class Address {
   /**
    * @description Префикс адреса, три символа латиницы в нижнем регистре.
    * @type {string}
+   * @throws {Error}
    */
   get prefix (): string {
     return uint16ToPrefix(this.version)
@@ -140,12 +153,17 @@ export class Address {
   /**
    * @description Адрес в формате Bech32, длина 62 символа.
    * @type {string}
+   * @throws {Error}
    */
   get bech32 (): string {
     return Bech32.encode(this._bytes)
   }
 
   set bech32 (bech32: string) {
+    if (typeof bech32 !== 'string') {
+      throw new Error('bech32 type must be a string')
+    }
+
     const regexp = /^(genesis|[a-z]{3})1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]{58}$/
 
     if (!regexp.test(bech32)) {

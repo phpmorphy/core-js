@@ -1,7 +1,7 @@
 .idea
-doc
-lib
-dist
-types
-node_modules
+/doc
+/lib
+/dist
+/types
+/node_modules
 package-lock.json
