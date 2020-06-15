@@ -24,6 +24,10 @@ import { Ed25519 } from '../../util/Ed25519'
 import { PublicKey } from './PublicKey'
 import { sha256 } from '../../util/Sha256'
 
+/**
+ * Приватный ключ.
+ * @class
+ */
 export class SecretKey {
   /**
    * @description Длина приватного ключа в формате libsodium в байтах.

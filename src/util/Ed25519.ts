@@ -35,6 +35,7 @@
 // tslint:disable:no-bitwise
 
 /**
+ * Ассиметричная криптография на основе эллиптической кривой Curve25519.
  * @class
  * @hideconstructor
  */

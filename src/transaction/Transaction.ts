@@ -25,6 +25,10 @@ import { Address } from '../address/Address'
 import { sha256 } from '../util/Sha256'
 import { uint16ToPrefix, prefixToUint16 } from '../util/Converter'
 
+/**
+ * Транзакция.
+ * @class
+ */
 export class Transaction {
   /**
    * @description Длина транзакции в байтах.

@@ -22,6 +22,10 @@
 
 import { Ed25519 } from '../../util/Ed25519'
 
+/**
+ * Публичный ключ.
+ * @class
+ */
 export class PublicKey {
   /**
    * @description Длина публичного ключа в формате libsodium в байтах.

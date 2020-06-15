@@ -1,5 +1,3 @@
-/* eslint-disable no-undef */
-
 const crypto = require('crypto')
 const { SecretKey } = require('../../../../lib')
 

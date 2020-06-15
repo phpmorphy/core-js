@@ -25,6 +25,10 @@ import { PublicKey } from '../key/ed25519/PublicKey'
 import { SecretKey } from '../key/ed25519/SecretKey'
 import { prefixToUint16, uint16ToPrefix } from '../util/Converter'
 
+/**
+ * Адрес.
+ * @class
+ */
 export class Address {
   /**
    * @description Длина адреса в байтах.

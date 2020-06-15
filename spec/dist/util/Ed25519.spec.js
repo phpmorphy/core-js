@@ -1,5 +1,3 @@
-/* eslint-disable no-undef */
-
 const crypto = require('crypto')
 const { Ed25519 } = require('../../../lib')
 

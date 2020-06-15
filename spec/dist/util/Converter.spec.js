@@ -1,5 +1,3 @@
-/* eslint-disable no-undef */
-
 const { uint16ToPrefix, prefixToUint16 } = require('../../../lib')
 
 describe('Converter', function () {

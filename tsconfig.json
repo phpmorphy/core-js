@@ -1,15 +1,12 @@
 {
   "compilerOptions": {
-    "outDir": "dist",
     "target": "es2015",
     "module": "es2015",
-    "declaration": true,
-    "declarationDir": "types",
+    "declaration": false,
     "strict": true,
-    "removeComments": false,
-    "esModuleInterop": true
+    "removeComments": false
   },
   "files": [
-    "./src/index.ts"
+    "./tmp/index.ts"
   ]
 }

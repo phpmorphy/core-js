@@ -1,5 +1,3 @@
-/* eslint-disable no-undef */
-
 const { Address, PublicKey, SecretKey } = require('../../../lib')
 
 describe('Address', function () {

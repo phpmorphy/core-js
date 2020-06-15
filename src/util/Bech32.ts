@@ -1,5 +1,4 @@
 /**
- * @licence
  * Copyright (c) 2017 Pieter Wuille
  * Copyright (c) 2018 bitcoinjs contributors
  * Copyright (c) 2020 UMI
@@ -27,6 +26,10 @@ import { prefixToUint16, uint16ToPrefix } from './Converter'
 
 // tslint:disable:no-bitwise
 
+/**
+ * Bech32 конвертер.
+ * @class
+ */
 export class Bech32 {
   static get ALPHABET (): string { return 'qpzry9x8gf2tvdw0s3jn54khce6mua7l' }
 

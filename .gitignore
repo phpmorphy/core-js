@@ -1,7 +1,9 @@
 .idea
+/tmp
 /doc
-/lib
+/esm
+/cjs
+/iife
 /dist
-/types
 /node_modules
 package-lock.json

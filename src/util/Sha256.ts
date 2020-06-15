@@ -23,6 +23,7 @@
 // tslint:disable:no-bitwise
 
 /**
+ * Безопасный алгоритм хеширования, SHA2-256.
  * @function
  * @param {Uint8Array} message message
  * @returns {Uint8Array} hash

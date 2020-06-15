@@ -1,5 +1,3 @@
-/* eslint-disable no-undef */
-
 const crypto = require('crypto')
 const { sha256 } = require('../../../lib')
 

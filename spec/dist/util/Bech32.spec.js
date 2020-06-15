@@ -1,5 +1,3 @@
-/* eslint-disable no-undef */
-
 const { Bech32 } = require('../../../lib')
 
 describe('Bech32', function () {
