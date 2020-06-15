@@ -1,4 +1,7 @@
 .idea
+.flowconfig
+.nyc_output
+/coverage
 /tmp
 /doc
 /esm

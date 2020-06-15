@@ -103,7 +103,7 @@ export class Address {
   }
 
   /**
-   * @description Публиный ключ.
+   * @description Публичный ключ.
    * @type {PublicKey}
    * @throws {Error}
    */
