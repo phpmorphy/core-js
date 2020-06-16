@@ -1,24 +1,22 @@
-/**
- * Copyright (c) 2020 UMI
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
+// Copyright (c) 2020 UMI
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 
 import { SecretKey } from '../key/ed25519/SecretKey' // eslint-disable-line
 import { Address } from '../address/Address'
@@ -26,25 +24,21 @@ import { sha256 } from '../util/Sha256'
 import { uint16ToPrefix, prefixToUint16 } from '../util/Converter'
 
 /**
- * Транзакция.
+ * Базовый класс для работы с транзакциями.
  * @class
  */
 export class Transaction {
   /**
-   * @description Длина транзакции в байтах.
-   * @constant
+   * Длина транзакции в байтах.
    * @type {number}
-   * @default 150
    */
   static get LENGTH (): number { return 150 }
 
   /**
-   * @description Genesis-транзакция.
+   * Genesis-транзакция.
    * Может быть добавлена только в Genesis-блок.
    * Адрес отправителя должен иметь префикс genesis, адрес получаетеля - umi.
-   * @constant
    * @type {number}
-   * @default 0
    * @example
    * let secKey = SecretKey.fromSeed(new Uint8Array(32))
    * let sender = Address.fromKey(secKey).setPrefix('genesis')
@@ -59,10 +53,8 @@ export class Transaction {
   static get Genesis (): number { return 0 }
 
   /**
-   * @description Стандартная транзакция. Перевод монет из одного кошелька в другой.
-   * @constant
+   * Стандартная транзакция. Перевод монет из одного кошелька в другой.
    * @type {number}
-   * @default 1
    * @example
    * let secKey = SecretKey.fromSeed(new Uint8Array(32))
    * let sender = Address.fromKey(secKey).setPrefix('umi')
@@ -77,10 +69,8 @@ export class Transaction {
   static get Basic (): number { return 1 }
 
   /**
-   * @description Создание новой структуры.
-   * @constant
+   * Создание новой структуры.
    * @type {number}
-   * @default 2
    * @example
    * let secKey = SecretKey.fromSeed(new Uint8Array(32))
    * let sender = Address.fromKey(secKey).setPrefix('umi')
@@ -96,10 +86,8 @@ export class Transaction {
   static get CreateStructure (): number { return 2 }
 
   /**
-   * @description Обновление настроек существующей структуры.
-   * @constant
+   * Обновление настроек существующей структуры.
    * @type {number}
-   * @default 3
    * @example
    * let secKey = SecretKey.fromSeed(new Uint8Array(32))
    * let sender = Address.fromKey(secKey).setPrefix('umi')
@@ -115,10 +103,8 @@ export class Transaction {
   static get UpdateStructure (): number { return 3 }
 
   /**
-   * @description Изменение адреса для начисления профита.
-   * @constant
+   * Изменение адреса для начисления профита.
    * @type {number}
-   * @default 4
    * @example
    * let secKey = SecretKey.fromSeed(new Uint8Array(32))
    * let sender = Address.fromKey(secKey).setPrefix('umi')
@@ -132,10 +118,8 @@ export class Transaction {
   static get UpdateProfitAddress (): number { return 4 }
 
   /**
-   * @description Изменение адреса на который переводоится комиссия.
-   * @constant
+   * Изменение адреса на который переводоится комиссия.
    * @type {number}
-   * @default 5
    * @example
    * let secKey = SecretKey.fromSeed(new Uint8Array(32))
    * let sender = Address.fromKey(secKey).setPrefix('umi')
@@ -149,10 +133,8 @@ export class Transaction {
   static get UpdateFeeAddress (): number { return 5 }
 
   /**
-   * @description Активация транзитного адреса.
-   * @constant
+   * Активация транзитного адреса.
    * @type {number}
-   * @default 6
    * @example
    * let secKey = SecretKey.fromSeed(new Uint8Array(32))
    * let sender = Address.fromKey(secKey).setPrefix('umi')
@@ -166,10 +148,8 @@ export class Transaction {
   static get CreateTransitAddress (): number { return 6 }
 
   /**
-   * @description Деактивация транзитного адреса.
-   * @constant
+   * Деактивация транзитного адреса.
    * @type {number}
-   * @default 7
    * @example
    * let secKey = SecretKey.fromSeed(new Uint8Array(32))
    * let sender = Address.fromKey(secKey).setPrefix('umi')
@@ -183,34 +163,92 @@ export class Transaction {
   static get DeleteTransitAddress (): number { return 7 }
 
   /**
-   * @description Транзакция в бинарном виде.
-   * @private
-   * @readonly
+   * Транзакция в бинарном виде.
    * @type {Uint8Array}
+   * @private
+   * @internal
    */
   private readonly _bytes: Uint8Array = new Uint8Array(Transaction.LENGTH)
 
   /**
-   * @description Транзакция в бинарном виде.
-   * @private
-   * @readonly
+   * Транзакция в бинарном виде.
    * @type {DataView}
+   * @private
+   * @internal
    */
   private readonly _view: DataView = new DataView(this._bytes.buffer)
 
+  /**
+   * @type {boolean}
+   * @private
+   * @internal
+   */
   private _isVersionSet: boolean = false
+
+  /**
+   * @type {boolean}
+   * @private
+   * @internal
+   */
   private _isSenderSet: boolean = false
+
+  /**
+   * @type {boolean}
+   * @private
+   * @internal
+   */
   private _isRecipientSet: boolean = false
+
+  /**
+   * @type {boolean}
+   * @private
+   * @internal
+   */
   private _isValueSet: boolean = false
+
+  /**
+   * @type {boolean}
+   * @private
+   * @internal
+   */
   private _isPrefixSet: boolean = false
+
+  /**
+   * @type {boolean}
+   * @private
+   * @internal
+   */
   private _isNameSet: boolean = false
+
+  /**
+   * @type {boolean}
+   * @private
+   * @internal
+   */
   private _isProfitPercentSet: boolean = false
+
+  /**
+   * @type {boolean}
+   * @private
+   * @internal
+   */
   private _isFeePercentSet: boolean = false
+
+  /**
+   * @type {boolean}
+   * @private
+   * @internal
+   */
   private _isNonceSet: boolean = false
+
+  /**
+   * @type {boolean}
+   * @private
+   * @internal
+   */
   private _isSignatureSet: boolean = false
 
   /**
-   * @constructor
    * @param {Uint8Array} [bytes] Транзакция в бинарном виде, 150 байт.
    * @throws {Error}
    */
@@ -219,17 +257,27 @@ export class Transaction {
       if (bytes instanceof Uint8Array === false) {
         throw new Error('bytes type must be Uint8Array')
       } else if (bytes.byteLength !== Transaction.LENGTH) {
-        throw new Error('incorrect length')
+        throw new Error('bytes length must be 150 bytes')
       } else {
         this._bytes.set(bytes)
+        this._isVersionSet = true
+        this._isSenderSet = true
+        this._isRecipientSet = true
+        this._isValueSet = true
+        this._isPrefixSet = true
+        this._isNameSet = true
+        this._isProfitPercentSet = true
+        this._isFeePercentSet = true
+        this._isNonceSet = true
+        this._isSignatureSet = true
       }
     }
   }
 
   /**
-   * @description Транзакция в бинарном виде, 150 байт.
-   * @readonly
+   * Транзакция в бинарном виде, 150 байт.
    * @type {Uint8Array}
+   * @readonly
    */
   get bytes (): Uint8Array {
     const b = new Uint8Array(this._bytes.byteLength)
@@ -238,14 +286,18 @@ export class Transaction {
   }
 
   /**
-   * @readonly
+   * Хэш транзакции, sha256 от всех 150 байт.
    * @type {Uint8Array}
+   * @readonly
    */
   get hash (): Uint8Array {
     return sha256(this._bytes)
   }
 
   /**
+   * Версия (тип) транзакции.
+   * Обязательное поле, необходимо задать сразу после создания новой транзакции.
+   * Изменять тип транзакции, после того как он был задан, нельзя.
    * @type {number}
    * @throws {Error}
    * @see Transaction.Genesis
@@ -283,6 +335,7 @@ export class Transaction {
   }
 
   /**
+   * Устанавливает версию и возващяет this.
    * @param {number} version Версия адреса.
    * @returns {Transaction}
    * @throws {Error}
@@ -295,12 +348,13 @@ export class Transaction {
    * @see Transaction.CreateTransitAddress
    * @see Transaction.DeleteTransitAddress
    */
-  setVersion (version: number): this {
+  setVersion (version: number): Transaction {
     this.version = version
     return this
   }
 
   /**
+   * Отправитель. Доступно для всех типов транзакций.
    * @type {Address}
    * @throws {Error}
    */
@@ -338,16 +392,19 @@ export class Transaction {
   }
 
   /**
+   * Устанавливает отправителя и возвращяет this.
    * @param {Address} address Адрес получателя.
    * @returns {Transaction}
    * @throws {Error}
    */
-  setSender (address: Address): this {
+  setSender (address: Address): Transaction {
     this.sender = address
     return this
   }
 
   /**
+   * Получатель.
+   * Доступно для всех типов транзакций кроме CreateStructure и UpdateStructure.
    * @type {Address}
    * @throws {Error}
    */
@@ -395,16 +452,21 @@ export class Transaction {
   }
 
   /**
+   * Устанавливает получателя и возвращяет this.
+   * Доступно для всех типов транзакций кроме CreateStructure и UpdateStructure.
    * @param {Address} address Адрес получателя.
    * @returns {Transaction}
    * @throws {Error}
    */
-  setRecipient (address: Address): this {
+  setRecipient (address: Address): Transaction {
     this.recipient = address
     return this
   }
 
   /**
+   * Сумма перевода в UMI-центах, цело число в промежутке от 1 до 18446744073709551615.
+   * Из-за ограничений JavaScript максимальное доступное значение 9007199254740991.
+   * Доступно только для Genesis и Basic транзакций.
    * @type {number}
    * @throws {Error}
    */
@@ -461,17 +523,21 @@ export class Transaction {
   }
 
   /**
+   * Устанавливает сумму и возвращяет this.
+   * Принимает значения в промежутке от 1 до 9007199254740991.
+   * Доступно только для Genesis и Basic транзакций.
    * @param {number} value
    * @returns {Transaction}
    * @throws {Error}
    */
-  setValue (value: number): this {
+  setValue (value: number): Transaction {
     this.value = value
     return this
   }
 
   /**
-   * @description Префикс для адресов, принадлежащих структуре.
+   * Префикс адресов, принадлежащих структуре.
+   * Доступно только для CreateStructure и UpdateStructure.
    * @type {string}
    * @throws {Error}
    */
@@ -508,17 +574,20 @@ export class Transaction {
   }
 
   /**
-   * @param {string} prefix Префикс для адресов, принадлежащих структуре.
+   * Устанавливает префикс и возвращяет this.
+   * Доступно только для CreateStructure и UpdateStructure.
+   * @param {string} prefix Префикс адресов, принадлежащих структуре.
    * @returns {Transaction}
    * @throws {Error}
    */
-  setPrefix (prefix: string): this {
+  setPrefix (prefix: string): Transaction {
     this.prefix = prefix
     return this
   }
 
   /**
-   * @description Название структуры в UTF-8.
+   * Название структуры в кодировке UTF-8.
+   * Доступно только для CreateStructure и UpdateStructure.
    * @type {string}
    * @throws {Error}
    */
@@ -568,7 +637,9 @@ export class Transaction {
   }
 
   /**
-   * @param {string} name Название структуры в UTF-8.
+   * Устанавливает название структуры.
+   * Доступно только для CreateStructure и UpdateStructure.
+   * @param {string} name Название структуры в кодировке UTF-8.
    * @returns {Transaction}
    * @throws {Error}
    */
@@ -578,7 +649,9 @@ export class Transaction {
   }
 
   /**
-   * @description Процент профита в сотых долях процента с шагом в 0.01%. Валидные значения от 100 до 500 (соотвественно от 1% до 5%).
+   * Профита в сотых долях процента с шагом в 0.01%.
+   * Валидные значения от 100 до 500 (соотвественно от 1% до 5%).
+   * Доступно только для CreateStructure и UpdateStructure.
    * @type {number}
    * @throws {Error}
    */
@@ -627,17 +700,21 @@ export class Transaction {
   }
 
   /**
-   * @param {number} percent Процент профита в сотых долях процента с шагом в 0.01%. Валидные значения от 100 до 500 (соотвественно от 1% до 5%).
+   * Устанавливает процент профита и возвращяет this.
+   * Доступно только для CreateStructure и UpdateStructure.
+   * @param {number} percent Профит в сотых долях процента с шагом в 0.01%. Валидные значения от 100 до 500 (соотвественно от 1% до 5%).
    * @returns {Transaction}
    * @throws {Error}
    */
-  setProfitPercent (percent: number): this {
+  setProfitPercent (percent: number): Transaction {
     this.profitPercent = percent
     return this
   }
 
   /**
-   * @description Процент комиссии в сотых долях процента с шагом в 0.01%. Валидные значения от 0 до 2000 (соотвественно от 0% до 20%).
+   * Комиссия в сотых долях процента с шагом в 0.01%.
+   * Валидные значения от 0 до 2000 (соотвественно от 0% до 20%).
+   * Доступно только для CreateStructure и UpdateStructure.
    * @type {number}
    * @throws {Error}
    */
@@ -686,7 +763,9 @@ export class Transaction {
   }
 
   /**
-   * @param {number} percent Процент комиссии в сотых долях процента с шагом в 0.01%. Валидные значения от 0 до 2000 (соотвественно от 0% до 20%).
+   * Устанавливает размер комисии и возвращяет this.
+   * Доступно только для CreateStructure и UpdateStructure.
+   * @param {number} percent Комиссия в сотых долях процента с шагом в 0.01%. Валидные значения от 0 до 2000 (соотвественно от 0% до 20%).
    * @returns {Transaction}
    * @throws {Error}
    */
@@ -696,7 +775,9 @@ export class Transaction {
   }
 
   /**
-   * @description Nonce, в данном случае просто случайное целое положительное число.
+   * Nonce, целое число в промежутке от 0 до 18446744073709551615.
+   * Из-за ограничений JavaScript максимальное доступное значение 9007199254740991.
+   * Генерируется автоматичеки при вызове sign().
    * @type {number}
    * @throws {Error}
    */
@@ -743,7 +824,8 @@ export class Transaction {
   }
 
   /**
-   * @param {number} nonce Nonce, в данном случае просто случайное целое положительное число.
+   * Устанавливает nonce и возвращяет this.
+   * @param {number} nonce Nonce, целое числов промежутке от 0 до 9007199254740991.
    * @returns {Transaction}
    * @throws {Error}
    */
@@ -753,6 +835,8 @@ export class Transaction {
   }
 
   /**
+   * Цифровая подпись транзкции, длина 64 байта.
+   * Генерируется автоматически при вызове sign().
    * @type {Uint8Array}
    * @throws {Error}
    */
@@ -791,7 +875,8 @@ export class Transaction {
   }
 
   /**
-   * @param {Uint8Array} signature
+   * Устанавливает цифровую подпись и возвращяет this.
+   * @param {Uint8Array} signature Подпись, длина 64 байта.
    * @returns {Transaction}
    * @throws {Error}
    */
@@ -801,7 +886,7 @@ export class Transaction {
   }
 
   /**
-   * @description Подписать транзакцию приватным ключем.
+   * Подписать транзакцию приватным ключем.
    * @param {SecretKey} secretKey
    * @throws {Error}
    */
@@ -822,7 +907,7 @@ export class Transaction {
   }
 
   /**
-   * @description Проверить транзакцию на соотвествие формальным правилам.
+   * Проверить транзакцию на соотвествие формальным правилам.
    * @returns {boolean}
    */
   verify (): boolean {

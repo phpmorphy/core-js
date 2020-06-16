@@ -2,9 +2,6 @@
 const { Transaction, Address, SecretKey } = require('../../../lib')
 
 describe('Transaction', function () {
-  it('проверяем, что класс существует', function () {
-    expect(Transaction).toBeDefined()
-  })
 
   describe('конструктор', function () {
     describe('должен возвращять ошибку если', function () {

@@ -4,7 +4,8 @@
     "module": "es2015",
     "declaration": false,
     "strict": true,
-    "removeComments": false
+    "removeComments": false,
+    "stripInternal": true
   },
   "files": [
     "./tmp/index.ts"

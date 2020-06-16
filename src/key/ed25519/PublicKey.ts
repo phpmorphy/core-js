@@ -1,24 +1,22 @@
-/**
- * Copyright (c) 2020 UMI
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
+// Copyright (c) 2020 UMI
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 
 import { Ed25519 } from '../../util/Ed25519'
 
@@ -28,26 +26,21 @@ import { Ed25519 } from '../../util/Ed25519'
  */
 export class PublicKey {
   /**
-   * @description Длина публичного ключа в формате libsodium в байтах.
-   * @constant
+   * Длина публичного ключа в формате libsodium в байтах.
    * @type {number}
-   * @default 32
    */
   static get LENGTH (): number { return Ed25519.PUBLIC_KEY_BYTES }
 
   /**
-   * @description Публичный ключ в бинарном виде. В формате libsodium.
-   * Ссылка на внутренний массив, поэтому НЕбезопасно использовать вне класса.
-   * @private
-   * @readonly
+   * Публичный ключ в бинарном виде. В формате libsodium.
    * @type {Uint8Array}
+   * @private
+   * @internal
    */
   private readonly _bytes: Uint8Array = new Uint8Array(PublicKey.LENGTH)
 
   /**
-   * @constructor
-   * @param {Uint8Array} bytes Публичный ключ в бинарном виде.
-   * В формате libsodium, 32 байта (256 бит).
+   * @param {Uint8Array} bytes Публичный ключ в формате libsodium, 32 байта (256 бит).
    * @throws {Error}
    */
   constructor (bytes: Uint8Array) {
@@ -63,10 +56,9 @@ export class PublicKey {
   }
 
   /**
-   * @description Публичный ключ в бинарном виде.
-   * В формате libsodium, 32 байта (256 бит).
-   * @readonly
+   * Публичный ключ в формате libsodium, 32 байта (256 бит).
    * @type {Uint8Array}
+   * @readonly
    */
   get bytes (): Uint8Array {
     const b = new Uint8Array(this._bytes.byteLength)
@@ -75,7 +67,7 @@ export class PublicKey {
   }
 
   /**
-   * @description Проверяет цифровую подпись.
+   * Проверяет цифровую подпись.
    * @param {Uint8Array} message Сообщение
    * @param {Uint8Array} signature Подпись, 64 байта.
    * @returns {boolean}

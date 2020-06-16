@@ -11,18 +11,18 @@
   "sideEffects": false,
   "scripts": {
     "pretest": "tsc --target es2015 --module commonjs --removeComments --outDir dist ./src/index.ts",
-    "test": "nyc -r text -r html mocha --recursive",
+    "test": "nyc -r text -r html mocha",
     "posttest": "rm -rf dist",
     "cleanup": "rm -rf ./tmp ./dist ./esm ./cjs ./iife ./doc ./coverage ./.nyc_output",
-    "prepack": "npm run build; echo '{\"type\":\"module\",\"types\": \"index.d.ts\"}' > ./esm/package.json; echo '{\"type\":\"commonjs\",\"types\": \"index.d.ts\"}' > ./cjs/package.json; cp ./esm/index.js.flow ./cjs/index.js.flow; cp ./esm/index.d.ts ./cjs/index.d.ts",
-    "build": "npm run cleanup; mkdir -p tmp; npm run build:concat; npm run build:compile; npm run build:types; npm run build:rollup",
+    "prepack": "npm run build; echo '{\"type\":\"module\",\"types\": \"index.d.ts\"}' > ./esm/package.json; echo '{\"type\":\"commonjs\",\"types\": \"index.d.ts\"}' > ./cjs/package.json",
+    "build": "npm run cleanup; mkdir -p tmp; npm run build:concat; tsc; rollup -c; npm run build:types; npm run build:flow",
     "tslint": "tslint -c tslint.json 'src/**/*.ts'",
     "eslint": "eslint src/**/*.ts",
+    "build:concat": "concat ./src/**/*.ts ./src/**/**/*.ts -o ./tmp/index.ts; sed -i .tmp -e '/^import/d' ./tmp/index.ts; sed -i .tmp -e '/^\\/\\/ /d' ./tmp/index.ts",
+    "build:types": "tsc --emitDeclarationOnly --declaration --declarationDir esm; cp ./esm/index.d.ts ./cjs/index.d.ts",
+    "build:flow": "flowgen --no-jsdoc --add-flow-header -o ./esm/index.js.flow ./esm/index.d.ts; cp ./esm/index.js.flow ./cjs/index.js.flow",
     "jsdoc": "jsdoc --pedantic -d ./doc ./esm/index.js",
-    "build:concat": "concat ./src/**/*.ts ./src/**/**/*.ts -o ./tmp/index.ts; sed -i .tmp -e '/^import/d' ./tmp/index.ts",
-    "build:compile": "tsc",
-    "build:types": "tsc --emitDeclarationOnly --declaration --declarationDir esm; flowgen --no-jsdoc --add-flow-header -o ./esm/index.js.flow ./esm/index.d.ts",
-    "build:rollup": "rollup -c"
+    "typedoc": "typedoc"
   },
   "repository": {
     "type": "git",
@@ -58,6 +58,7 @@
     "rollup-plugin-cleanup": "^3.1.1",
     "rollup-plugin-terser": "^5.3.0",
     "tslint": "^6.1.2",
+    "typedoc": "^0.17.7",
     "typescript": "^3.9.5"
   },
   "files": [

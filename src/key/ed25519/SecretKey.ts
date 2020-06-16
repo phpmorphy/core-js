@@ -1,27 +1,25 @@
-/**
- * Copyright (c) 2020 UMI
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
+// Copyright (c) 2020 UMI
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 
-import { Ed25519 } from '../../util/Ed25519'
 import { PublicKey } from './PublicKey'
+import { Ed25519 } from '../../util/Ed25519'
 import { sha256 } from '../../util/Sha256'
 
 /**
@@ -30,45 +28,40 @@ import { sha256 } from '../../util/Sha256'
  */
 export class SecretKey {
   /**
-   * @description Длина приватного ключа в формате libsodium в байтах.
-   * @constant
+   * Длина приватного ключа в формате libsodium в байтах.
    * @type {number}
-   * @default 64
    */
   static get LENGTH (): number { return Ed25519.SECRET_KEY_BYTES }
 
   /**
-   * @description Приватный ключ в бинарном виде. В формате libsodium.
-   * Ссылка на внутренний массив, поэтому НЕбезопасно использовать вне класса.
-   * @private
-   * @readonly
+   * Приватный ключ в бинарном виде. В формате libsodium.
    * @type {Uint8Array}
+   * @private
+   * @internal
    */
   private readonly _bytes: Uint8Array = new Uint8Array(SecretKey.LENGTH)
 
   /**
-   * @constructor
    * @param {Uint8Array} bytes Приватный ключ в бинарном виде.
    * В формате libsodium, 64 байта (512 бит).
    * @throws {Error}
    */
   constructor (bytes: Uint8Array) {
     if (bytes instanceof Uint8Array === false) {
-      throw new Error('bytes must be Uint8Array')
+      throw new Error('bytes type must be Uint8Array')
     }
 
     if (bytes.byteLength !== SecretKey.LENGTH) {
-      throw new Error('bytes must be 64 bytes length')
+      throw new Error('bytes length must be 64 bytes')
     }
 
     this._bytes.set(bytes)
   }
 
   /**
-   * @description Приватный ключ в бинарном виде.
-   * В формате libsodium, 64 байта (512 бит).
-   * @readonly
+   * Приватный ключ в бинарном виде. В формате libsodium, 64 байта (512 бит).
    * @type {Uint8Array}
+   * @readonly
    */
   get bytes (): Uint8Array {
     const b = new Uint8Array(this._bytes.byteLength)
@@ -77,16 +70,16 @@ export class SecretKey {
   }
 
   /**
-   * @description Публичный ключ, соотвествующий приватному ключу.
-   * @readonly
+   * Публичный ключ, соотвествующий приватному ключу.
    * @type {PublicKey}
+   * @readonly
    */
   get publicKey (): PublicKey {
     return new PublicKey(Ed25519.publicKeyFromSecretKey(this._bytes))
   }
 
   /**
-   * @description Создает цифровую подпись сообщения.
+   * Создает цифровую подпись сообщения.
    * @param {Uint8Array} message Сообщение, которое необходимо подписать.
    * @returns {Uint8Array} Цифровая подпись длиной 64 байта (512 бит).
    * @throws {Error}
@@ -104,10 +97,9 @@ export class SecretKey {
   }
 
   /**
-   * @description Статический фабричный метод, создающий приватный ключ из seed.
-   * Libsodium принимает seed длиной 32 байта (256 бит), если seed имеет
-   * другуой размер, от него берется sha256 хэш.
-   * @static
+   * Статический фабричный метод, создающий приватный ключ из seed.
+   * Libsodium принимает seed длиной 32 байта (256 бит), если длина
+   * отличается, то берется sha256 хэш.
    * @param {Uint8Array} seed Seed длиной от 0 до 128 байт.
    * @returns {SecretKey}
    * @throws {Error}

@@ -1,24 +1,22 @@
-/**
- * Copyright (c) 2020 UMI
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
+// Copyright (c) 2020 UMI
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 
 import { Bech32 } from '../util/Bech32'
 import { PublicKey } from '../key/ed25519/PublicKey'
@@ -26,28 +24,25 @@ import { SecretKey } from '../key/ed25519/SecretKey'
 import { prefixToUint16, uint16ToPrefix } from '../util/Converter'
 
 /**
- * Адрес.
+ * Базовый класс для работы с адресами.
  * @class
  */
 export class Address {
   /**
-   * @description Длина адреса в байтах.
-   * @constant
+   * Длина адреса в байтах.
    * @type {number}
-   * @default 34
    */
   static get LENGTH (): number { return 34 }
 
   /**
-   * @description Адрес в бинарном виде, длина 34 байта.
-   * @private
-   * @readonly
+   * Адрес в бинарном виде, длина 34 байта.
    * @type {Uint8Array}
+   * @private
+   * @internal
    */
   private readonly _bytes: Uint8Array = new Uint8Array(Address.LENGTH)
 
   /**
-   * @constructor
    * @param {Uint8Array} [bytes] Адрес в бинарном виде, длина 34 байта.
    * @throws {Error}
    */
@@ -64,9 +59,9 @@ export class Address {
   }
 
   /**
-   * @description Адрес в бинарном виде, длина 34 байта.
-   * @readonly
+   * Адрес в бинарном виде, длина 34 байта.
    * @type {Uint8Array}
+   * @readonly
    */
   get bytes (): Uint8Array {
     const b = new Uint8Array(this._bytes.byteLength)
@@ -75,7 +70,7 @@ export class Address {
   }
 
   /**
-   * @description Версия адреса.
+   * Версия адреса, префикс в числовом виде.
    * @type {number}
    * @throws {Error}
    */
@@ -93,17 +88,18 @@ export class Address {
   }
 
   /**
+   * Устанавливает версию адреса и возвращяет this.
    * @param {number} version Версия адреса.
    * @returns {Address}
    * @throws {Error}
    */
-  setVersion (version: number): this {
+  setVersion (version: number): Address {
     this.version = version
     return this
   }
 
   /**
-   * @description Публичный ключ.
+   * Публичный ключ.
    * @type {PublicKey}
    * @throws {Error}
    */
@@ -122,17 +118,18 @@ export class Address {
   }
 
   /**
+   * Устанавливает публичный ключи и возвращяет this.
    * @param {PublicKey} publicKey Публичный ключ.
    * @returns {Address}
    * @throws {Error}
    */
-  setPublicKey (publicKey: PublicKey): this {
+  setPublicKey (publicKey: PublicKey): Address {
     this.publicKey = publicKey
     return this
   }
 
   /**
-   * @description Префикс адреса, три символа латиницы в нижнем регистре.
+   * Префикс адреса, три символа латиницы в нижнем регистре.
    * @type {string}
    * @throws {Error}
    */
@@ -145,17 +142,18 @@ export class Address {
   }
 
   /**
+   * Устанавливает префикс адреса и возвращяет this.
    * @param {string} prefix Префикс адреса, три символа латиницы в нижнем регистре.
    * @returns {Address}
    * @throws {Error}
    */
-  setPrefix (prefix: string): this {
+  setPrefix (prefix: string): Address {
     this.prefix = prefix
     return this
   }
 
   /**
-   * @description Адрес в формате Bech32, длина 62 символа.
+   * Адрес в формате Bech32, длина 62 символа.
    * @type {string}
    * @throws {Error}
    */
@@ -178,17 +176,18 @@ export class Address {
   }
 
   /**
+   * Устанавливает адрес в формате Bech32.
    * @param {string} bech32 Адрес в формате Bech32, длина 62 символа.
    * @returns {Address}
    * @throws {Error}
    */
-  setBech32 (bech32: string): this {
+  setBech32 (bech32: string): Address {
     this.bech32 = bech32
     return this
   }
 
   /**
-   * @description Статический фабричный метод, создающий объект из адреса в формате Bech32.
+   * Статический фабричный метод, создающий объект из адреса в формате Bech32.
    * @param {string} bech32 Адрес в формате Bech32, длина 62 символа.
    * @returns {Address}
    * @throws {Error}
@@ -198,7 +197,7 @@ export class Address {
   }
 
   /**
-   * @description Статический фабричный метод, создающий объект из публичного или приватного ключа.
+   * Статический фабричный метод, создающий объект из публичного или приватного ключа.
    * @param {PublicKey|SecretKey} key Публичный или приватный ключ.
    * @returns {Address}
    * @throws {Error}

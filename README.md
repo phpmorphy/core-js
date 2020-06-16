@@ -1,5 +1,50 @@
-# umi-core-js
-UMI Core JavaScript Library
+<h1 align="center">
+  <a href="https://umi.top"><img src="file:/Users/axel/umi/umi-core-js/logo.svg" alt="UMI" width="200"></a>
+  <br>
+  UMI Core - JavaScript Library
+  <br>
+  <br>
+</h1>
+
+<p align="center">
+  <img alt="GitHub release (latest SemVer)" src="https://img.shields.io/github/v/release/umi-top/umi-core-js.svg">
+  <!--a href="https://travis-ci.org/umi-top/umi-core-js"><img src="https://img.shields.io/travis/umi-top/umi-core-js/master.svg" alt="travis"></a-->
+  <img alt="npm type definitions" src="https://img.shields.io/npm/types/@umi-top/umi-core-js">
+  <a href="https://standardjs.com"><img src="https://img.shields.io/badge/code_style-standard-brightgreen.svg" alt="Standard - JavaScript Style Guide"></a>
+  <a href="https://www.npmjs.com/package/@umi-top/umi-core-js"><img src="https://img.shields.io/npm/l/@umi-top/umi-core-js.svg" alt="npm license"></a>
+  <a href="https://www.npmjs.com/package/@umi-top/umi-core-js"><img src="https://img.shields.io/npm/v/@umi-top/umi-core-js.svg" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/@umi-top/umi-core-js"><img src="https://img.shields.io/npm/dm/@umi-top/umi-core-js.svg" alt="npm downloads"></a>
+  <a href="https://www.npmjs.com/package/@umi-top/umi-core-js"><img src="https://img.shields.io/librariesio/release/npm/@umi-top/umi-core-js.svg" alt="Libraries.io dependency status for latest release, scoped npm package"></a>
+  <a href="https://keybase.io/umitop"><img alt="Keybase PGP" src="https://img.shields.io/keybase/pgp/umitop.svg"></a>
+</p>
+
+
+## Table of Contents
+- Quick start
+  - [Install](#install)
+  - [Usage](#usage)
+  - [What you might do if you're clever](#what-you-might-do-if-youre-clever)
+- FAQ
+  - [Why should I use JavaScript Standard Style?](#why-should-i-use-javascript-standard-style)
+  - [Who uses JavaScript Standard Style?](#who-uses-javascript-standard-style)
+  - [Are there text editor plugins?](#are-there-text-editor-plugins)
+  - [Is there a readme badge?](#is-there-a-readme-badge)
+  - [I disagree with rule X, can you change it?](#i-disagree-with-rule-x-can-you-change-it)
+  - [But this isn't a real web standard!](#but-this-isnt-a-real-web-standard)
+  - [Is there an automatic formatter?](#is-there-an-automatic-formatter)
+  - [How do I ignore files?](#how-do-i-ignore-files)
+  - [How do I hide a certain warning?](#how-do-i-hide-a-certain-warning)
+  - [I use a library that pollutes the global namespace. How do I prevent "variable is not defined" errors?](#i-use-a-library-that-pollutes-the-global-namespace-how-do-i-prevent-variable-is-not-defined-errors)
+  - [How do I use experimental JavaScript (ES Next) features?](#how-do-i-use-experimental-javascript-es-next-features)
+  - [Can I use a JavaScript language variant, like Flow or TypeScript?](#can-i-use-a-javascript-language-variant-like-flow-or-typescript)
+  - [What about Mocha, Jest, Jasmine, QUnit, etc?](#what-about-mocha-jest-jasmine-qunit-etc)
+  - [What about Web Workers and Service Workers?](#what-about-web-workers-and-service-workers)
+  - [Can I check code inside of Markdown or HTML files?](#can-i-check-code-inside-of-markdown-or-html-files)
+  - [Is there a Git `pre-commit` hook?](#is-there-a-git-pre-commit-hook)
+  - [How do I make the output all colorful and pretty?](#how-do-i-make-the-output-all-colorful-and-pretty)
+  - [Is there a Node.js API?](#is-there-a-nodejs-api)
+  - [How do I contribute to StandardJS?](#how-do-i-contribute-to-standardjs)
+- [License](#license)
 
 ### Install
 

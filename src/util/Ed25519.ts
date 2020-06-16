@@ -1,36 +1,33 @@
-/**
- * Ported in 2014 by Dmitry Chestnykh and Devi Mandiri.
- * Public domain.
- *
- * Implementation derived from TweetNaCl version 20140427.
- * See for details: http://tweetnacl.cr.yp.to/
- */
-/**
- * This is free and unencumbered software released into the public domain.
- *
- * Anyone is free to copy, modify, publish, use, compile, sell, or
- * distribute this software, either in source code form or as a compiled
- * binary, for any purpose, commercial or non-commercial, and by any
- * means.
- *
- * In jurisdictions that recognize copyright laws, the author or authors
- * of this software dedicate any and all copyright interest in the
- * software to the public domain. We make this dedication for the benefit
- * of the public at large and to the detriment of our heirs and
- * successors. We intend this dedication to be an overt act of
- * relinquishment in perpetuity of all present and future rights to this
- * software under copyright law.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
- * IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
- * OTHER DEALINGS IN THE SOFTWARE.
- *
- * For more information, please refer to <http://unlicense.org>
- */
+// This is free and unencumbered software released into the public domain.
+//
+// Anyone is free to copy, modify, publish, use, compile, sell, or
+// distribute this software, either in source code form or as a compiled
+// binary, for any purpose, commercial or non-commercial, and by any
+// means.
+//
+// In jurisdictions that recognize copyright laws, the author or authors
+// of this software dedicate any and all copyright interest in the
+// software to the public domain. We make this dedication for the benefit
+// of the public at large and to the detriment of our heirs and
+// successors. We intend this dedication to be an overt act of
+// relinquishment in perpetuity of all present and future rights to this
+// software under copyright law.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+// IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+// OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+// ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+// OTHER DEALINGS IN THE SOFTWARE.
+//
+// For more information, please refer to <http://unlicense.org>
+
+// Ported in 2014 by Dmitry Chestnykh and Devi Mandiri.
+// Public domain.
+//
+// Implementation derived from TweetNaCl version 20140427.
+// See for details: http://tweetnacl.cr.yp.to/
 
 // tslint:disable:no-bitwise
 
@@ -41,39 +38,31 @@
  */
 export class Ed25519 {
   /**
-   * @description Длина публичного ключа в байтах.
-   * @constant
+   * Длина публичного ключа в байтах.
    * @type {number}
-   * @default 32
    */
   static get PUBLIC_KEY_BYTES (): number { return 32 }
 
   /**
-   * @description Длина приватного ключа в байтах.
-   * @constant {number}
+   * Длина приватного ключа в байтах.
    * @type {number}
-   * @default 64
    */
   static get SECRET_KEY_BYTES (): number { return 64 }
 
   /**
-   * @description Длина seed в байтах.
-   * @constant {number}
+   * Длина seed в байтах.
    * @type {number}
-   * @default 32
    */
   static get SEED_BYTES (): number { return 32 }
 
   /**
-   * @description Длина подписи в байтах.
-   * @constant {number}
+   * Длина подписи в байтах.
    * @type {number}
-   * @default 64
    */
   static get SIGNATURE_BYTES (): number { return 64 }
 
   /**
-   * @static
+   * Подписать сообщение.
    * @param {Uint8Array} message
    * @param {Uint8Array} secretKey
    * @returns {Uint8Array}
@@ -87,7 +76,7 @@ export class Ed25519 {
   }
 
   /**
-   * @static
+   * Проверить подпись.
    * @param {Uint8Array} message
    * @param {Uint8Array} signature
    * @param {Uint8Array} publicKey
@@ -111,7 +100,7 @@ export class Ed25519 {
   }
 
   /**
-   * @static
+   * Получить приватный ключ из seed.
    * @param {Uint8Array} seed
    * @returns {Uint8Array}
    */
@@ -129,7 +118,7 @@ export class Ed25519 {
   }
 
   /**
-   * @static
+   * Получить публичный ключ из приватного ключа.
    * @param {Uint8Array} secretKey
    * @returns {Uint8Array}
    */
@@ -137,6 +126,12 @@ export class Ed25519 {
     return new Uint8Array(secretKey.buffer, 32, 32)
   }
 
+  /**
+   * @param {Float64Array[]} p
+   * @param {Float64Array[]} q
+   * @private
+   * @internal
+   */
   private static _add (p: Float64Array[], q: Float64Array[]): void {
     const D2 = new Float64Array([
       0xf159,
@@ -186,12 +181,26 @@ export class Ed25519 {
     this._M(p[3], e, h)
   }
 
+  /**
+   * @param {Float64Array} o
+   * @param {Float64Array} a
+   * @param {Float64Array} b
+   * @private
+   * @internal
+   */
   private static _A (o: Float64Array, a: Float64Array, b: Float64Array): void {
     for (let i = 0; i < 16; i++) {
       o[i] = a[i] + b[i]
     }
   }
 
+  /**
+   * @param {Float64Array} o
+   * @param {Float64Array} a
+   * @param {Float64Array} b
+   * @private
+   * @internal
+   */
   private static _M (o: Float64Array, a: Float64Array, b: Float64Array): void {
     let v
     let c
@@ -656,16 +665,37 @@ export class Ed25519 {
     o[15] = t15
   }
 
+  /**
+   * @param {Float64Array} o
+   * @param {Float64Array} a
+   * @private
+   * @internal
+   */
   private static _S (o: Float64Array, a: Float64Array): void {
     this._M(o, a, a)
   }
 
+  /**
+   * @param {Float64Array} o
+   * @param {Float64Array} a
+   * @param {Float64Array} b
+   * @private
+   * @internal
+   */
   private static _Z (o: Float64Array, a: Float64Array, b: Float64Array): void {
     for (let i = 0; i < 16; i++) {
       o[i] = a[i] - b[i]
     }
   }
 
+  /**
+   * @param {Uint8Array} x
+   * @param {number} i
+   * @param {number} h
+   * @param {number} l
+   * @private
+   * @internal
+   */
   private static _ts64 (x: Uint8Array, i: number, h: number, l: number): void {
     x[i] = (h >> 24) & 0xff
     x[i + 1] = (h >> 16) & 0xff
@@ -677,6 +707,12 @@ export class Ed25519 {
     x[i + 7] = l & 0xff
   }
 
+  /**
+   * @param {Uint8Array} r
+   * @param {Float64Array} x
+   * @private
+   * @internal
+   */
   private static _modL (r: Uint8Array, x: Float64Array): void {
     const L = new Float64Array([
       0xed,
@@ -741,6 +777,13 @@ export class Ed25519 {
     }
   }
 
+  /**
+   * @param {Float64Array[]} p
+   * @param {Float64Array[]} q
+   * @param {number} b
+   * @private
+   * @internal
+   */
   private static _cswap (
     p: Float64Array[], q: Float64Array[], b: number
   ): void {
@@ -749,6 +792,12 @@ export class Ed25519 {
     }
   }
 
+  /**
+   * @param {Float64Array} a
+   * @param {Float64Array} b
+   * @private
+   * @internal
+   */
   private static _neq25519 (a: Float64Array, b: Float64Array): number {
     const c = new Uint8Array(32)
     const d = new Uint8Array(32)
@@ -758,6 +807,13 @@ export class Ed25519 {
     return this._cryptoVerify32(c, 0, d, 0)
   }
 
+  /**
+   * @param {Float64Array} p
+   * @param {Float64Array} q
+   * @param {number} b
+   * @private
+   * @internal
+   */
   private static _sel25519 (p: Float64Array, q: Float64Array, b: number): void {
     let t
     const c = ~(b - 1)
@@ -768,6 +824,12 @@ export class Ed25519 {
     }
   }
 
+  /**
+   * @param {Uint8Array} o
+   * @param {Float64Array} n
+   * @private
+   * @internal
+   */
   private static _pack25519 (o: Uint8Array, n: Float64Array): void {
     let i
     let j
@@ -797,6 +859,12 @@ export class Ed25519 {
     }
   }
 
+  /**
+   * @param {Float64Array} o
+   * @param {Uint8Array} n
+   * @private
+   * @internal
+   */
   private static _unpack25519 (o: Float64Array, n: Uint8Array): void {
     for (let i = 0; i < 16; i++) {
       o[i] = n[2 * i] + (n[2 * i + 1] << 8)
@@ -804,6 +872,12 @@ export class Ed25519 {
     o[15] &= 0x7fff
   }
 
+  /**
+   * @param {Float64Array} o
+   * @param {Float64Array} i
+   * @private
+   * @internal
+   */
   private static _pow2523 (o: Float64Array, i: Float64Array): void {
     const c = new Float64Array(16)
     let a
@@ -821,6 +895,11 @@ export class Ed25519 {
     }
   }
 
+  /**
+   * @param {Float64Array} o
+   * @private
+   * @internal
+   */
   private static _car25519 (o: Float64Array): void {
     let v
     let c = 1
@@ -832,6 +911,11 @@ export class Ed25519 {
     o[0] += c - 1 + 37 * (c - 1)
   }
 
+  /**
+   * @param {Float64Array} a
+   * @private
+   * @internal
+   */
   private static _par25519 (a: Float64Array): number {
     const d = new Uint8Array(32)
     this._pack25519(d, a)
@@ -839,6 +923,12 @@ export class Ed25519 {
     return d[0] & 1
   }
 
+  /**
+   * @param {Float64Array} o
+   * @param {Float64Array} i
+   * @private
+   * @internal
+   */
   private static _inv25519 (o: Float64Array, i: Float64Array): void {
     const c = new Float64Array(16)
     let a
@@ -856,12 +946,25 @@ export class Ed25519 {
     }
   }
 
+  /**
+   * @param {Float64Array} r
+   * @param {Float64Array} a
+   * @private
+   * @internal
+   */
   private static _set25519 (r: Float64Array, a: Float64Array): void {
     for (let i = 0; i < 16; i++) {
       r[i] = a[i] | 0
     }
   }
 
+  /**
+   * @param {Float64Array[]} p
+   * @param {Float64Array[]} q
+   * @param {Uint8Array} s
+   * @private
+   * @internal
+   */
   private static _scalarmult (
     p: Float64Array[], q: Float64Array[], s: Uint8Array
   ): void {
@@ -883,6 +986,12 @@ export class Ed25519 {
     }
   }
 
+  /**
+   * @param {Float64Array[]} p
+   * @param {Uint8Array} s
+   * @private
+   * @internal
+   */
   private static _scalarbase (p: Float64Array[], s: Uint8Array): void {
     const q = [
       new Float64Array(16),
@@ -932,6 +1041,12 @@ export class Ed25519 {
     this._scalarmult(p, q, s)
   }
 
+  /**
+   * @param {Uint8Array} r
+   * @param {Float64Array[]} p
+   * @private
+   * @internal
+   */
   private static _pack (r: Uint8Array, p: Float64Array[]): void {
     const tx = new Float64Array(16)
     const ty = new Float64Array(16)
@@ -943,6 +1058,12 @@ export class Ed25519 {
     r[31] ^= this._par25519(tx) << 7
   }
 
+  /**
+   * @param {Float64Array[]} r
+   * @param {Uint8Array} p
+   * @private
+   * @internal
+   */
   private static _unpackneg (r: Float64Array[], p: Uint8Array): number {
     const gf0 = new Float64Array(16)
     const gf1 = new Float64Array(
@@ -1029,6 +1150,11 @@ export class Ed25519 {
     return 0
   }
 
+  /**
+   * @param {Uint8Array} r
+   * @private
+   * @internal
+   */
   private static _reduce (r: Uint8Array): void {
     const x = new Float64Array(64)
     let i
@@ -1041,6 +1167,15 @@ export class Ed25519 {
     this._modL(r, x)
   }
 
+  /**
+   * @param {Uint8Array} x
+   * @param {number} xi
+   * @param {Uint8Array} y
+   * @param {number} yi
+   * @param {number} n
+   * @private
+   * @internal
+   */
   private static _vn (
     x: Uint8Array, xi: number, y: Uint8Array, yi: number, n: number
   ): number {
@@ -1052,12 +1187,28 @@ export class Ed25519 {
     return (1 & ((d - 1) >>> 8)) - 1
   }
 
+  /**
+   * @param {Uint8Array} x
+   * @param {number} xi
+   * @param {Uint8Array} y
+   * @param {number} yi
+   * @private
+   * @internal
+   */
   private static _cryptoVerify32 (
     x: Uint8Array, xi: number, y: Uint8Array, yi: number
   ): number {
     return this._vn(x, xi, y, yi, 32)
   }
 
+  /**
+   * @param {Int32Array} hh
+   * @param {Int32Array} hl
+   * @param {Uint8Array} m
+   * @param {number} n
+   * @private
+   * @internal
+   */
   private static _cryptoHashBlocksHl (
     hh: Int32Array, hl: Int32Array, m: Uint8Array, n: number
   ): number {
@@ -1563,6 +1714,13 @@ export class Ed25519 {
     return n
   }
 
+  /**
+   * @param {Uint8Array} out
+   * @param {Uint8Array} m
+   * @param {number} n
+   * @private
+   * @internal
+   */
   private static _cryptoHash (
     out: Uint8Array, m: Uint8Array, n: number): number {
     const hh = new Int32Array(8)
@@ -1610,6 +1768,12 @@ export class Ed25519 {
     return 0
   }
 
+  /**
+   * @param {Uint8Array} pk
+   * @param {Uint8Array} sk
+   * @private
+   * @internal
+   */
   private static _cryptoSignKeypair (pk: Uint8Array, sk: Uint8Array): number {
     const d = new Uint8Array(64)
     const p = [
@@ -1633,7 +1797,15 @@ export class Ed25519 {
     return 0
   }
 
-  // Note: difference from C - smlen returned, not passed as argument.
+  /**
+   * Note: difference from C - smlen returned, not passed as argument.
+   * @param {Uint8Array} sm
+   * @param {Uint8Array} m
+   * @param {number} n
+   * @param {Uint8Array} sk
+   * @private
+   * @internal
+   */
   private static _cryptoSign (
     sm: Uint8Array, m: Uint8Array, n: number, sk: Uint8Array): number {
     const d = new Uint8Array(64)
@@ -1689,8 +1861,17 @@ export class Ed25519 {
     return smlen
   }
 
+  /**
+   * @param {Uint8Array} m
+   * @param {Uint8Array} sm
+   * @param {number} n
+   * @param {Uint8Array} pk
+   * @private
+   * @internal
+   */
   private static _cryptoSignOpen (
-    m: Uint8Array, sm: Uint8Array, n: number, pk: Uint8Array): number {
+    m: Uint8Array, sm: Uint8Array, n: number, pk: Uint8Array
+  ): number {
     let i
     const t = new Uint8Array(32)
     const h = new Uint8Array(64)
