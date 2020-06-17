@@ -2,6 +2,12 @@
   "name": "@umi-top/umi-core-js",
   "version": "1.0.0",
   "description": "UMI Core JS Library",
+  "license": "MIT",
+  "author": {
+    "name": "UMI",
+    "email": "dev@umi.top",
+    "url": "https://umi.top"
+  },
   "type": "commonjs",
   "main": "cjs/index.js",
   "module": "esm/index.js",
@@ -14,13 +20,12 @@
     "test": "nyc -r text -r html mocha",
     "posttest": "rm -rf dist",
     "cleanup": "rm -rf ./tmp ./dist ./esm ./cjs ./iife ./doc ./coverage ./.nyc_output",
-    "prepack": "npm run build; echo '{\"type\":\"module\",\"types\": \"index.d.ts\"}' > ./esm/package.json; echo '{\"type\":\"commonjs\",\"types\": \"index.d.ts\"}' > ./cjs/package.json",
-    "build": "npm run cleanup; mkdir -p tmp; npm run build:concat; tsc; rollup -c; npm run build:types; npm run build:flow",
-    "tslint": "tslint -c tslint.json 'src/**/*.ts'",
-    "eslint": "eslint src/**/*.ts",
-    "build:concat": "concat ./src/**/*.ts ./src/**/**/*.ts -o ./tmp/index.ts; sed -i .tmp -e '/^import/d' ./tmp/index.ts; sed -i .tmp -e '/^\\/\\/ /d' ./tmp/index.ts",
+    "build": "npm run cleanup; npm run build:concat; tsc; rollup -c; npm run build:types; npm run build:flow; npm run build:prepack",
+    "lint": "eslint src/**/*.ts",
+    "build:concat": "mkdir -p tmp; find ./src -type f -name '*.ts' -exec cat {} + > ./tmp/index.ts; sed -i -e '/^import/d' ./tmp/index.ts; sed -i -e '/^export {/d' ./tmp/index.ts; sed -i -e '/^\\/\\//d' ./tmp/index.ts",
     "build:types": "tsc --emitDeclarationOnly --declaration --declarationDir esm; cp ./esm/index.d.ts ./cjs/index.d.ts",
-    "build:flow": "flowgen --no-jsdoc --add-flow-header -o ./esm/index.js.flow ./esm/index.d.ts; cp ./esm/index.js.flow ./cjs/index.js.flow",
+    "build:flow": "flowgen --no-jsdoc --add-flow-header -o ./tmp/index.js.flow ./esm/index.d.ts; sed -i -e '/^  -/d' ./tmp/index.js.flow; cp ./tmp/index.js.flow ./esm/index.js.flow; cp ./tmp/index.js.flow ./cjs/index.js.flow",
+    "build:prepack": "echo '{\"type\":\"module\",\"types\":\"index.d.ts\"}' > ./esm/package.json; echo '{\"type\":\"commonjs\",\"types\":\"index.d.ts\"}' > ./cjs/package.json",
     "jsdoc": "jsdoc --pedantic -d ./doc ./esm/index.js",
     "typedoc": "typedoc"
   },
@@ -32,18 +37,15 @@
     "UMI",
     "umi.top"
   ],
-  "author": "UMI <dev@umi.top>",
-  "license": "MIT",
   "bugs": {
     "url": "https://github.com/umi-top/umi-core-js/issues"
   },
   "homepage": "https://umi.top",
   "dependencies": {},
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^3.2.0",
-    "@typescript-eslint/parser": "^3.2.0",
+    "@typescript-eslint/eslint-plugin": "^3.3.0",
+    "@typescript-eslint/parser": "^3.3.0",
     "chai": "^4.2.0",
-    "concat": "^1.0.3",
     "eslint": "^7.2.0",
     "eslint-config-standard": "^14.1.1",
     "eslint-plugin-import": "^2.21.2",
@@ -54,12 +56,14 @@
     "jsdoc": "^3.6.4",
     "mocha": "^8.0.1",
     "nyc": "^15.1.0",
-    "rollup": "^2.16.0",
+    "rollup": "^2.16.1",
     "rollup-plugin-cleanup": "^3.1.1",
     "rollup-plugin-terser": "^5.3.0",
-    "tslint": "^6.1.2",
     "typedoc": "^0.17.7",
     "typescript": "^3.9.5"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "files": [
     "esm",

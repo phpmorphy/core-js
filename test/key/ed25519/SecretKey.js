@@ -1,17 +1,37 @@
+if (typeof window === 'undefined') {
+  var umi = require('../../../dist')
+  var assert = require('chai').assert
+  var crypto = require('crypto')
+}
+
 describe('SecretKey', function () {
+  describe('константы', function () {
+    const tests = [
+      { args: 'LENGTH', expected: 64 },
+      { args: 'SIGNATURE_LENGTH', expected: 64 }
+    ]
+
+    tests.forEach(function (test) {
+      it(test.args, function () {
+        const actual = umi.SecretKey[test.args]
+        assert.strictEqual(actual, test.expected)
+      })
+    })
+  })
+
   describe('new SecretKey()', function () {
-    describe('должен возвращять ошибку если передано', function () {
+    describe('возвращяет ошибку если передать', function () {
+      const len = umi.SecretKey.LENGTH
       const tests = [
-        { desc: 'отрицательное целое число', args: -1 },
-        { desc: 'положительное вещественное число', args: 0.123 },
-        { desc: 'пустую строку', args: '' },
-        { desc: 'пустой массив', args: [] },
-        { desc: 'пустой объект', args: {} },
-        { desc: 'ничего', args: undefined },
-        { desc: 'ArrayBuffer', args: new ArrayBuffer(1) },
-        { desc: 'DataView', args: new DataView(new ArrayBuffer(1)) },
-        { desc: 'ключ короче чем 64 байта', args: new Uint8Array(63) },
-        { desc: 'ключ длиньше чем 64 байта', args: new Uint8Array(65) }
+        { desc: 'число', args: len },
+        { desc: 'строку', args: 'a'.repeat(len) },
+        { desc: 'массив', args: new Array(len) },
+        { desc: 'пустой объект', args: { a: 'b' } },
+        { desc: 'undefined', args: undefined },
+        { desc: 'ArrayBuffer', args: new ArrayBuffer(len) },
+        { desc: 'DataView', args: new DataView(new ArrayBuffer(len)) },
+        { desc: 'слишко короткий Uint8Array', args: new Uint8Array(len - 1) },
+        { desc: 'слишко длинный Uint8Array', args: new Uint8Array(len + 1) }
       ]
 
       tests.forEach(function (test) {
@@ -23,17 +43,18 @@ describe('SecretKey', function () {
   })
 
   describe('fromSeed()', function () {
-    describe('должен возвращять ошибку если передать', function () {
+    describe('возвращяет ошибку если передать', function () {
+      const len = 1
       const tests = [
-        { desc: 'отрицательное целое число', args: -1 },
-        { desc: 'положительное вещественное число', args: 0.123 },
-        { desc: 'пустую строку', args: '' },
-        { desc: 'пустой массив', args: [] },
-        { desc: 'пустой объект', args: {} },
+        { desc: 'число', args: len },
+        { desc: 'строку', args: 'a'.repeat(len) },
+        { desc: 'массив', args: new Array(len) },
+        { desc: 'объект', args: {a: 'b'} },
         { desc: 'ничего', args: undefined },
-        { desc: 'ArrayBuffer', args: new ArrayBuffer(1) },
-        { desc: 'DataView', args: new DataView(new ArrayBuffer(1)) },
-        { desc: 'seed длиньше чем 128 байт', args: new Uint8Array(129) }
+        { desc: 'ArrayBuffer', args: new ArrayBuffer(len) },
+        { desc: 'DataView', args: new DataView(new ArrayBuffer(len)) },
+        { desc: 'Int8Array', args: new Int8Array(len) },
+        { desc: 'Uint8Array длиннее чем 128 байт', args: new Uint8Array(129) }
       ]
 
       tests.forEach(function (test) {
@@ -43,7 +64,7 @@ describe('SecretKey', function () {
       })
     })
 
-    describe('должен создавать правильный приватный ключ если', function () {
+    describe('создает правильный приватный ключ если', function () {
       it('seed меньше 32 байт', function () {
         if (typeof window !== 'undefined') {
           this.skip()
@@ -96,7 +117,7 @@ describe('SecretKey', function () {
   })
 
   describe('publicKey', function () {
-    it('должен возвращать правильный публичный ключ', function () {
+    it('возвращяет правильный публичный ключ', function () {
       if (typeof window !== 'undefined') {
         this.skip()
       }
@@ -115,27 +136,27 @@ describe('SecretKey', function () {
   })
 
   describe('sign()', function () {
-    describe('должен возвращять ошибку если передать', function () {
+    describe('возвращяет ошибку если передать', function () {
+      const len = 1
       const tests = [
-        { desc: 'отрицательное целое число', args: -1 },
-        { desc: 'положительное вещественное число', args: 0.123 },
-        { desc: 'пустую строку', args: '' },
-        { desc: 'пустой массив', args: [] },
-        { desc: 'пустой объект', args: {} },
-        { desc: 'ничего', args: undefined },
-        { desc: 'ArrayBuffer', args: new ArrayBuffer(1) },
-        { desc: 'DataView', args: new DataView(new ArrayBuffer(1)) }
+        { desc: 'число', args: len },
+        { desc: 'строку', args: 'a'.repeat(len) },
+        { desc: 'массив', args: new Array(len) },
+        { desc: 'объект', args: { a: 'b' } },
+        { desc: 'undefined', args: undefined },
+        { desc: 'ArrayBuffer', args: new ArrayBuffer(len) },
+        { desc: 'DataView', args: new DataView(new ArrayBuffer(len)) }
       ]
 
       tests.forEach(function (test) {
         it(test.desc, function () {
-          const secKey = umi.SecretKey.fromSeed(new Uint8Array(64))
+          const secKey = new umi.SecretKey(new Uint8Array(umi.SecretKey.LENGTH))
           assert.throws(() => secKey.sign(test.args), Error)
         })
       })
     })
 
-    it('должен возвращать правильную подпись', function () {
+    it('возвращяет корректную подпись', function () {
       if (typeof window !== 'undefined') {
         this.skip()
       }

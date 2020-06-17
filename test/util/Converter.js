@@ -1,3 +1,8 @@
+if (typeof window === 'undefined') {
+  var umi = require('../../dist')
+  var assert = require('chai').assert
+}
+
 describe('Converter', function () {
   describe('uint16ToPrefix()', function () {
     describe('возвращяет ошибку если передать', function () {
@@ -33,6 +38,10 @@ describe('Converter', function () {
 
       tests.forEach(function (test) {
         it(test.desc, function () {
+          if (typeof window !== 'undefined') {
+            this.skip()
+          }
+
           assert.throws(() => umi.uint16ToPrefix(test.args), Error)
         })
       })
@@ -49,8 +58,12 @@ describe('Converter', function () {
 
       tests.forEach(function (test) {
         it(test.desc, function () {
+          if (typeof window !== 'undefined') {
+            this.skip()
+          }
+
           const actual = umi.uint16ToPrefix(test.args)
-          assert.equal(actual, test.expected)
+          assert.strictEqual(actual, test.expected)
         })
       })
     })
@@ -76,6 +89,10 @@ describe('Converter', function () {
 
       tests.forEach(function (test) {
         it(test.desc, function () {
+          if (typeof window !== 'undefined') {
+            this.skip()
+          }
+
           assert.throws(() => umi.prefixToUint16(test.args), Error)
         })
       })
@@ -92,8 +109,12 @@ describe('Converter', function () {
 
       tests.forEach(function (test) {
         it(test.desc, function () {
+          if (typeof window !== 'undefined') {
+            this.skip()
+          }
+
           const actual = umi.prefixToUint16(test.args)
-          assert.equal(actual, test.expected)
+          assert.strictEqual(actual, test.expected)
         })
       })
     })

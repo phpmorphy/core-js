@@ -34,6 +34,12 @@ export class SecretKey {
   static get LENGTH (): number { return Ed25519.SECRET_KEY_BYTES }
 
   /**
+   * Длина цифровой подписи в байтах.
+   * @type {number}
+   */
+  static get SIGNATURE_LENGTH (): number { return Ed25519.SIGNATURE_BYTES }
+
+  /**
    * Приватный ключ в бинарном виде. В формате libsodium.
    * @type {Uint8Array}
    * @private
@@ -47,7 +53,7 @@ export class SecretKey {
    * @throws {Error}
    */
   constructor (bytes: Uint8Array) {
-    if (bytes instanceof Uint8Array === false) {
+    if (!(bytes instanceof Uint8Array)) {
       throw new Error('bytes type must be Uint8Array')
     }
 
@@ -89,8 +95,8 @@ export class SecretKey {
    * let sig = SecretKey.fromSeed(seed).sign(msg)
    */
   sign (message: Uint8Array): Uint8Array {
-    if (message instanceof Uint8Array === false) {
-      throw new Error('message must be Uint8Array')
+    if (!(message instanceof Uint8Array)) {
+      throw new Error('message type must be Uint8Array')
     }
 
     return Ed25519.sign(message, this._bytes)
@@ -108,7 +114,7 @@ export class SecretKey {
    * let key = SecretKey.fromSeed(seed)
    */
   static fromSeed (seed: Uint8Array): SecretKey {
-    if (seed instanceof Uint8Array === false) {
+    if (!(seed instanceof Uint8Array)) {
       throw new Error('seed must be Uint8Array')
     }
 

@@ -32,6 +32,18 @@ export class PublicKey {
   static get LENGTH (): number { return Ed25519.PUBLIC_KEY_BYTES }
 
   /**
+   * Длина цифровой подписи в байтах.
+   * @type {number}
+   */
+  static get SIGNATURE_LENGTH (): number { return Ed25519.SIGNATURE_BYTES }
+
+  /**
+   * Длина цифровой подписи в байтах.
+   * @type {number}
+   */
+  get signatureLength (): number { return PublicKey.SIGNATURE_LENGTH }
+
+  /**
    * Публичный ключ в бинарном виде. В формате libsodium.
    * @type {Uint8Array}
    * @private
@@ -44,7 +56,7 @@ export class PublicKey {
    * @throws {Error}
    */
   constructor (bytes: Uint8Array) {
-    if (bytes instanceof Uint8Array === false) {
+    if (!(bytes instanceof Uint8Array)) {
       throw new Error('bytes must be Uint8Array')
     }
 
@@ -79,16 +91,16 @@ export class PublicKey {
    * let ver = new PublicKey(key).verifySignature(msg, sig)
    */
   verifySignature (message: Uint8Array, signature: Uint8Array): boolean {
-    if (message instanceof Uint8Array === false) {
-      throw new Error('message must be Uint8Array')
+    if (!(message instanceof Uint8Array)) {
+      throw new Error('message type must be Uint8Array')
     }
 
-    if (signature instanceof Uint8Array === false) {
-      throw new Error('signature must be Uint8Array')
+    if (!(signature instanceof Uint8Array)) {
+      throw new Error('signature type must be Uint8Array')
     }
 
-    if (signature.byteLength !== Ed25519.SIGNATURE_BYTES) {
-      throw new Error('signature must be 64 bytes length')
+    if (signature.byteLength !== PublicKey.SIGNATURE_LENGTH) {
+      throw new Error('signature length must be 64 bytes')
     }
 
     return Ed25519.verify(message, signature, this._bytes)

@@ -1,5 +1,20 @@
+if (typeof window === 'undefined') {
+  var umi = require('../../dist')
+  var assert = require('chai').assert
+  var crypto = require('crypto')
+}
 
 describe('Ed25519', function () {
+  describe('константы', function () {
+    it('SEED_BYTES', function () {
+      if (typeof window !== 'undefined') {
+        this.skip()
+      }
+
+      assert.isNumber(umi.Ed25519.SEED_BYTES)
+    })
+  })
+
   describe('secretKeyFromSeed()', function () {
     it('генерирует правильный приватный ключ', function () {
       if (typeof window !== 'undefined') {
@@ -58,8 +73,8 @@ describe('Ed25519', function () {
         this.skip()
       }
 
-      const rnd = new Uint8Array(64)
-      const expected = new Uint8Array(32)
+      const rnd = new Uint8Array(umi.Ed25519.SECRET_KEY_BYTES)
+      const expected = new Uint8Array(umi.Ed25519.PUBLIC_KEY_BYTES)
 
       for (let i = 0; i < 64; i++) {
         crypto.randomFillSync(rnd)
@@ -186,9 +201,24 @@ describe('Ed25519', function () {
     })
   })
 
-  describe('константы', function () {
-    it('SEED_BYTES', function () {
-      assert.isNumber(umi.Ed25519.SEED_BYTES)
+  describe('_cryptoSignOpen()', function () {
+    it('возвращяет -1 при n < 64', function () {
+      const m = new Uint8Array(64)
+      const sm = new Uint8Array(64)
+      const n = 63
+      const pk = new Uint8Array(32)
+      const actual = umi.Ed25519._cryptoSignOpen(m, sm, n, pk)
+      assert.strictEqual(actual, -1)
+    })
+
+    it('возвращяет -1 при _unpackneg()', function () {
+      const m = new Uint8Array(64)
+      const sm = new Uint8Array(64)
+      const n = 64
+      const pk = new Uint8Array(32)
+      pk[0] = 2
+      const actual = umi.Ed25519._cryptoSignOpen(m, sm, n, pk)
+      assert.strictEqual(actual, -1)
     })
   })
 })

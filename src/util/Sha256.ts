@@ -27,7 +27,7 @@
  * @returns {Uint8Array} hash
  * @throws {Error}
  */
-export function sha256 (message: Uint8Array): Uint8Array {
+function sha256 (message: Uint8Array): Uint8Array {
   if (message instanceof Uint8Array === false) {
     throw new Error('message must be Uint8Array')
   }
@@ -192,3 +192,5 @@ export function sha256 (message: Uint8Array): Uint8Array {
 
   return new Uint8Array(hash.buffer)
 }
+
+export { sha256 }

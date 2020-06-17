@@ -26,18 +26,20 @@ import { prefixToUint16, uint16ToPrefix } from './Converter'
  * Bech32 конвертер.
  * @class
  */
-export class Bech32 {
+class Bech32 {
   /**
    * @type {string}
    * @private
+   * @internal
    */
-  static get ALPHABET (): string { return 'qpzry9x8gf2tvdw0s3jn54khce6mua7l' }
+  static get _ALPHABET (): string { return 'qpzry9x8gf2tvdw0s3jn54khce6mua7l' }
 
   /**
-   * @type {object}
+   * @type {Object}
    * @private
+   * @internal
    */
-  static get ALPHABET_MAP (): { [p: string]: number } {
+  static get _ALPHABET_MAP (): { [p: string]: number } {
     return {
       0: 15,
       2: 10,
@@ -101,14 +103,19 @@ export class Bech32 {
     return res
   }
 
-  private static _encode (prefix: string, words: any) {
+  /**
+   * @param {string} prefix
+   * @param {number[]} words
+   * @returns {string}
+   * @throws {Error}
+   * @private
+   * @internal
+   */
+  private static _encode (prefix: string, words: number[]): string {
     prefix = prefix.toLowerCase()
 
     // determine chk mod
     let chk = this._prefixChk(prefix)
-    if (typeof chk === 'string') {
-      throw new Error(chk)
-    }
 
     let result = prefix + '1'
     let word
@@ -118,7 +125,7 @@ export class Bech32 {
       }
 
       chk = this._polymodStep(chk) ^ word
-      result += this.ALPHABET.charAt(word)
+      result += this._ALPHABET.charAt(word)
     }
 
     for (let i = 0; i < 6; ++i) {
@@ -128,13 +135,20 @@ export class Bech32 {
 
     for (let i = 0; i < 6; ++i) {
       const v = (chk >> ((5 - i) * 5)) & 0x1f
-      result += this.ALPHABET.charAt(v)
+      result += this._ALPHABET.charAt(v)
     }
 
     return result
   }
 
-  private static _decode (str: string) {
+  /**
+   * @param {string} str
+   * @returns {Object}
+   * @throws {Error}
+   * @private
+   * @internal
+   */
+  private static _decode (str: string): { prefix: string, words: number[] } {
     // don't allow mixed case
     const lowered = str.toLowerCase()
     const uppered = str.toUpperCase()
@@ -158,14 +172,11 @@ export class Bech32 {
     }
 
     let chk = this._prefixChk(prefix)
-    if (typeof chk === 'string') {
-      throw new Error(chk)
-    }
 
     const words = []
     for (let i = 0; i < wordChars.length; ++i) {
       const c = wordChars.charAt(i)
-      const v = this.ALPHABET_MAP[c]
+      const v = this._ALPHABET_MAP[c]
       if (v === undefined) {
         throw new Error('Unknown character ' + c)
       }
@@ -185,7 +196,13 @@ export class Bech32 {
     return { prefix, words }
   }
 
-  private static _polymodStep (pre: any) {
+  /**
+   * @param {number} pre
+   * @returns {number}
+   * @private
+   * @internal
+   */
+  private static _polymodStep (pre: number): number {
     const b = pre >> 25
     return ((pre & 0x1FFFFFF) << 5) ^
       (-((b >> 0) & 1) & 0x3b6a57b2) ^
@@ -195,14 +212,20 @@ export class Bech32 {
       (-((b >> 4) & 1) & 0x2a1462b3)
   }
 
-  private static _prefixChk (prefix: any) {
+  /**
+   * @param {string} prefix
+   * @returns {number}
+   * @throws {Error}
+   * @private
+   * @internal
+   */
+  private static _prefixChk (prefix: string): number {
     let chk = 1
     for (let i = 0; i < prefix.length; ++i) {
       const c = prefix.charCodeAt(i)
       if (c < 33 || c > 126) {
-        return 'Invalid prefix (' + prefix + ')'
+        throw Error('Invalid prefix (' + prefix + ')')
       }
-
       chk = this._polymodStep(chk) ^ (c >> 5)
     }
     chk = this._polymodStep(chk)
@@ -211,11 +234,22 @@ export class Bech32 {
       const v = prefix.charCodeAt(i)
       chk = this._polymodStep(chk) ^ (v & 0x1f)
     }
+
     return chk
   }
 
+  /**
+   * @param {number[]|Uint8Array} data
+   * @param {number} inBits
+   * @param {number} outBits
+   * @param {boolean} pad
+   * @returns {number[]}
+   * @private
+   * @internal
+   */
   private static _convert (
-    data: any, inBits: number, outBits: number, pad: boolean): number[] {
+    data: number[]|Uint8Array, inBits: number, outBits: number, pad: boolean
+  ): number[] {
     let value = 0
     let bits = 0
     const maxV = (1 << outBits) - 1
@@ -248,3 +282,5 @@ export class Bech32 {
     return result
   }
 }
+
+export { Bech32 }

@@ -1,3 +1,9 @@
+if (typeof window === 'undefined') {
+  var umi = require('../../dist')
+  var assert = require('chai').assert
+  var crypto = require('crypto')
+}
+
 describe('Sha256()', function () {
   describe('возвращяет ошибку если', function () {
     it('вызвать без параметров', function () {
@@ -23,17 +29,29 @@ describe('Sha256()', function () {
   })
 
   describe('хэш пустой строки', function () {
-    const actual = umi.sha256(new Uint8Array(0))
-
     it('возвращяет Uint8Array', function () {
+      if (typeof window !== 'undefined') {
+        this.skip()
+      }
+
+      const actual = umi.sha256(new Uint8Array(0))
       assert.instanceOf(actual, Uint8Array)
     })
 
     it('имеет длину 32 байта', function () {
+      if (typeof window !== 'undefined') {
+        this.skip()
+      }
+
+      const actual = umi.sha256(new Uint8Array(0))
       assert.lengthOf(actual, 32)
     })
 
     it('равен e3b0c44298fc1c149af...1e4649b934ca495991b7852b855', function () {
+      if (typeof window !== 'undefined') {
+        this.skip()
+      }
+
       const expected = new Uint8Array([
         0xe3,
         0xb0,
@@ -94,17 +112,17 @@ describe('Sha256()', function () {
         it(test.desc, function () {
           assert.deepEqual(actual, expected)
         })
-      } else { // browser
-        const actual = umi.sha256(msg)
-
-        it(test.desc, function (done) {
-          crypto.subtle.digest('SHA-256', msg).then(
-            function (digest) {
-              const expected = new Uint8Array(digest)
-              assert.deepEqual(actual, expected)
-              done()
-            })
-        })
+      // } else { // browser
+      //   const actual = umi.sha256(msg)
+      //
+      //   it(test.desc, function (done) {
+      //     crypto.subtle.digest('SHA-256', msg).then(
+      //       function (digest) {
+      //         const expected = new Uint8Array(digest)
+      //         assert.deepEqual(actual, expected)
+      //         done()
+      //       })
+      //   })
       }
     })
   })

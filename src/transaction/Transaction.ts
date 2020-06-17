@@ -254,23 +254,26 @@ export class Transaction {
    */
   constructor (bytes?: Uint8Array) {
     if (bytes !== undefined) {
-      if (bytes instanceof Uint8Array === false) {
+      if (!(bytes instanceof Uint8Array)) {
         throw new Error('bytes type must be Uint8Array')
-      } else if (bytes.byteLength !== Transaction.LENGTH) {
-        throw new Error('bytes length must be 150 bytes')
-      } else {
-        this._bytes.set(bytes)
-        this._isVersionSet = true
-        this._isSenderSet = true
-        this._isRecipientSet = true
-        this._isValueSet = true
-        this._isPrefixSet = true
-        this._isNameSet = true
-        this._isProfitPercentSet = true
-        this._isFeePercentSet = true
-        this._isNonceSet = true
-        this._isSignatureSet = true
       }
+
+      if (bytes.byteLength !== Transaction.LENGTH) {
+        throw new Error('bytes length must be 150 bytes')
+      }
+
+      this._bytes.set(bytes)
+
+      this._isVersionSet = true
+      this._isSenderSet = true
+      this._isRecipientSet = true
+      this._isValueSet = true
+      this._isPrefixSet = true
+      this._isNameSet = true
+      this._isProfitPercentSet = true
+      this._isFeePercentSet = true
+      this._isNonceSet = true
+      this._isSignatureSet = true
     }
   }
 
@@ -317,12 +320,16 @@ export class Transaction {
   }
 
   set version (version: number) {
+    if (this._isVersionSet) {
+      throw new Error('could not update version')
+    }
+
     if (typeof version !== 'number') {
-      throw new Error('version must be number')
+      throw new Error('version type must be number')
     }
 
     if (Math.floor(version) !== version) {
-      throw new Error('version must be integer')
+      throw new Error('version type must be integer')
     }
 
     if (version < Transaction.Genesis ||
@@ -335,7 +342,7 @@ export class Transaction {
   }
 
   /**
-   * Устанавливает версию и возващяет this.
+   * Устанавливает версию и возвращяет this.
    * @param {number} version Версия адреса.
    * @returns {Transaction}
    * @throws {Error}
@@ -374,21 +381,24 @@ export class Transaction {
       throw new Error('must set version first')
     }
 
-    if (address instanceof Address === false) {
+    if (!(address instanceof Address)) {
       throw new Error('address type must be Address')
     }
 
-    if (this.version === 0 && address.version !== 0) {
+    if (this.version === Transaction.Genesis &&
+      address.version !== Address.Genesis) {
       throw new Error('address version must be genesis')
     }
 
-    if (this.version !== 0 && address.version === 0) {
+    if (this.version !== Transaction.Genesis &&
+      address.version === Address.Genesis) {
       throw new Error('address version must not be genesis')
     }
 
     // sender length = 34
     // sender begin = 1
     this._bytes.set(address.bytes, 1)
+    this._isSenderSet = true
   }
 
   /**
@@ -404,7 +414,7 @@ export class Transaction {
 
   /**
    * Получатель.
-   * Доступно для всех типов транзакций кроме CreateStructure и UpdateStructure.
+   * Недоступно для транзакций CreateStructure и UpdateStructure.
    * @type {Address}
    * @throws {Error}
    */
@@ -438,17 +448,29 @@ export class Transaction {
       throw new Error('recipient unavailable for this transaction type')
     }
 
-    if (address instanceof Address === false) {
-      throw new Error('address type must be Address')
+    if (!(address instanceof Address)) {
+      throw new Error('recipient type must be Address')
     }
 
-    if (address.version === 0) {
-      throw new Error('address version must not be genesis')
+    if (address.version === Address.Genesis) {
+      throw new Error('recipient version must not be genesis')
+    }
+
+    if (this.version === Transaction.Genesis &&
+      address.version !== Address.Umi) {
+      throw new Error('recipient version must be umi')
+    }
+
+    if (this.version !== Transaction.Genesis &&
+      this.version !== Transaction.Basic &&
+      address.version === Address.Umi) {
+      throw new Error('recipient version must not be umi')
     }
 
     // recipient length = 34
     // recipient begin = 35
     this._bytes.set(address.bytes, 35)
+    this._isRecipientSet = true
   }
 
   /**
@@ -520,6 +542,7 @@ export class Transaction {
     this._view.setInt32(69 + 4, value | 0)
     this._view.setInt32(69,
       (value - this._view.getUint32(69 + 4)) / 0x1_0000_0000)
+    this._isValueSet = true
   }
 
   /**
@@ -571,6 +594,7 @@ export class Transaction {
 
     // prefix offset = 35
     this._view.setUint16(35, prefixToUint16(prefix))
+    this._isPrefixSet = true
   }
 
   /**
@@ -624,7 +648,6 @@ export class Transaction {
       throw new Error('name type must be a string')
     }
 
-    // name offset = 41
     // name length = 36
     const txt = new TextEncoder().encode(name)
 
@@ -632,8 +655,10 @@ export class Transaction {
       throw new Error('name is too long')
     }
 
+    // name offset = 41
     this._bytes[41] = txt.byteLength
     this._bytes.set(txt, 41 + 1)
+    this._isNameSet = true
   }
 
   /**
@@ -643,7 +668,7 @@ export class Transaction {
    * @returns {Transaction}
    * @throws {Error}
    */
-  setName (name: string): this {
+  setName (name: string): Transaction {
     this.name = name
     return this
   }
@@ -697,6 +722,7 @@ export class Transaction {
 
     // profit offset = 37
     this._view.setUint16(37, percent)
+    this._isProfitPercentSet = true
   }
 
   /**
@@ -747,11 +773,11 @@ export class Transaction {
     }
 
     if (typeof percent !== 'number') {
-      throw new Error('percent must be number')
+      throw new Error('percent type must be number')
     }
 
     if (Math.floor(percent) !== percent) {
-      throw new Error('percent must be integer')
+      throw new Error('percent type must be integer')
     }
 
     if (percent < 0 || percent > 2000) {
@@ -760,6 +786,7 @@ export class Transaction {
 
     // fee offset = 39
     this._view.setUint16(39, percent)
+    this._isFeePercentSet = true
   }
 
   /**
@@ -769,7 +796,7 @@ export class Transaction {
    * @returns {Transaction}
    * @throws {Error}
    */
-  setFeePercent (percent: number): this {
+  setFeePercent (percent: number): Transaction {
     this.feePercent = percent
     return this
   }
@@ -782,10 +809,6 @@ export class Transaction {
    * @throws {Error}
    */
   get nonce (): number {
-    if (!this._isVersionSet) {
-      throw new Error('must set version first')
-    }
-
     if (!this._isNonceSet) {
       throw new Error('must set nonce first')
     }
@@ -800,20 +823,16 @@ export class Transaction {
   }
 
   set nonce (nonce: number) {
-    if (!this._isVersionSet) {
-      throw new Error('must set version first')
-    }
-
     if (typeof nonce !== 'number') {
-      throw new Error('nonce must be number')
+      throw new Error('nonce type must be number')
     }
 
     if (Math.floor(nonce) !== nonce) {
-      throw new Error('nonce must be integer')
+      throw new Error('nonce type must be integer')
     }
 
     if (nonce < 0 || nonce > Number.MAX_SAFE_INTEGER) {
-      throw new Error('nonce must be between 0 and 9007199254740991')
+      throw new Error('nonce value must be between 0 and 9007199254740991')
     }
 
     // nonce offset = 77
@@ -821,6 +840,7 @@ export class Transaction {
     this._view.setInt32(77 + 4, nonce | 0)
     this._view.setInt32(77,
       (nonce - this._view.getUint32(77 + 4)) / 0x1_0000_0000)
+    this._isNonceSet = true
   }
 
   /**
@@ -829,7 +849,7 @@ export class Transaction {
    * @returns {Transaction}
    * @throws {Error}
    */
-  setNonce (nonce: number): this {
+  setNonce (nonce: number): Transaction {
     this.nonce = nonce
     return this
   }
@@ -841,18 +861,19 @@ export class Transaction {
    * @throws {Error}
    */
   get signature (): Uint8Array {
-    if (!this._isVersionSet) {
-      throw new Error('must set version first')
+    if (!this._isSenderSet) {
+      throw new Error('must set sender first')
     }
 
     if (!this._isSignatureSet) {
       throw new Error('must set signature first')
     }
 
-    // signature offset = 85
     // signature length = 64
-    const len = 64
+    const len = this.sender.publicKey.signatureLength
     const sig = new Uint8Array(len)
+
+    // signature offset = 85
     sig.set(this._bytes.subarray(85, 85 + len))
     return sig
   }
@@ -862,16 +883,21 @@ export class Transaction {
       throw new Error('must set version first')
     }
 
-    if (signature instanceof Uint8Array === false) {
-      throw new Error('signature must be Uint8Array')
+    if (!this._isSenderSet) {
+      throw new Error('must set sender first')
     }
 
-    if (signature.byteLength !== 64) {
-      throw new Error('signature must be 64 bytes length')
+    if (!(signature instanceof Uint8Array)) {
+      throw new Error('signature type must be Uint8Array')
+    }
+
+    if (signature.byteLength !== this.sender.publicKey.signatureLength) {
+      throw new Error('incorrect signature length')
     }
 
     // signature offset = 85
     this._bytes.set(signature, 85)
+    this._isSignatureSet = true
   }
 
   /**
@@ -880,7 +906,7 @@ export class Transaction {
    * @returns {Transaction}
    * @throws {Error}
    */
-  setSignature (signature: Uint8Array): this {
+  setSignature (signature: Uint8Array): Transaction {
     this.signature = signature
     return this
   }
@@ -890,12 +916,12 @@ export class Transaction {
    * @param {SecretKey} secretKey
    * @throws {Error}
    */
-  sign (secretKey: SecretKey): this {
+  sign (secretKey: SecretKey): Transaction {
     if (!this._isVersionSet) {
       throw new Error('must set version first')
     }
 
-    if (secretKey instanceof SecretKey === false) {
+    if (!(secretKey instanceof SecretKey)) {
       throw new Error('secretKey type must be SecretKey')
     }
 
@@ -909,10 +935,19 @@ export class Transaction {
   /**
    * Проверить транзакцию на соотвествие формальным правилам.
    * @returns {boolean}
+   * @throws {Error}
    */
   verify (): boolean {
     if (!this._isVersionSet) {
       throw new Error('must set version first')
+    }
+
+    if (!this._isSenderSet) {
+      throw new Error('must set sender first')
+    }
+
+    if (!this._isSignatureSet) {
+      throw new Error('must set signature first')
     }
 
     // unsigned begin = 0

@@ -4,10 +4,6 @@
         "es6": true,
         "mocha": true
     },
-    "globals": {
-        "assert": true,
-        "umi": true
-    },
     "extends": [
         "standard"
     ],

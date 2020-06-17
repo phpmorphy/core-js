@@ -36,7 +36,7 @@
  * @class
  * @hideconstructor
  */
-export class Ed25519 {
+class Ed25519 {
   /**
    * Длина публичного ключа в байтах.
    * @type {number}
@@ -123,7 +123,9 @@ export class Ed25519 {
    * @returns {Uint8Array}
    */
   static publicKeyFromSecretKey (secretKey: Uint8Array): Uint8Array {
-    return new Uint8Array(secretKey.buffer, 32, 32)
+    const b = new Uint8Array(this.PUBLIC_KEY_BYTES)
+    b.set(new Uint8Array(secretKey.buffer, 32, 32))
+    return b
   }
 
   /**
@@ -1923,3 +1925,5 @@ export class Ed25519 {
     return n
   }
 }
+
+export { Ed25519 }

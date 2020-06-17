@@ -35,6 +35,18 @@ export class Address {
   static get LENGTH (): number { return 34 }
 
   /**
+   * Версия Genesis-адрса.
+   * @type {number}
+   */
+  static get Genesis (): number { return 0 }
+
+  /**
+   * Версия Umi-адреса.
+   * @type {number}
+   */
+  static get Umi (): number { return 21929 }
+
+  /**
    * Адрес в бинарном виде, длина 34 байта.
    * @type {Uint8Array}
    * @private
@@ -49,11 +61,15 @@ export class Address {
   constructor (bytes?: Uint8Array) {
     if (bytes === undefined) {
       this.prefix = 'umi'
-    } else if (bytes instanceof Uint8Array === false) {
-      throw new Error('bytes must be Uint8Array')
-    } else if (bytes.byteLength !== Address.LENGTH) {
-      throw new Error('bytes must be 34 bytes length')
     } else {
+      if (!(bytes instanceof Uint8Array)) {
+        throw new Error('bytes type must be Uint8Array')
+      }
+
+      if (bytes.byteLength !== Address.LENGTH) {
+        throw new Error('bytes length must be 34 bytes')
+      }
+
       this._bytes.set(bytes)
     }
   }
@@ -109,7 +125,7 @@ export class Address {
   }
 
   set publicKey (publicKey: PublicKey) {
-    if (publicKey instanceof PublicKey === false) {
+    if (!(publicKey instanceof PublicKey)) {
       throw new Error('publicKey type must be PublicKey')
     }
 

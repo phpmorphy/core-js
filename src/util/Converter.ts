@@ -25,7 +25,7 @@
  * @returns {string}
  * @throws {Error}
  */
-export function uint16ToPrefix (version: number): string {
+function uint16ToPrefix (version: number): string {
   if (typeof version !== 'number') {
     throw new Error('version must be number')
   }
@@ -66,7 +66,7 @@ export function uint16ToPrefix (version: number): string {
  * @returns {number}
  * @throws {Error}
  */
-export function prefixToUint16 (prefix: string): number {
+function prefixToUint16 (prefix: string): number {
   if (typeof prefix !== 'string') {
     throw new Error('prefix must be string')
   }
@@ -97,3 +97,5 @@ export function prefixToUint16 (prefix: string): number {
 
   return (a << 10) + (b << 5) + c
 }
+
+export { uint16ToPrefix, prefixToUint16 }

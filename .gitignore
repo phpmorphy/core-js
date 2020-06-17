@@ -1,10 +1,7 @@
 .idea
-.flowconfig
 /.nyc_output
 /coverage
 /tmp
-/doc
-/docs
 /esm
 /cjs
 /iife

@@ -1,7 +1,7 @@
 {
   "mode": "file",
   "inputFiles": ["./src"],
-  "out": "docs",
+  "out": "doc",
   "excludePrivate": false,
   "excludeTags": ["example", "see", "readonly", "hideconstructor"]
 }
