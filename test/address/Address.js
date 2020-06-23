@@ -1,5 +1,5 @@
 if (typeof window === 'undefined') {
-  var umi = require('../../dist')
+  var umi = require('../../')
   var assert = require('chai').assert
 }
 
@@ -248,7 +248,7 @@ describe('Address', function () {
     })
   })
 
-  describe('bytes', function () {
+  xdescribe('bytes', function () {
     it('возвращяет Uint8Array корректной длины', function () {
       if (typeof window !== 'undefined') {
         this.skip()

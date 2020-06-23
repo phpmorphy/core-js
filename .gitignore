@@ -1,10 +1,5 @@
 .idea
 /.nyc_output
 /coverage
-/tmp
-/esm
-/cjs
-/iife
-/dist
 /node_modules
 package-lock.json

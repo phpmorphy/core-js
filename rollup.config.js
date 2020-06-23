@@ -29,24 +29,18 @@ export default [
     input: 'tmp/index.js',
     output: [
       {
-        file: 'cjs/index.js',
+        file: 'lib/index.js',
         format: 'cjs',
         banner: license,
         esModule: false
       },
       {
-        file: 'esm/index.js',
+        file: 'lib/index.mjs',
         format: 'es',
         banner: license
       },
       {
-        file: 'iife/index.js',
-        format: 'iife',
-        name: 'umi',
-        banner: license
-      },
-      {
-        file: 'iife/index.min.js',
+        file: 'lib/index.min.js',
         format: 'iife',
         name: 'umi',
         banner: '/**\n' +

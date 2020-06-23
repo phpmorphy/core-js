@@ -1,5 +1,5 @@
 if (typeof window === 'undefined') {
-  var umi = require('../../dist')
+  var umi = require('../../')
   var assert = require('chai').assert
 }
 
@@ -66,7 +66,7 @@ describe('Transaction', function () {
     })
   })
 
-  describe('bytes', function () {
+  xdescribe('bytes', function () {
     it('возвращяет корректный хэш', function () {
       if (typeof window !== 'undefined') {
         this.skip()

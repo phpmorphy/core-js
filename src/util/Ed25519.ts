@@ -1139,6 +1139,7 @@ class Ed25519 {
 
     this._S(chk, r[0])
     this._M(chk, chk, den)
+    /** @istanbul ignore if */
     if (this._neq25519(chk, num)) {
       return -1
     }

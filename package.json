@@ -9,24 +9,30 @@
     "url": "https://umi.top"
   },
   "type": "commonjs",
-  "main": "cjs/index.js",
-  "module": "esm/index.js",
-  "es2015": "esm/index.js",
-  "types": "esm/index.d.ts",
-  "unpkg": "iife/index.min.js",
+  "main": "lib/index.js",
+  "module": "lib/index.mjs",
+  "es2015": "lib/index.mjs",
+  "types": "lib/index.d.ts",
+  "unpkg": "lib/index.min.js",
+  "exports": {
+    ".": {
+      "require": "lib/index.js",
+      "import": "lib/index.mjs"
+    }
+  },
   "sideEffects": false,
   "scripts": {
-    "pretest": "tsc --target es2015 --module commonjs --removeComments --outDir dist ./src/index.ts",
-    "test": "nyc -r text -r html mocha",
-    "posttest": "rm -rf dist",
-    "cleanup": "rm -rf ./tmp ./dist ./esm ./cjs ./iife ./doc ./coverage ./.nyc_output",
-    "build": "npm run cleanup; npm run build:concat; tsc; rollup -c; npm run build:types; npm run build:flow; npm run build:prepack",
-    "lint": "eslint src/**/*.ts",
-    "build:concat": "mkdir -p tmp; find ./src -type f -name '*.ts' -exec cat {} + > ./tmp/index.ts; sed -i -e '/^import/d' ./tmp/index.ts; sed -i -e '/^export {/d' ./tmp/index.ts; sed -i -e '/^\\/\\//d' ./tmp/index.ts",
-    "build:types": "tsc --emitDeclarationOnly --declaration --declarationDir esm; cp ./esm/index.d.ts ./cjs/index.d.ts",
-    "build:flow": "flowgen --no-jsdoc --add-flow-header -o ./tmp/index.js.flow ./esm/index.d.ts; sed -i -e '/^  -/d' ./tmp/index.js.flow; cp ./tmp/index.js.flow ./esm/index.js.flow; cp ./tmp/index.js.flow ./cjs/index.js.flow",
-    "build:prepack": "echo '{\"type\":\"module\",\"types\":\"index.d.ts\"}' > ./esm/package.json; echo '{\"type\":\"commonjs\",\"types\":\"index.d.ts\"}' > ./cjs/package.json",
-    "jsdoc": "jsdoc --pedantic -d ./doc ./esm/index.js",
+    "test": "nyc --reporter=text --reporter=html mocha",
+    "coverage": "nyc report --reporter=text-lcov | coveralls",
+    "lint": "eslint src/**/*.ts lib/*.js",
+    "build": "mkdir -p tmp; npm run build:concat; tsc; npm run build:format; rollup -c; npm run build:comments; npm run build:codestyle; npm run build:types; npm run build:flow; rm -r tmp",
+    "build:concat": "find ./src -type f -name '*.ts' -exec cat {} + > ./tmp/index.ts; sed -i -e '/^import/d' ./tmp/index.ts; sed -i -e '/^export {/d' ./tmp/index.ts; sed -i -e '/^\\/\\//d' ./tmp/index.ts",
+    "build:format": "sed -e 's/^/~/' -e ': r' -e 's/^\\( *\\)~    /\\1  ~/' -e 't r' -e 's/~//' ./tmp/index.js > ./tmp/index2.js; mv ./tmp/index2.js ./tmp/index.js",
+    "build:comments": "sed -e 's/\\* @is/ is/' ./lib/index.js > ./tmp/index.tmp.js; sed -e '/@internal/d' ./tmp/index.tmp.js > ./lib/index.js",
+    "build:codestyle": "standard --fix ./lib/index.js ./lib/index.mjs",
+    "build:types": "tsc --emitDeclarationOnly --declaration --declarationDir lib",
+    "build:flow": "flowgen --no-jsdoc --add-flow-header -o ./tmp/index.js.flow ./lib/index.d.ts; sed -e '/^  -/d' ./tmp/index.js.flow > ./lib/index.js.flow",
+    "jsdoc": "jsdoc --pedantic -d ./doc ./lib/index.mjs",
     "typedoc": "typedoc"
   },
   "repository": {
@@ -59,6 +65,7 @@
     "rollup": "^2.16.1",
     "rollup-plugin-cleanup": "^3.1.1",
     "rollup-plugin-terser": "^5.3.0",
+    "standard": "^14.3.4",
     "typedoc": "^0.17.7",
     "typescript": "^3.9.5"
   },
@@ -66,8 +73,6 @@
     "access": "public"
   },
   "files": [
-    "esm",
-    "cjs",
-    "iife"
+    "lib"
   ]
 }
