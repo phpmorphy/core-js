@@ -81,7 +81,7 @@ export class SecretKey {
    * @readonly
    */
   get publicKey (): PublicKey {
-    return new PublicKey(Ed25519.publicKeyFromSecretKey(this._bytes))
+    return new PublicKey(new Ed25519().publicKeyFromSecretKey(this._bytes))
   }
 
   /**
@@ -99,7 +99,7 @@ export class SecretKey {
       throw new Error('message type must be Uint8Array')
     }
 
-    return Ed25519.sign(message, this._bytes)
+    return new Ed25519().sign(message, this._bytes)
   }
 
   /**
@@ -123,9 +123,9 @@ export class SecretKey {
     }
 
     if (seed.byteLength === Ed25519.SEED_BYTES) {
-      return new SecretKey(Ed25519.secretKeyFromSeed(seed))
+      return new SecretKey(new Ed25519().secretKeyFromSeed(seed))
     }
 
-    return new SecretKey(Ed25519.secretKeyFromSeed(sha256(seed)))
+    return new SecretKey(new Ed25519().secretKeyFromSeed(sha256(seed)))
   }
 }

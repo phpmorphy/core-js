@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { prefixToUint16, uint16ToPrefix } from './Converter'
+import { prefixToVersion, versionToPrefix } from './Converter'
 
 // tslint:disable:no-bitwise
 
@@ -82,7 +82,7 @@ class Bech32 {
    * @throws {Error}
    */
   static encode (bytes: Uint8Array): string {
-    const prefix = uint16ToPrefix(new DataView(bytes.buffer).getUint16(0))
+    const prefix = versionToPrefix(new DataView(bytes.buffer).getUint16(0))
     const data = new Uint8Array(bytes.subarray(2))
 
     return this._encode(prefix, this._convert(data, 8, 5, true))
@@ -95,10 +95,15 @@ class Bech32 {
    */
   static decode (bech32: string): Uint8Array {
     const raw = this._decode(bech32)
+    const bytes = this._convert(raw.words, 5, 8, false)
+
+    if (bytes.length !== 32) {
+      throw new Error('invalid data length')
+    }
 
     const res = new Uint8Array(34)
-    res.set(this._convert(raw.words, 5, 8, false), 2)
-    new DataView(res.buffer).setUint16(0, prefixToUint16(raw.prefix))
+    res.set(bytes, 2)
+    new DataView(res.buffer).setUint16(0, prefixToVersion(raw.prefix))
 
     return res
   }
@@ -148,7 +153,7 @@ class Bech32 {
    * @private
    * @internal
    */
-  private static _decode (str: string): { prefix: string, words: number[] } {
+  private static _decode (str: string): { prefix: string, words: Uint8Array } {
     // don't allow mixed case
     const lowered = str.toLowerCase()
     const uppered = str.toUpperCase()
@@ -193,7 +198,7 @@ class Bech32 {
       throw new Error('Invalid checksum for ' + str)
     }
 
-    return { prefix, words }
+    return { prefix, words: new Uint8Array(words) }
   }
 
   /**
@@ -248,16 +253,15 @@ class Bech32 {
    * @internal
    */
   private static _convert (
-    data: number[]|Uint8Array, inBits: number, outBits: number, pad: boolean
+    data: Uint8Array, inBits: number, outBits: number, pad: boolean
   ): number[] {
     let value = 0
     let bits = 0
     const maxV = (1 << outBits) - 1
 
     const result = []
-    let dat
-    for (dat of data) {
-      value = (value << inBits) | dat
+    for (let i = 0; i < data.byteLength; i++) {
+      value = (value << inBits) | data[i]
       bits += inBits
 
       while (bits >= outBits) {

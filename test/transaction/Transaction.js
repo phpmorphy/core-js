@@ -30,7 +30,6 @@ describe('Transaction', function () {
       const len = umi.Transaction.LENGTH
       const tests = [
         { desc: 'число', args: len },
-        { desc: 'строку', args: 'a'.repeat(len) },
         { desc: 'массив', args: new Array(len) },
         { desc: 'объект', args: { a: 'b' } },
         { desc: 'ArrayBuffer', args: new ArrayBuffer(len) },
@@ -41,18 +40,22 @@ describe('Transaction', function () {
 
       tests.forEach(function (test) {
         it(test.desc, function () {
-          assert.throws(() => new umi.Transaction(test.args), Error)
+          assert.throws(function () {
+            return new umi.Transaction(test.args)
+          }, Error)
         })
       })
     })
 
     describe('создает транзакцию', function () {
       it('если вызвать без параметров', function () {
-        assert.doesNotThrow(() => new umi.Transaction())
+        assert.doesNotThrow(function () { return new umi.Transaction() })
       })
 
       it('передать Uint8Array длиной 150 байт', function () {
-        assert.doesNotThrow(() => new umi.Transaction(new Uint8Array(150)))
+        assert.doesNotThrow(function () {
+          return new umi.Transaction(new Uint8Array(150))
+        })
       })
     })
   })
@@ -83,12 +86,14 @@ describe('Transaction', function () {
     describe('возвращяет ошибку если', function () {
       it('запросить значение не установив его перед этим', function () {
         const tx = new umi.Transaction()
-        assert.throws(() => { tx.version }, Error) // eslint-disable-line
+        assert.throws(function () { tx.version }, Error) // eslint-disable-line
       })
 
       it('попытаться изменить уже установленное версию', function () {
         const tx = new umi.Transaction().setVersion(umi.Transaction.Basic)
-        assert.throws(() => { tx.version = umi.Transaction.Genesis }, Error)
+        assert.throws(function () {
+          tx.version = umi.Transaction.Genesis
+        }, Error)
       })
     })
 
@@ -109,7 +114,7 @@ describe('Transaction', function () {
       tests.forEach(function (test) {
         it(test.desc, function () {
           const tx = new umi.Transaction()
-          assert.throws(() => tx.setVersion(test.args), Error)
+          assert.throws(function () { tx.setVersion(test.args) }, Error)
         })
       })
     })
@@ -128,30 +133,30 @@ describe('Transaction', function () {
     describe('возвращяет ошибку если', function () {
       it('запросить отправителя не установив версию', function () {
         const tx = new umi.Transaction()
-        assert.throws(() => { tx.sender }, Error) // eslint-disable-line
+        assert.throws(function () { tx.sender }, Error) // eslint-disable-line
       })
 
       it('установить отправителя не установив версию', function () {
         const tx = new umi.Transaction()
         const sender = new umi.Address().setVersion(umi.Address.Umi)
-        assert.throws(() => { tx.sender = sender }, Error) // eslint-disable-line
+        assert.throws(function () { tx.sender = sender }, Error) // eslint-disable-line
       })
 
       it('запросить отправителя не установив его перед этим', function () {
         const tx = new umi.Transaction().setVersion(umi.Transaction.Genesis)
-        assert.throws(() => { tx.sender }, Error) // eslint-disable-line
+        assert.throws(function () { tx.sender }, Error) // eslint-disable-line
       })
 
       it('передать genesis адрес в basic транзакцию', function () {
         const tx = new umi.Transaction().setVersion(umi.Transaction.Basic)
         const sender = new umi.Address().setVersion(umi.Address.Genesis)
-        assert.throws(() => { tx.sender = sender }, Error)
+        assert.throws(function () { tx.sender = sender }, Error)
       })
 
       it('передать не genesis адрес в genesis транзакцию', function () {
         const tx = new umi.Transaction().setVersion(umi.Transaction.Genesis)
         const sender = new umi.Address().setVersion(umi.Address.Umi)
-        assert.throws(() => { tx.sender = sender }, Error)
+        assert.throws(function () { tx.sender = sender }, Error)
       })
     })
 
@@ -172,7 +177,7 @@ describe('Transaction', function () {
       tests.forEach(function (test) {
         it(test.desc, function () {
           const tx = new umi.Transaction().setVersion(umi.Transaction.Basic)
-          assert.throws(() => tx.setSender(test.args), Error)
+          assert.throws(function () { tx.setSender(test.args) }, Error)
         })
       })
     })
@@ -212,37 +217,37 @@ describe('Transaction', function () {
         tests.forEach(function (test) {
           it(test.desc, function () {
             const tx = new umi.Transaction().setVersion(umi.Transaction.Basic)
-            assert.throws(() => tx.setRecipient(test.args), Error)
+            assert.throws(function () { tx.setRecipient(test.args) }, Error)
           })
         })
       })
 
       it('запросить получателя не установив версию', function () {
         const tx = new umi.Transaction()
-        assert.throws(() => { tx.recipient }, Error) // eslint-disable-line
+        assert.throws(function () { tx.recipient }, Error) // eslint-disable-line
       })
 
       it('установить получателя не установив версию', function () {
         const tx = new umi.Transaction()
         const recipient = new umi.Address().setVersion(umi.Address.Umi)
-        assert.throws(() => { tx.recipient = recipient }, Error) // eslint-disable-line
+        assert.throws(function () { tx.recipient = recipient }, Error) // eslint-disable-line
       })
 
       it('запросить получателя не установив его перед этим', function () {
         const tx = new umi.Transaction().setVersion(umi.Transaction.Genesis)
-        assert.throws(() => { tx.recipient }, Error) // eslint-disable-line
+        assert.throws(function () { tx.recipient }, Error) // eslint-disable-line
       })
 
       it('передать genesis адрес в basic транзакцию', function () {
         const tx = new umi.Transaction().setVersion(umi.Transaction.Basic)
         const recipient = new umi.Address().setVersion(umi.Address.Genesis)
-        assert.throws(() => { tx.recipient = recipient }, Error)
+        assert.throws(function () { tx.recipient = recipient }, Error)
       })
 
       it('передать не umi адрес в genesis транзакцию', function () {
         const tx = new umi.Transaction().setVersion(umi.Transaction.Genesis)
         const recipient = new umi.Address().setPrefix('aaa')
-        assert.throws(() => { tx.recipient = recipient }, Error)
+        assert.throws(function () { tx.recipient = recipient }, Error)
       })
 
       describe('версия транзакции равна', function () {
@@ -255,14 +260,14 @@ describe('Transaction', function () {
           it(test.desc + ' (set)', function () {
             const tx = new umi.Transaction().setVersion(test.args)
             const recipient = new umi.Address().setVersion(umi.Address.Umi)
-            assert.throws(() => { tx.recipient = recipient }, Error)
+            assert.throws(function () { tx.recipient = recipient }, Error)
           })
         })
 
         tests.forEach(function (test) {
           it(test.desc + ' (get)', function () {
             const tx = new umi.Transaction().setVersion(test.args)
-            assert.throws(() => { tx.recipient }, Error) // eslint-disable-line
+            assert.throws(function () { tx.recipient }, Error) // eslint-disable-line
           })
         })
       })
@@ -288,7 +293,7 @@ describe('Transaction', function () {
           it(test.desc, function () {
             const tx = new umi.Transaction().setVersion(test.args)
             const recipient = new umi.Address().setVersion(umi.Address.Umi)
-            assert.throws(() => { tx.recipient = recipient }, Error)
+            assert.throws(function () { tx.recipient = recipient }, Error)
           })
         })
       })
@@ -351,24 +356,24 @@ describe('Transaction', function () {
         tests.forEach(function (test) {
           it(test.desc, function () {
             const tx = new umi.Transaction().setVersion(umi.Transaction.Basic)
-            assert.throws(() => tx.setValue(test.args), Error)
+            assert.throws(function () { tx.setValue(test.args) }, Error)
           })
         })
       })
 
       it('запросить сумму не установив версию', function () {
         const tx = new umi.Transaction()
-        assert.throws(() => { tx.value }, Error) // eslint-disable-line
+        assert.throws(function () { tx.value }, Error) // eslint-disable-line
       })
 
       it('установить сумму не установив версию', function () {
         const tx = new umi.Transaction()
-        assert.throws(() => { tx.value = 42 }, Error) // eslint-disable-line
+        assert.throws(function () { tx.value = 42 }, Error) // eslint-disable-line
       })
 
       it('запросить сумму не установив ее перед этим', function () {
         const tx = new umi.Transaction().setVersion(umi.Transaction.Genesis)
-        assert.throws(() => { tx.value }, Error) // eslint-disable-line
+        assert.throws(function () { tx.value }, Error) // eslint-disable-line
       })
 
       describe('версия транзакции равна', function () {
@@ -393,14 +398,14 @@ describe('Transaction', function () {
         tests.forEach(function (test) {
           it(test.desc + ' (set)', function () {
             const tx = new umi.Transaction().setVersion(test.args)
-            assert.throws(() => { tx.value = 42 }, Error)
+            assert.throws(function () { tx.value = 42 }, Error)
           })
         })
 
         tests.forEach(function (test) {
           it(test.desc + ' (get)', function () {
             const tx = new umi.Transaction().setVersion(test.args)
-            assert.throws(() => { tx.value }, Error) // eslint-disable-line
+            assert.throws(function () { tx.value }, Error) // eslint-disable-line
           })
         })
       })
@@ -409,7 +414,7 @@ describe('Transaction', function () {
         const tx = new umi.Transaction().setVersion(umi.Transaction.Genesis)
         tx._bytes[70] = 0x80
         tx._isValueSet = true
-        assert.throws(() => { tx.value }, Error) // eslint-disable-line
+        assert.throws(function () { tx.value }, Error) // eslint-disable-line
       })
     })
 
@@ -436,18 +441,18 @@ describe('Transaction', function () {
     describe('возвращяет ошибку если', function () {
       it('запросить префикс не установив версию', function () {
         const tx = new umi.Transaction()
-        assert.throws(() => { tx.prefix }, Error) // eslint-disable-line
+        assert.throws(function () { tx.prefix }, Error) // eslint-disable-line
       })
 
       it('установить префикс не установив версию', function () {
         const tx = new umi.Transaction()
-        assert.throws(() => { tx.prefix = 'aaa' }, Error) // eslint-disable-line
+        assert.throws(function () { tx.prefix = 'aaa' }, Error) // eslint-disable-line
       })
 
       it('запросить префикс не установив его перед этим', function () {
         const tx = new umi.Transaction().setVersion(
           umi.Transaction.CreateStructure)
-        assert.throws(() => { tx.prefix }, Error) // eslint-disable-line
+        assert.throws(function () { tx.prefix }, Error) // eslint-disable-line
       })
 
       describe('версия транзакции равна', function () {
@@ -472,14 +477,14 @@ describe('Transaction', function () {
         tests.forEach(function (test) {
           it(test.desc + ' (set)', function () {
             const tx = new umi.Transaction().setVersion(test.args)
-            assert.throws(() => { tx.prefix = 'aaa' }, Error)
+            assert.throws(function () { tx.prefix = 'aaa' }, Error)
           })
         })
 
         tests.forEach(function (test) {
           it(test.desc + ' (get)', function () {
             const tx = new umi.Transaction().setVersion(test.args)
-            assert.throws(() => { tx.prefix }, Error) // eslint-disable-line
+            assert.throws(function () { tx.prefix }, Error) // eslint-disable-line
           })
         })
       })
@@ -517,32 +522,35 @@ describe('Transaction', function () {
           { desc: 'NaN', args: NaN },
           { desc: 'Infinity', args: Infinity },
           { desc: 'float', args: 0.13 },
-          { desc: 'строку длиннее 35 символов', args: 'a'.repeat(36) }
+          {
+            desc: 'строку длиннее 35 символов',
+            args: '1234567890123456789012345678901234567890'
+          }
         ]
 
         tests.forEach(function (test) {
           it(test.desc, function () {
             const tx = new umi.Transaction().setVersion(
               umi.Transaction.CreateStructure)
-            assert.throws(() => tx.setName(test.args), Error)
+            assert.throws(function () { tx.setName(test.args) }, Error)
           })
         })
       })
 
       it('запросить название не установив версию', function () {
         const tx = new umi.Transaction()
-        assert.throws(() => { tx.name }, Error) // eslint-disable-line
+        assert.throws(function () { tx.name }, Error) // eslint-disable-line
       })
 
       it('установить название не установив версию', function () {
         const tx = new umi.Transaction()
-        assert.throws(() => { tx.name = 'name' }, Error) // eslint-disable-line
+        assert.throws(function () { tx.name = 'name' }, Error) // eslint-disable-line
       })
 
       it('запросить название не установив его перед этим', function () {
         const tx = new umi.Transaction().setVersion(
           umi.Transaction.CreateStructure)
-        assert.throws(() => { tx.name }, Error) // eslint-disable-line
+        assert.throws(function () { tx.name }, Error) // eslint-disable-line
       })
 
       describe('версия транзакции равна', function () {
@@ -567,14 +575,14 @@ describe('Transaction', function () {
         tests.forEach(function (test) {
           it(test.desc + ' (set)', function () {
             const tx = new umi.Transaction().setVersion(test.args)
-            assert.throws(() => { tx.name = 'aaa' }, Error)
+            assert.throws(function () { tx.name = 'aaa' }, Error)
           })
         })
 
         tests.forEach(function (test) {
           it(test.desc + ' (get)', function () {
             const tx = new umi.Transaction().setVersion(test.args)
-            assert.throws(() => { tx.name }, Error) // eslint-disable-line
+            assert.throws(function () { tx.name }, Error) // eslint-disable-line
           })
         })
       })
@@ -619,25 +627,25 @@ describe('Transaction', function () {
           it(test.desc, function () {
             const tx = new umi.Transaction().setVersion(
               umi.Transaction.CreateStructure)
-            assert.throws(() => tx.setProfitPercent(test.args), Error)
+            assert.throws(function () { tx.setProfitPercent(test.args) }, Error)
           })
         })
       })
 
       it('запросить профит не установив версию', function () {
         const tx = new umi.Transaction()
-        assert.throws(() => { tx.profitPercent }, Error) // eslint-disable-line
+        assert.throws(function () { tx.profitPercent }, Error) // eslint-disable-line
       })
 
       it('установить профит не установив версию', function () {
         const tx = new umi.Transaction()
-        assert.throws(() => { tx.profitPercent = 250 }, Error) // eslint-disable-line
+        assert.throws(function () { tx.profitPercent = 250 }, Error) // eslint-disable-line
       })
 
       it('запросить профит не установив его перед этим', function () {
         const tx = new umi.Transaction().setVersion(
           umi.Transaction.CreateStructure)
-        assert.throws(() => { tx.profitPercent }, Error) // eslint-disable-line
+        assert.throws(function () { tx.profitPercent }, Error) // eslint-disable-line
       })
 
       describe('версия транзакции равна', function () {
@@ -662,14 +670,14 @@ describe('Transaction', function () {
         tests.forEach(function (test) {
           it(test.desc + ' (set)', function () {
             const tx = new umi.Transaction().setVersion(test.args)
-            assert.throws(() => { tx.profitPercent = 250 }, Error)
+            assert.throws(function () { tx.profitPercent = 250 }, Error)
           })
         })
 
         tests.forEach(function (test) {
           it(test.desc + ' (get)', function () {
             const tx = new umi.Transaction().setVersion(test.args)
-            assert.throws(() => { tx.profitPercent }, Error) // eslint-disable-line
+            assert.throws(function () { tx.profitPercent }, Error) // eslint-disable-line
           })
         })
       })
@@ -714,25 +722,25 @@ describe('Transaction', function () {
           it(test.desc, function () {
             const tx = new umi.Transaction().setVersion(
               umi.Transaction.CreateStructure)
-            assert.throws(() => tx.setFeePercent(test.args), Error)
+            assert.throws(function () { tx.setFeePercent(test.args) }, Error)
           })
         })
       })
 
       it('запросить комиссию не установив версию', function () {
         const tx = new umi.Transaction()
-        assert.throws(() => { tx.feePercent }, Error) // eslint-disable-line
+        assert.throws(function () { tx.feePercent }, Error) // eslint-disable-line
       })
 
       it('установить комиссию не установив версию', function () {
         const tx = new umi.Transaction()
-        assert.throws(() => { tx.feePercent = 250 }, Error) // eslint-disable-line
+        assert.throws(function () { tx.feePercent = 250 }, Error) // eslint-disable-line
       })
 
       it('запросить комиссию не установив его перед этим', function () {
         const tx = new umi.Transaction().setVersion(
           umi.Transaction.CreateStructure)
-        assert.throws(() => { tx.feePercent }, Error) // eslint-disable-line
+        assert.throws(function () { tx.feePercent }, Error) // eslint-disable-line
       })
 
       describe('версия транзакции равна', function () {
@@ -757,14 +765,14 @@ describe('Transaction', function () {
         tests.forEach(function (test) {
           it(test.desc + ' (set)', function () {
             const tx = new umi.Transaction().setVersion(test.args)
-            assert.throws(() => { tx.feePercent = 250 }, Error)
+            assert.throws(function () { tx.feePercent = 250 }, Error)
           })
         })
 
         tests.forEach(function (test) {
           it(test.desc + ' (get)', function () {
             const tx = new umi.Transaction().setVersion(test.args)
-            assert.throws(() => { tx.feePercent }, Error) // eslint-disable-line
+            assert.throws(function () { tx.feePercent }, Error) // eslint-disable-line
           })
         })
       })
@@ -807,21 +815,21 @@ describe('Transaction', function () {
         tests.forEach(function (test) {
           it(test.desc, function () {
             const tx = new umi.Transaction()
-            assert.throws(() => tx.setNonce(test.args), Error)
+            assert.throws(function () { tx.setNonce(test.args) }, Error)
           })
         })
       })
 
       it('запросить nonce не установив его перед этим', function () {
         const tx = new umi.Transaction()
-        assert.throws(() => { tx.nonce }, Error) // eslint-disable-line
+        assert.throws(function () { tx.nonce }, Error) // eslint-disable-line
       })
 
       it('nonce больше 9007199254740991', function () {
         const tx = new umi.Transaction()
         tx._bytes[77] = 0x80
         tx._isNonceSet = true
-        assert.throws(() => { tx.nonce }, Error) // eslint-disable-line
+        assert.throws(function () { tx.nonce }, Error) // eslint-disable-line
       })
     })
 
@@ -856,36 +864,36 @@ describe('Transaction', function () {
             const tx = new umi.Transaction()
             tx.version = umi.Transaction.Basic
             tx.sender = new umi.Address()
-            assert.throws(() => tx.setSignature(test.args), Error)
+            assert.throws(function () { tx.setSignature(test.args) }, Error)
           })
         })
       })
 
       it('запросить подпись не установив версию', function () {
         const tx = new umi.Transaction()
-        assert.throws(() => { tx.name }, Error) // eslint-disable-line
+        assert.throws(function () { tx.name }, Error) // eslint-disable-line
       })
 
       it('запросить подпись не установив отправителя', function () {
         const tx = new umi.Transaction().setVersion(umi.Transaction.Basic)
-        assert.throws(() => { tx.signature }, Error) // eslint-disable-line
+        assert.throws(function () { tx.signature }, Error) // eslint-disable-line
       })
 
       it('установить подпись не установив версию', function () {
         const tx = new umi.Transaction()
-        assert.throws(() => { tx.signature = new Uint8Array(64) }, Error)
+        assert.throws(function () { tx.signature = new Uint8Array(64) }, Error)
       })
 
       it('установить подпись не установив отправителя', function () {
         const tx = new umi.Transaction().setVersion(umi.Transaction.Basic)
-        assert.throws(() => { tx.signature = new Uint8Array(64) }, Error)
+        assert.throws(function () { tx.signature = new Uint8Array(64) }, Error)
       })
 
       it('запросить подпись не установив ее перед этим', function () {
         const tx = new umi.Transaction()
         tx.version = umi.Transaction.Basic
         tx.sender = new umi.Address()
-        assert.throws(() => { tx.signature }, Error) // eslint-disable-line
+        assert.throws(function () { tx.signature }, Error) // eslint-disable-line
       })
     })
 
@@ -921,7 +929,7 @@ describe('Transaction', function () {
             const tx = new umi.Transaction()
             tx.version = umi.Transaction.Basic
             tx.sender = new umi.Address()
-            assert.throws(() => tx.sign(test.args), Error)
+            assert.throws(function () { tx.sign(test.args) }, Error)
           })
         })
       })
@@ -929,7 +937,7 @@ describe('Transaction', function () {
       it('подписать не установив версию', function () {
         const key = umi.SecretKey.fromSeed(new Uint8Array(32))
         const tx = new umi.Transaction()
-        assert.throws(() => { tx.sign(key) }, Error)
+        assert.throws(function () { tx.sign(key) }, Error)
       })
     })
 
@@ -938,7 +946,7 @@ describe('Transaction', function () {
       const tx = new umi.Transaction()
       tx.version = umi.Transaction.Basic
       tx.sender = umi.Address.fromKey(key)
-      assert.doesNotThrow(() => tx.sign(key))
+      assert.doesNotThrow(function () { tx.sign(key) })
     })
   })
 
@@ -946,19 +954,19 @@ describe('Transaction', function () {
     describe('возвращяет ошибку если', function () {
       it('не установлена версию', function () {
         const tx = new umi.Transaction()
-        assert.throws(() => { tx.verify() }, Error)
+        assert.throws(function () { tx.verify() }, Error)
       })
 
       it('не установлен отправитель', function () {
         const tx = new umi.Transaction().setVersion(umi.Transaction.Basic)
-        assert.throws(() => { tx.verify() }, Error)
+        assert.throws(function () { tx.verify() }, Error)
       })
 
       it('не установлена подпись', function () {
         const tx = new umi.Transaction()
         tx.version = umi.Transaction.Basic
         tx.sender = new umi.Address()
-        assert.throws(() => { tx.verify() }, Error)
+        assert.throws(function () { tx.verify() }, Error)
       })
     })
 

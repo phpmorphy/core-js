@@ -21,7 +21,8 @@
 import { SecretKey } from '../key/ed25519/SecretKey' // eslint-disable-line
 import { Address } from '../address/Address'
 import { sha256 } from '../util/Sha256'
-import { uint16ToPrefix, prefixToUint16 } from '../util/Converter'
+import { versionToPrefix, prefixToVersion } from '../util/Converter'
+import { Utf8Decode, Utf8Encode } from '../util/Utf8'
 
 /**
  * Базовый класс для работы с транзакциями.
@@ -179,74 +180,37 @@ export class Transaction {
   private readonly _view: DataView = new DataView(this._bytes.buffer)
 
   /**
-   * @type {boolean}
+   * Заполнненые свойства.
+   * @type {Object}
    * @private
    * @internal
    */
-  private _isVersionSet: boolean = false
+  private readonly _fieldsMap: { [key: string]: boolean } = {}
 
   /**
-   * @type {boolean}
+   * Проверить свойство
+   * @param {string[]} fields
+   * @throws {Error}
    * @private
-   * @internal
    */
-  private _isSenderSet: boolean = false
+  private _checkFields (fields: string[]): void {
+    for (const field of fields) {
+      if (!Object.prototype.hasOwnProperty.call(this._fieldsMap, field)) {
+        throw new Error(`${field} must be set`)
+      }
+    }
+  }
 
   /**
-   * @type {boolean}
+   * Отметить свойство как установленное
+   * @param {string[]} fields
    * @private
-   * @internal
    */
-  private _isRecipientSet: boolean = false
-
-  /**
-   * @type {boolean}
-   * @private
-   * @internal
-   */
-  private _isValueSet: boolean = false
-
-  /**
-   * @type {boolean}
-   * @private
-   * @internal
-   */
-  private _isPrefixSet: boolean = false
-
-  /**
-   * @type {boolean}
-   * @private
-   * @internal
-   */
-  private _isNameSet: boolean = false
-
-  /**
-   * @type {boolean}
-   * @private
-   * @internal
-   */
-  private _isProfitPercentSet: boolean = false
-
-  /**
-   * @type {boolean}
-   * @private
-   * @internal
-   */
-  private _isFeePercentSet: boolean = false
-
-  /**
-   * @type {boolean}
-   * @private
-   * @internal
-   */
-  private _isNonceSet: boolean = false
-
-  /**
-   * @type {boolean}
-   * @private
-   * @internal
-   */
-  private _isSignatureSet: boolean = false
+  private _setFields (fields: string[]): void {
+    for (const field of fields) {
+      this._fieldsMap[field] = true
+    }
+  }
 
   /**
    * @param {Uint8Array} [bytes] Транзакция в бинарном виде, 150 байт.
@@ -263,17 +227,9 @@ export class Transaction {
       }
 
       this._bytes.set(bytes)
-
-      this._isVersionSet = true
-      this._isSenderSet = true
-      this._isRecipientSet = true
-      this._isValueSet = true
-      this._isPrefixSet = true
-      this._isNameSet = true
-      this._isProfitPercentSet = true
-      this._isFeePercentSet = true
-      this._isNonceSet = true
-      this._isSignatureSet = true
+      this._setFields([
+        'version', 'sender', 'recipient', 'value', 'prefix',
+        'name', 'profitPercent', 'feePercent', 'nonce', 'signature'])
     }
   }
 
@@ -313,14 +269,12 @@ export class Transaction {
    * @see Transaction.DeleteTransitAddress
    */
   get version (): number {
-    if (!this._isVersionSet) {
-      throw new Error('must set version first')
-    }
+    this._checkFields(['version'])
     return this._bytes[0]
   }
 
   set version (version: number) {
-    if (this._isVersionSet) {
+    if (Object.prototype.hasOwnProperty.call(this._fieldsMap, 'version')) {
       throw new Error('could not update version')
     }
 
@@ -338,7 +292,7 @@ export class Transaction {
     }
 
     this._bytes[0] = version
-    this._isVersionSet = true
+    this._setFields(['version'])
   }
 
   /**
@@ -366,9 +320,7 @@ export class Transaction {
    * @throws {Error}
    */
   get sender (): Address {
-    if (!this._isSenderSet) {
-      throw new Error('must set sender first')
-    }
+    this._checkFields(['sender'])
 
     // sender length = 34
     // sender begin = 1
@@ -377,9 +329,7 @@ export class Transaction {
   }
 
   set sender (address: Address) {
-    if (!this._isVersionSet) {
-      throw new Error('must set version first')
-    }
+    this._checkFields(['version'])
 
     if (!(address instanceof Address)) {
       throw new Error('address type must be Address')
@@ -398,7 +348,7 @@ export class Transaction {
     // sender length = 34
     // sender begin = 1
     this._bytes.set(address.bytes, 1)
-    this._isSenderSet = true
+    this._setFields(['sender'])
   }
 
   /**
@@ -419,18 +369,14 @@ export class Transaction {
    * @throws {Error}
    */
   get recipient (): Address {
-    if (!this._isVersionSet) {
-      throw new Error('must set version first')
-    }
+    this._checkFields(['version'])
 
     if (this.version === Transaction.CreateStructure ||
       this.version === Transaction.UpdateStructure) {
       throw new Error('recipient unavailable for this transaction type')
     }
 
-    if (!this._isRecipientSet) {
-      throw new Error('must set recipient first')
-    }
+    this._checkFields(['recipient'])
 
     // recipient length = 34
     // recipient begin = 35
@@ -439,9 +385,7 @@ export class Transaction {
   }
 
   set recipient (address: Address) {
-    if (!this._isVersionSet) {
-      throw new Error('must set version first')
-    }
+    this._checkFields(['version'])
 
     if (this.version === Transaction.CreateStructure ||
       this.version === Transaction.UpdateStructure) {
@@ -470,7 +414,7 @@ export class Transaction {
     // recipient length = 34
     // recipient begin = 35
     this._bytes.set(address.bytes, 35)
-    this._isRecipientSet = true
+    this._setFields(['recipient'])
   }
 
   /**
@@ -493,18 +437,14 @@ export class Transaction {
    * @throws {Error}
    */
   get value (): number {
-    if (!this._isVersionSet) {
-      throw new Error('must set version first')
-    }
+    this._checkFields(['version'])
 
     if (this.version !== Transaction.Genesis &&
       this.version !== Transaction.Basic) {
       throw new Error('value unavailable for this transaction type')
     }
 
-    if (!this._isValueSet) {
-      throw new Error('must set value first')
-    }
+    this._checkFields(['value'])
 
     // value offset = 69
     if (this._view.getUint16(69) > 0x001f) {
@@ -516,9 +456,7 @@ export class Transaction {
   }
 
   set value (value: number) {
-    if (!this._isVersionSet) {
-      throw new Error('must set version first')
-    }
+    this._checkFields(['version'])
 
     if (this.version !== Transaction.Genesis &&
       this.version !== Transaction.Basic) {
@@ -533,7 +471,8 @@ export class Transaction {
       throw new Error('value must be integer')
     }
 
-    if (value < 1 || value > Number.MAX_SAFE_INTEGER) {
+    // Number.MAX_SAFE_INTEGER
+    if (value < 1 || value > 9007199254740991) {
       throw new Error('value must be between 1 and 9007199254740991')
     }
 
@@ -542,7 +481,7 @@ export class Transaction {
     this._view.setInt32(69 + 4, value | 0)
     this._view.setInt32(69,
       (value - this._view.getUint32(69 + 4)) / 0x1_0000_0000)
-    this._isValueSet = true
+    this._setFields(['value'])
   }
 
   /**
@@ -565,27 +504,21 @@ export class Transaction {
    * @throws {Error}
    */
   get prefix (): string {
-    if (!this._isVersionSet) {
-      throw new Error('must set version first')
-    }
+    this._checkFields(['version'])
 
     if (this.version !== Transaction.CreateStructure &&
       this.version !== Transaction.UpdateStructure) {
       throw new Error('prefix unavailable for this transaction type')
     }
 
-    if (!this._isPrefixSet) {
-      throw new Error('must set prefix first')
-    }
+    this._checkFields(['prefix'])
 
     // prefix offset = 35
-    return uint16ToPrefix(this._view.getUint16(35))
+    return versionToPrefix(this._view.getUint16(35))
   }
 
   set prefix (prefix: string) {
-    if (!this._isVersionSet) {
-      throw new Error('must set version first')
-    }
+    this._checkFields(['version'])
 
     if (this.version !== Transaction.CreateStructure &&
       this.version !== Transaction.UpdateStructure) {
@@ -593,8 +526,8 @@ export class Transaction {
     }
 
     // prefix offset = 35
-    this._view.setUint16(35, prefixToUint16(prefix))
-    this._isPrefixSet = true
+    this._view.setUint16(35, prefixToVersion(prefix))
+    this._setFields(['prefix'])
   }
 
   /**
@@ -616,28 +549,22 @@ export class Transaction {
    * @throws {Error}
    */
   get name (): string {
-    if (!this._isVersionSet) {
-      throw new Error('must set version first')
-    }
+    this._checkFields(['version'])
 
     if (this.version !== Transaction.CreateStructure &&
       this.version !== Transaction.UpdateStructure) {
       throw new Error('name unavailable for this transaction type')
     }
 
-    if (!this._isNameSet) {
-      throw new Error('must set name first')
-    }
+    this._checkFields(['name'])
 
     // name offset = 41
     const txt = this._bytes.subarray(41 + 1, 41 + 1 + this._bytes[41])
-    return new TextDecoder().decode(txt)
+    return Utf8Decode(txt)
   }
 
   set name (name: string) {
-    if (!this._isVersionSet) {
-      throw new Error('must set version first')
-    }
+    this._checkFields(['version'])
 
     if (this.version !== Transaction.CreateStructure &&
       this.version !== Transaction.UpdateStructure) {
@@ -649,7 +576,7 @@ export class Transaction {
     }
 
     // name length = 36
-    const txt = new TextEncoder().encode(name)
+    const txt = Utf8Encode(name)
 
     if (txt.byteLength >= 36) {
       throw new Error('name is too long')
@@ -658,7 +585,7 @@ export class Transaction {
     // name offset = 41
     this._bytes[41] = txt.byteLength
     this._bytes.set(txt, 41 + 1)
-    this._isNameSet = true
+    this._setFields(['name'])
   }
 
   /**
@@ -681,27 +608,21 @@ export class Transaction {
    * @throws {Error}
    */
   get profitPercent (): number {
-    if (!this._isVersionSet) {
-      throw new Error('must set version first')
-    }
+    this._checkFields(['version'])
 
     if (this.version !== Transaction.CreateStructure &&
       this.version !== Transaction.UpdateStructure) {
       throw new Error('profitPercent unavailable for this transaction type')
     }
 
-    if (!this._isProfitPercentSet) {
-      throw new Error('must set profitPercent first')
-    }
+    this._checkFields(['profitPercent'])
 
     // profit offset = 37
     return this._view.getUint16(37)
   }
 
   set profitPercent (percent: number) {
-    if (!this._isVersionSet) {
-      throw new Error('must set version first')
-    }
+    this._checkFields(['version'])
 
     if (this.version !== Transaction.CreateStructure &&
       this.version !== Transaction.UpdateStructure) {
@@ -722,7 +643,7 @@ export class Transaction {
 
     // profit offset = 37
     this._view.setUint16(37, percent)
-    this._isProfitPercentSet = true
+    this._setFields(['profitPercent'])
   }
 
   /**
@@ -745,27 +666,21 @@ export class Transaction {
    * @throws {Error}
    */
   get feePercent (): number {
-    if (!this._isVersionSet) {
-      throw new Error('must set version first')
-    }
+    this._checkFields(['version'])
 
     if (this.version !== Transaction.CreateStructure &&
       this.version !== Transaction.UpdateStructure) {
       throw new Error('feePercent unavailable for this transaction type')
     }
 
-    if (!this._isFeePercentSet) {
-      throw new Error('must set feePercent first')
-    }
+    this._checkFields(['feePercent'])
 
     // fee offset = 39
     return this._view.getUint16(39)
   }
 
   set feePercent (percent: number) {
-    if (!this._isVersionSet) {
-      throw new Error('must set version first')
-    }
+    this._checkFields(['version'])
 
     if (this.version !== Transaction.CreateStructure &&
       this.version !== Transaction.UpdateStructure) {
@@ -786,7 +701,7 @@ export class Transaction {
 
     // fee offset = 39
     this._view.setUint16(39, percent)
-    this._isFeePercentSet = true
+    this._setFields(['feePercent'])
   }
 
   /**
@@ -809,9 +724,7 @@ export class Transaction {
    * @throws {Error}
    */
   get nonce (): number {
-    if (!this._isNonceSet) {
-      throw new Error('must set nonce first')
-    }
+    this._checkFields(['nonce'])
 
     // nonce offset = 77
     if (this._view.getUint16(77) > 0x001f) {
@@ -831,7 +744,8 @@ export class Transaction {
       throw new Error('nonce type must be integer')
     }
 
-    if (nonce < 0 || nonce > Number.MAX_SAFE_INTEGER) {
+    // Number.MAX_SAFE_INTEGER
+    if (nonce < 0 || nonce > 9007199254740991) {
       throw new Error('nonce value must be between 0 and 9007199254740991')
     }
 
@@ -840,7 +754,7 @@ export class Transaction {
     this._view.setInt32(77 + 4, nonce | 0)
     this._view.setInt32(77,
       (nonce - this._view.getUint32(77 + 4)) / 0x1_0000_0000)
-    this._isNonceSet = true
+    this._setFields(['nonce'])
   }
 
   /**
@@ -861,13 +775,7 @@ export class Transaction {
    * @throws {Error}
    */
   get signature (): Uint8Array {
-    if (!this._isSenderSet) {
-      throw new Error('must set sender first')
-    }
-
-    if (!this._isSignatureSet) {
-      throw new Error('must set signature first')
-    }
+    this._checkFields(['signature'])
 
     // signature length = 64
     const len = this.sender.publicKey.signatureLength
@@ -879,13 +787,7 @@ export class Transaction {
   }
 
   set signature (signature: Uint8Array) {
-    if (!this._isVersionSet) {
-      throw new Error('must set version first')
-    }
-
-    if (!this._isSenderSet) {
-      throw new Error('must set sender first')
-    }
+    this._checkFields(['version', 'sender'])
 
     if (!(signature instanceof Uint8Array)) {
       throw new Error('signature type must be Uint8Array')
@@ -897,7 +799,7 @@ export class Transaction {
 
     // signature offset = 85
     this._bytes.set(signature, 85)
-    this._isSignatureSet = true
+    this._setFields(['signature'])
   }
 
   /**
@@ -917,9 +819,7 @@ export class Transaction {
    * @throws {Error}
    */
   sign (secretKey: SecretKey): Transaction {
-    if (!this._isVersionSet) {
-      throw new Error('must set version first')
-    }
+    this._checkFields(['version', 'sender'])
 
     if (!(secretKey instanceof SecretKey)) {
       throw new Error('secretKey type must be SecretKey')
@@ -938,21 +838,11 @@ export class Transaction {
    * @throws {Error}
    */
   verify (): boolean {
-    if (!this._isVersionSet) {
-      throw new Error('must set version first')
-    }
-
-    if (!this._isSenderSet) {
-      throw new Error('must set sender first')
-    }
-
-    if (!this._isSignatureSet) {
-      throw new Error('must set signature first')
-    }
+    this._checkFields(['version', 'sender', 'signature'])
 
     // unsigned begin = 0
     // unsigned end = 85
     const msg = this._bytes.subarray(0, 85)
-    return this.sender.publicKey.verifySignature(msg, this.signature)
+    return this.sender.publicKey.verifySignature(this.signature, msg)
   }
 }

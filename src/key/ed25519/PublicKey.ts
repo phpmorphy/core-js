@@ -80,21 +80,17 @@ export class PublicKey {
 
   /**
    * Проверяет цифровую подпись.
-   * @param {Uint8Array} message Сообщение
    * @param {Uint8Array} signature Подпись, 64 байта.
+   * @param {Uint8Array} message Сообщение
    * @returns {boolean}
    * @throws {Error}
    * @example
-   * let msg = new Uint8Array(1)
-   * let sig = new Uint8Array(64)
    * let key = new Uint8Array(32)
-   * let ver = new PublicKey(key).verifySignature(msg, sig)
+   * let sig = new Uint8Array(64)
+   * let msg = new Uint8Array(1)
+   * let ver = new PublicKey(key).verifySignature(sig, msg)
    */
-  verifySignature (message: Uint8Array, signature: Uint8Array): boolean {
-    if (!(message instanceof Uint8Array)) {
-      throw new Error('message type must be Uint8Array')
-    }
-
+  verifySignature (signature: Uint8Array, message: Uint8Array): boolean {
     if (!(signature instanceof Uint8Array)) {
       throw new Error('signature type must be Uint8Array')
     }
@@ -103,6 +99,10 @@ export class PublicKey {
       throw new Error('signature length must be 64 bytes')
     }
 
-    return Ed25519.verify(message, signature, this._bytes)
+    if (!(message instanceof Uint8Array)) {
+      throw new Error('message type must be Uint8Array')
+    }
+
+    return new Ed25519().verify(signature, message, this._bytes)
   }
 }

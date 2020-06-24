@@ -38,21 +38,26 @@ export default [
         file: 'lib/index.mjs',
         format: 'es',
         banner: license
-      },
-      {
-        file: 'lib/index.min.js',
-        format: 'iife',
-        name: 'umi',
-        banner: '/**\n' +
-          ' * @license\n' +
-          ' * Copyright (c) 2020 UMI\n' +
-          ' * MIT Licensed\n' +
-          ' */\n',
-        plugins: [terser()]
       }
     ],
     plugins: [
       cleanup({ comments: 'jsdoc', compactComments: false })
+    ]
+  },
+  {
+    input: 'tmp/es5/index.js',
+    output: {
+      file: 'lib/index.min.js',
+      format: 'iife',
+      name: 'umi',
+      banner: '/**\n' +
+        ' * @license\n' +
+        ' * Copyright (c) 2020 UMI\n' +
+        ' * MIT Licensed\n' +
+        ' */\n'
+    },
+    plugins: [
+      terser()
     ]
   }
 ]

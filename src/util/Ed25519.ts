@@ -1,42 +1,64 @@
-// This is free and unencumbered software released into the public domain.
+// Copyright (c) 2020 UMI
 //
-// Anyone is free to copy, modify, publish, use, compile, sell, or
-// distribute this software, either in source code form or as a compiled
-// binary, for any purpose, commercial or non-commercial, and by any
-// means.
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
 //
-// In jurisdictions that recognize copyright laws, the author or authors
-// of this software dedicate any and all copyright interest in the
-// software to the public domain. We make this dedication for the benefit
-// of the public at large and to the detriment of our heirs and
-// successors. We intend this dedication to be an overt act of
-// relinquishment in perpetuity of all present and future rights to this
-// software under copyright law.
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
 //
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-// IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
-// OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-// ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-// OTHER DEALINGS IN THE SOFTWARE.
-//
-// For more information, please refer to <http://unlicense.org>
-
-// Ported in 2014 by Dmitry Chestnykh and Devi Mandiri.
-// Public domain.
-//
-// Implementation derived from TweetNaCl version 20140427.
-// See for details: http://tweetnacl.cr.yp.to/
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 
 // tslint:disable:no-bitwise
 
 /**
  * Ассиметричная криптография на основе эллиптической кривой Curve25519.
+ * Implementation derived from TweetNaCl version 20140427.
+ * @see http://tweetnacl.cr.yp.to/
  * @class
  * @hideconstructor
  */
 class Ed25519 {
+  private readonly _D = new Float64Array([
+    0x78a3, 0x1359, 0x4dca, 0x75eb, 0xd8ab, 0x4141, 0x0a4d, 0x0070,
+    0xe898, 0x7779, 0x4079, 0x8cc7, 0xfe73, 0x2b6f, 0x6cee, 0x5203])
+
+  private readonly _D2 = new Float64Array([
+    0xf159, 0x26b2, 0x9b94, 0xebd6, 0xb156, 0x8283, 0x149a, 0x00e0,
+    0xd130, 0xeef3, 0x80f2, 0x198e, 0xfce7, 0x56df, 0xd9dc, 0x2406])
+
+  private readonly _gf0 = new Float64Array(16)
+
+  private readonly _gf1 = new Float64Array(
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+
+  private readonly _L = new Float64Array([
+    0xed, 0xd3, 0xf5, 0x5c, 0x1a, 0x63, 0x12, 0x58,
+    0xd6, 0x9c, 0xf7, 0xa2, 0xde, 0xf9, 0xde, 0x14,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0x10])
+
+  private readonly _I = new Float64Array([
+    0xa0b0, 0x4a0e, 0x1b27, 0xc4ee, 0xe478, 0xad2f, 0x1806, 0x2f43,
+    0xd7a7, 0x3dfb, 0x0099, 0x2b4d, 0xdf0b, 0x4fc1, 0x2480, 0x2b83])
+
+  private readonly _X = new Float64Array([
+    0xd51a, 0x8f25, 0x2d60, 0xc956, 0xa7b2, 0x9525, 0xc760, 0x692c,
+    0xdc5c, 0xfdd6, 0xe231, 0xc0a4, 0x53fe, 0xcd6e, 0x36d3, 0x2169])
+
+  private readonly _Y = new Float64Array([
+    0x6658, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666,
+    0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666])
+
   /**
    * Длина публичного ключа в байтах.
    * @type {number}
@@ -68,11 +90,11 @@ class Ed25519 {
    * @returns {Uint8Array}
    * @throws {Error}
    */
-  static sign (message: Uint8Array, secretKey: Uint8Array): Uint8Array {
-    const signedMsg = new Uint8Array(this.SIGNATURE_BYTES + message.length)
+  sign (message: Uint8Array, secretKey: Uint8Array): Uint8Array {
+    const signedMsg = new Uint8Array(Ed25519.SIGNATURE_BYTES + message.length)
     this._cryptoSign(signedMsg, message, message.length, secretKey)
 
-    return new Uint8Array(signedMsg.buffer, 0, this.SIGNATURE_BYTES)
+    return new Uint8Array(signedMsg.buffer, 0, Ed25519.SIGNATURE_BYTES)
   }
 
   /**
@@ -82,18 +104,18 @@ class Ed25519 {
    * @param {Uint8Array} publicKey
    * @returns {boolean}
    */
-  static verify (
-    message: Uint8Array, signature: Uint8Array, publicKey: Uint8Array
+  verify (
+    signature: Uint8Array, message: Uint8Array, publicKey: Uint8Array
   ): boolean {
-    const sm = new Uint8Array(this.SIGNATURE_BYTES + message.length)
-    const m = new Uint8Array(this.SIGNATURE_BYTES + message.length)
+    const sm = new Uint8Array(Ed25519.SIGNATURE_BYTES + message.length)
+    const m = new Uint8Array(Ed25519.SIGNATURE_BYTES + message.length)
 
     let i
-    for (i = 0; i < this.SIGNATURE_BYTES; i++) {
+    for (i = 0; i < Ed25519.SIGNATURE_BYTES; i++) {
       sm[i] = signature[i]
     }
     for (i = 0; i < message.length; i++) {
-      sm[i + this.SIGNATURE_BYTES] = message[i]
+      sm[i + Ed25519.SIGNATURE_BYTES] = message[i]
     }
 
     return (this._cryptoSignOpen(m, sm, sm.length, publicKey) >= 0)
@@ -104,9 +126,9 @@ class Ed25519 {
    * @param {Uint8Array} seed
    * @returns {Uint8Array}
    */
-  static secretKeyFromSeed (seed: Uint8Array): Uint8Array {
-    const pk = new Uint8Array(this.PUBLIC_KEY_BYTES)
-    const sk = new Uint8Array(this.SECRET_KEY_BYTES)
+  secretKeyFromSeed (seed: Uint8Array): Uint8Array {
+    const pk = new Uint8Array(Ed25519.PUBLIC_KEY_BYTES)
+    const sk = new Uint8Array(Ed25519.SECRET_KEY_BYTES)
 
     for (let i = 0; i < 32; i++) {
       sk[i] = seed[i]
@@ -122,8 +144,8 @@ class Ed25519 {
    * @param {Uint8Array} secretKey
    * @returns {Uint8Array}
    */
-  static publicKeyFromSecretKey (secretKey: Uint8Array): Uint8Array {
-    const b = new Uint8Array(this.PUBLIC_KEY_BYTES)
+  publicKeyFromSecretKey (secretKey: Uint8Array): Uint8Array {
+    const b = new Uint8Array(Ed25519.PUBLIC_KEY_BYTES)
     b.set(new Uint8Array(secretKey.buffer, 32, 32))
     return b
   }
@@ -134,24 +156,7 @@ class Ed25519 {
    * @private
    * @internal
    */
-  private static _add (p: Float64Array[], q: Float64Array[]): void {
-    const D2 = new Float64Array([
-      0xf159,
-      0x26b2,
-      0x9b94,
-      0xebd6,
-      0xb156,
-      0x8283,
-      0x149a,
-      0x00e0,
-      0xd130,
-      0xeef3,
-      0x80f2,
-      0x198e,
-      0xfce7,
-      0x56df,
-      0xd9dc,
-      0x2406])
+  private _add (p: Float64Array[], q: Float64Array[]): void {
     const a = new Float64Array(16)
     const b = new Float64Array(16)
     const c = new Float64Array(16)
@@ -162,739 +167,25 @@ class Ed25519 {
     const h = new Float64Array(16)
     const t = new Float64Array(16)
 
-    this._Z(a, p[1], p[0])
-    this._Z(t, q[1], q[0])
-    this._M(a, a, t)
-    this._A(b, p[0], p[1])
-    this._A(t, q[0], q[1])
-    this._M(b, b, t)
-    this._M(c, p[3], q[3])
-    this._M(c, c, D2)
-    this._M(d, p[2], q[2])
-    this._A(d, d, d)
-    this._Z(e, b, a)
-    this._Z(f, d, c)
-    this._A(g, d, c)
-    this._A(h, b, a)
+    this._fnZ(a, p[1], p[0])
+    this._fnZ(t, q[1], q[0])
+    this._fnM(a, a, t)
+    this._fnA(b, p[0], p[1])
+    this._fnA(t, q[0], q[1])
+    this._fnM(b, b, t)
+    this._fnM(c, p[3], q[3])
+    this._fnM(c, c, this._D2)
+    this._fnM(d, p[2], q[2])
+    this._fnA(d, d, d)
+    this._fnZ(e, b, a)
+    this._fnZ(f, d, c)
+    this._fnA(g, d, c)
+    this._fnA(h, b, a)
 
-    this._M(p[0], e, f)
-    this._M(p[1], h, g)
-    this._M(p[2], g, f)
-    this._M(p[3], e, h)
-  }
-
-  /**
-   * @param {Float64Array} o
-   * @param {Float64Array} a
-   * @param {Float64Array} b
-   * @private
-   * @internal
-   */
-  private static _A (o: Float64Array, a: Float64Array, b: Float64Array): void {
-    for (let i = 0; i < 16; i++) {
-      o[i] = a[i] + b[i]
-    }
-  }
-
-  /**
-   * @param {Float64Array} o
-   * @param {Float64Array} a
-   * @param {Float64Array} b
-   * @private
-   * @internal
-   */
-  private static _M (o: Float64Array, a: Float64Array, b: Float64Array): void {
-    let v
-    let c
-    let t0 = 0
-    let t1 = 0
-    let t2 = 0
-    let t3 = 0
-    let t4 = 0
-    let t5 = 0
-    let t6 = 0
-    let t7 = 0
-    let t8 = 0
-    let t9 = 0
-    let t10 = 0
-    let t11 = 0
-    let t12 = 0
-    let t13 = 0
-    let t14 = 0
-    let t15 = 0
-    let t16 = 0
-    let t17 = 0
-    let t18 = 0
-    let t19 = 0
-    let t20 = 0
-    let t21 = 0
-    let t22 = 0
-    let t23 = 0
-    let t24 = 0
-    let t25 = 0
-    let t26 = 0
-    let t27 = 0
-    let t28 = 0
-    let t29 = 0
-    let t30 = 0
-
-    const b0 = b[0]
-    const b1 = b[1]
-    const b2 = b[2]
-    const b3 = b[3]
-    const b4 = b[4]
-    const b5 = b[5]
-    const b6 = b[6]
-    const b7 = b[7]
-    const b8 = b[8]
-    const b9 = b[9]
-    const b10 = b[10]
-    const b11 = b[11]
-    const b12 = b[12]
-    const b13 = b[13]
-    const b14 = b[14]
-    const b15 = b[15]
-
-    v = a[0]
-    t0 += v * b0
-    t1 += v * b1
-    t2 += v * b2
-    t3 += v * b3
-    t4 += v * b4
-    t5 += v * b5
-    t6 += v * b6
-    t7 += v * b7
-    t8 += v * b8
-    t9 += v * b9
-    t10 += v * b10
-    t11 += v * b11
-    t12 += v * b12
-    t13 += v * b13
-    t14 += v * b14
-    t15 += v * b15
-    v = a[1]
-    t1 += v * b0
-    t2 += v * b1
-    t3 += v * b2
-    t4 += v * b3
-    t5 += v * b4
-    t6 += v * b5
-    t7 += v * b6
-    t8 += v * b7
-    t9 += v * b8
-    t10 += v * b9
-    t11 += v * b10
-    t12 += v * b11
-    t13 += v * b12
-    t14 += v * b13
-    t15 += v * b14
-    t16 += v * b15
-    v = a[2]
-    t2 += v * b0
-    t3 += v * b1
-    t4 += v * b2
-    t5 += v * b3
-    t6 += v * b4
-    t7 += v * b5
-    t8 += v * b6
-    t9 += v * b7
-    t10 += v * b8
-    t11 += v * b9
-    t12 += v * b10
-    t13 += v * b11
-    t14 += v * b12
-    t15 += v * b13
-    t16 += v * b14
-    t17 += v * b15
-    v = a[3]
-    t3 += v * b0
-    t4 += v * b1
-    t5 += v * b2
-    t6 += v * b3
-    t7 += v * b4
-    t8 += v * b5
-    t9 += v * b6
-    t10 += v * b7
-    t11 += v * b8
-    t12 += v * b9
-    t13 += v * b10
-    t14 += v * b11
-    t15 += v * b12
-    t16 += v * b13
-    t17 += v * b14
-    t18 += v * b15
-    v = a[4]
-    t4 += v * b0
-    t5 += v * b1
-    t6 += v * b2
-    t7 += v * b3
-    t8 += v * b4
-    t9 += v * b5
-    t10 += v * b6
-    t11 += v * b7
-    t12 += v * b8
-    t13 += v * b9
-    t14 += v * b10
-    t15 += v * b11
-    t16 += v * b12
-    t17 += v * b13
-    t18 += v * b14
-    t19 += v * b15
-    v = a[5]
-    t5 += v * b0
-    t6 += v * b1
-    t7 += v * b2
-    t8 += v * b3
-    t9 += v * b4
-    t10 += v * b5
-    t11 += v * b6
-    t12 += v * b7
-    t13 += v * b8
-    t14 += v * b9
-    t15 += v * b10
-    t16 += v * b11
-    t17 += v * b12
-    t18 += v * b13
-    t19 += v * b14
-    t20 += v * b15
-    v = a[6]
-    t6 += v * b0
-    t7 += v * b1
-    t8 += v * b2
-    t9 += v * b3
-    t10 += v * b4
-    t11 += v * b5
-    t12 += v * b6
-    t13 += v * b7
-    t14 += v * b8
-    t15 += v * b9
-    t16 += v * b10
-    t17 += v * b11
-    t18 += v * b12
-    t19 += v * b13
-    t20 += v * b14
-    t21 += v * b15
-    v = a[7]
-    t7 += v * b0
-    t8 += v * b1
-    t9 += v * b2
-    t10 += v * b3
-    t11 += v * b4
-    t12 += v * b5
-    t13 += v * b6
-    t14 += v * b7
-    t15 += v * b8
-    t16 += v * b9
-    t17 += v * b10
-    t18 += v * b11
-    t19 += v * b12
-    t20 += v * b13
-    t21 += v * b14
-    t22 += v * b15
-    v = a[8]
-    t8 += v * b0
-    t9 += v * b1
-    t10 += v * b2
-    t11 += v * b3
-    t12 += v * b4
-    t13 += v * b5
-    t14 += v * b6
-    t15 += v * b7
-    t16 += v * b8
-    t17 += v * b9
-    t18 += v * b10
-    t19 += v * b11
-    t20 += v * b12
-    t21 += v * b13
-    t22 += v * b14
-    t23 += v * b15
-    v = a[9]
-    t9 += v * b0
-    t10 += v * b1
-    t11 += v * b2
-    t12 += v * b3
-    t13 += v * b4
-    t14 += v * b5
-    t15 += v * b6
-    t16 += v * b7
-    t17 += v * b8
-    t18 += v * b9
-    t19 += v * b10
-    t20 += v * b11
-    t21 += v * b12
-    t22 += v * b13
-    t23 += v * b14
-    t24 += v * b15
-    v = a[10]
-    t10 += v * b0
-    t11 += v * b1
-    t12 += v * b2
-    t13 += v * b3
-    t14 += v * b4
-    t15 += v * b5
-    t16 += v * b6
-    t17 += v * b7
-    t18 += v * b8
-    t19 += v * b9
-    t20 += v * b10
-    t21 += v * b11
-    t22 += v * b12
-    t23 += v * b13
-    t24 += v * b14
-    t25 += v * b15
-    v = a[11]
-    t11 += v * b0
-    t12 += v * b1
-    t13 += v * b2
-    t14 += v * b3
-    t15 += v * b4
-    t16 += v * b5
-    t17 += v * b6
-    t18 += v * b7
-    t19 += v * b8
-    t20 += v * b9
-    t21 += v * b10
-    t22 += v * b11
-    t23 += v * b12
-    t24 += v * b13
-    t25 += v * b14
-    t26 += v * b15
-    v = a[12]
-    t12 += v * b0
-    t13 += v * b1
-    t14 += v * b2
-    t15 += v * b3
-    t16 += v * b4
-    t17 += v * b5
-    t18 += v * b6
-    t19 += v * b7
-    t20 += v * b8
-    t21 += v * b9
-    t22 += v * b10
-    t23 += v * b11
-    t24 += v * b12
-    t25 += v * b13
-    t26 += v * b14
-    t27 += v * b15
-    v = a[13]
-    t13 += v * b0
-    t14 += v * b1
-    t15 += v * b2
-    t16 += v * b3
-    t17 += v * b4
-    t18 += v * b5
-    t19 += v * b6
-    t20 += v * b7
-    t21 += v * b8
-    t22 += v * b9
-    t23 += v * b10
-    t24 += v * b11
-    t25 += v * b12
-    t26 += v * b13
-    t27 += v * b14
-    t28 += v * b15
-    v = a[14]
-    t14 += v * b0
-    t15 += v * b1
-    t16 += v * b2
-    t17 += v * b3
-    t18 += v * b4
-    t19 += v * b5
-    t20 += v * b6
-    t21 += v * b7
-    t22 += v * b8
-    t23 += v * b9
-    t24 += v * b10
-    t25 += v * b11
-    t26 += v * b12
-    t27 += v * b13
-    t28 += v * b14
-    t29 += v * b15
-    v = a[15]
-    t15 += v * b0
-    t16 += v * b1
-    t17 += v * b2
-    t18 += v * b3
-    t19 += v * b4
-    t20 += v * b5
-    t21 += v * b6
-    t22 += v * b7
-    t23 += v * b8
-    t24 += v * b9
-    t25 += v * b10
-    t26 += v * b11
-    t27 += v * b12
-    t28 += v * b13
-    t29 += v * b14
-    t30 += v * b15
-
-    t0 += 38 * t16
-    t1 += 38 * t17
-    t2 += 38 * t18
-    t3 += 38 * t19
-    t4 += 38 * t20
-    t5 += 38 * t21
-    t6 += 38 * t22
-    t7 += 38 * t23
-    t8 += 38 * t24
-    t9 += 38 * t25
-    t10 += 38 * t26
-    t11 += 38 * t27
-    t12 += 38 * t28
-    t13 += 38 * t29
-    t14 += 38 * t30
-    // t15 left as is
-
-    // first car
-    c = 1
-    v = t0 + c + 65535
-    c = Math.floor(v / 65536)
-    t0 = v - c * 65536
-    v = t1 + c + 65535
-    c = Math.floor(v / 65536)
-    t1 = v - c * 65536
-    v = t2 + c + 65535
-    c = Math.floor(v / 65536)
-    t2 = v - c * 65536
-    v = t3 + c + 65535
-    c = Math.floor(v / 65536)
-    t3 = v - c * 65536
-    v = t4 + c + 65535
-    c = Math.floor(v / 65536)
-    t4 = v - c * 65536
-    v = t5 + c + 65535
-    c = Math.floor(v / 65536)
-    t5 = v - c * 65536
-    v = t6 + c + 65535
-    c = Math.floor(v / 65536)
-    t6 = v - c * 65536
-    v = t7 + c + 65535
-    c = Math.floor(v / 65536)
-    t7 = v - c * 65536
-    v = t8 + c + 65535
-    c = Math.floor(v / 65536)
-    t8 = v - c * 65536
-    v = t9 + c + 65535
-    c = Math.floor(v / 65536)
-    t9 = v - c * 65536
-    v = t10 + c + 65535
-    c = Math.floor(v / 65536)
-    t10 = v - c * 65536
-    v = t11 + c + 65535
-    c = Math.floor(v / 65536)
-    t11 = v - c * 65536
-    v = t12 + c + 65535
-    c = Math.floor(v / 65536)
-    t12 = v - c * 65536
-    v = t13 + c + 65535
-    c = Math.floor(v / 65536)
-    t13 = v - c * 65536
-    v = t14 + c + 65535
-    c = Math.floor(v / 65536)
-    t14 = v - c * 65536
-    v = t15 + c + 65535
-    c = Math.floor(v / 65536)
-    t15 = v - c * 65536
-    t0 += c - 1 + 37 * (c - 1)
-
-    // second car
-    c = 1
-    v = t0 + c + 65535
-    c = Math.floor(v / 65536)
-    t0 = v - c * 65536
-    v = t1 + c + 65535
-    c = Math.floor(v / 65536)
-    t1 = v - c * 65536
-    v = t2 + c + 65535
-    c = Math.floor(v / 65536)
-    t2 = v - c * 65536
-    v = t3 + c + 65535
-    c = Math.floor(v / 65536)
-    t3 = v - c * 65536
-    v = t4 + c + 65535
-    c = Math.floor(v / 65536)
-    t4 = v - c * 65536
-    v = t5 + c + 65535
-    c = Math.floor(v / 65536)
-    t5 = v - c * 65536
-    v = t6 + c + 65535
-    c = Math.floor(v / 65536)
-    t6 = v - c * 65536
-    v = t7 + c + 65535
-    c = Math.floor(v / 65536)
-    t7 = v - c * 65536
-    v = t8 + c + 65535
-    c = Math.floor(v / 65536)
-    t8 = v - c * 65536
-    v = t9 + c + 65535
-    c = Math.floor(v / 65536)
-    t9 = v - c * 65536
-    v = t10 + c + 65535
-    c = Math.floor(v / 65536)
-    t10 = v - c * 65536
-    v = t11 + c + 65535
-    c = Math.floor(v / 65536)
-    t11 = v - c * 65536
-    v = t12 + c + 65535
-    c = Math.floor(v / 65536)
-    t12 = v - c * 65536
-    v = t13 + c + 65535
-    c = Math.floor(v / 65536)
-    t13 = v - c * 65536
-    v = t14 + c + 65535
-    c = Math.floor(v / 65536)
-    t14 = v - c * 65536
-    v = t15 + c + 65535
-    c = Math.floor(v / 65536)
-    t15 = v - c * 65536
-    t0 += c - 1 + 37 * (c - 1)
-
-    o[0] = t0
-    o[1] = t1
-    o[2] = t2
-    o[3] = t3
-    o[4] = t4
-    o[5] = t5
-    o[6] = t6
-    o[7] = t7
-    o[8] = t8
-    o[9] = t9
-    o[10] = t10
-    o[11] = t11
-    o[12] = t12
-    o[13] = t13
-    o[14] = t14
-    o[15] = t15
-  }
-
-  /**
-   * @param {Float64Array} o
-   * @param {Float64Array} a
-   * @private
-   * @internal
-   */
-  private static _S (o: Float64Array, a: Float64Array): void {
-    this._M(o, a, a)
-  }
-
-  /**
-   * @param {Float64Array} o
-   * @param {Float64Array} a
-   * @param {Float64Array} b
-   * @private
-   * @internal
-   */
-  private static _Z (o: Float64Array, a: Float64Array, b: Float64Array): void {
-    for (let i = 0; i < 16; i++) {
-      o[i] = a[i] - b[i]
-    }
-  }
-
-  /**
-   * @param {Uint8Array} x
-   * @param {number} i
-   * @param {number} h
-   * @param {number} l
-   * @private
-   * @internal
-   */
-  private static _ts64 (x: Uint8Array, i: number, h: number, l: number): void {
-    x[i] = (h >> 24) & 0xff
-    x[i + 1] = (h >> 16) & 0xff
-    x[i + 2] = (h >> 8) & 0xff
-    x[i + 3] = h & 0xff
-    x[i + 4] = (l >> 24) & 0xff
-    x[i + 5] = (l >> 16) & 0xff
-    x[i + 6] = (l >> 8) & 0xff
-    x[i + 7] = l & 0xff
-  }
-
-  /**
-   * @param {Uint8Array} r
-   * @param {Float64Array} x
-   * @private
-   * @internal
-   */
-  private static _modL (r: Uint8Array, x: Float64Array): void {
-    const L = new Float64Array([
-      0xed,
-      0xd3,
-      0xf5,
-      0x5c,
-      0x1a,
-      0x63,
-      0x12,
-      0x58,
-      0xd6,
-      0x9c,
-      0xf7,
-      0xa2,
-      0xde,
-      0xf9,
-      0xde,
-      0x14,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0x10])
-
-    let carry
-    let i
-    let j
-    let k
-    for (i = 63; i >= 32; --i) {
-      carry = 0
-      for (j = i - 32, k = i - 12; j < k; ++j) {
-        x[j] += carry - 16 * x[i] * L[j - (i - 32)]
-        carry = Math.floor((x[j] + 128) / 256)
-        x[j] -= carry * 256
-      }
-      x[j] += carry
-      x[i] = 0
-    }
-    carry = 0
-    for (j = 0; j < 32; j++) {
-      x[j] += carry - (x[31] >> 4) * L[j]
-      carry = x[j] >> 8
-      x[j] &= 255
-    }
-    for (j = 0; j < 32; j++) {
-      x[j] -= carry * L[j]
-    }
-    for (i = 0; i < 32; i++) {
-      x[i + 1] += x[i] >> 8
-      r[i] = x[i] & 255
-    }
-  }
-
-  /**
-   * @param {Float64Array[]} p
-   * @param {Float64Array[]} q
-   * @param {number} b
-   * @private
-   * @internal
-   */
-  private static _cswap (
-    p: Float64Array[], q: Float64Array[], b: number
-  ): void {
-    for (let i = 0; i < 4; i++) {
-      this._sel25519(p[i], q[i], b)
-    }
-  }
-
-  /**
-   * @param {Float64Array} a
-   * @param {Float64Array} b
-   * @private
-   * @internal
-   */
-  private static _neq25519 (a: Float64Array, b: Float64Array): number {
-    const c = new Uint8Array(32)
-    const d = new Uint8Array(32)
-    this._pack25519(c, a)
-    this._pack25519(d, b)
-
-    return this._cryptoVerify32(c, 0, d, 0)
-  }
-
-  /**
-   * @param {Float64Array} p
-   * @param {Float64Array} q
-   * @param {number} b
-   * @private
-   * @internal
-   */
-  private static _sel25519 (p: Float64Array, q: Float64Array, b: number): void {
-    let t
-    const c = ~(b - 1)
-    for (let i = 0; i < 16; i++) {
-      t = c & (p[i] ^ q[i])
-      p[i] ^= t
-      q[i] ^= t
-    }
-  }
-
-  /**
-   * @param {Uint8Array} o
-   * @param {Float64Array} n
-   * @private
-   * @internal
-   */
-  private static _pack25519 (o: Uint8Array, n: Float64Array): void {
-    let i
-    let j
-    let b
-    const m = new Float64Array(16)
-    const t = new Float64Array(16)
-    for (i = 0; i < 16; i++) {
-      t[i] = n[i]
-    }
-    this._car25519(t)
-    this._car25519(t)
-    this._car25519(t)
-    for (j = 0; j < 2; j++) {
-      m[0] = t[0] - 0xffed
-      for (i = 1; i < 15; i++) {
-        m[i] = t[i] - 0xffff - ((m[i - 1] >> 16) & 1)
-        m[i - 1] &= 0xffff
-      }
-      m[15] = t[15] - 0x7fff - ((m[14] >> 16) & 1)
-      b = (m[15] >> 16) & 1
-      m[14] &= 0xffff
-      this._sel25519(t, m, 1 - b)
-    }
-    for (i = 0; i < 16; i++) {
-      o[2 * i] = t[i] & 0xff
-      o[2 * i + 1] = t[i] >> 8
-    }
-  }
-
-  /**
-   * @param {Float64Array} o
-   * @param {Uint8Array} n
-   * @private
-   * @internal
-   */
-  private static _unpack25519 (o: Float64Array, n: Uint8Array): void {
-    for (let i = 0; i < 16; i++) {
-      o[i] = n[2 * i] + (n[2 * i + 1] << 8)
-    }
-    o[15] &= 0x7fff
-  }
-
-  /**
-   * @param {Float64Array} o
-   * @param {Float64Array} i
-   * @private
-   * @internal
-   */
-  private static _pow2523 (o: Float64Array, i: Float64Array): void {
-    const c = new Float64Array(16)
-    let a
-    for (a = 0; a < 16; a++) {
-      c[a] = i[a]
-    }
-    for (a = 250; a >= 0; a--) {
-      this._S(c, c)
-      if (a !== 1) {
-        this._M(c, c, i)
-      }
-    }
-    for (a = 0; a < 16; a++) {
-      o[a] = c[a]
-    }
+    this._fnM(p[0], e, f)
+    this._fnM(p[1], h, g)
+    this._fnM(p[2], g, f)
+    this._fnM(p[3], e, h)
   }
 
   /**
@@ -902,7 +193,7 @@ class Ed25519 {
    * @private
    * @internal
    */
-  private static _car25519 (o: Float64Array): void {
+  private _car25519 (o: Float64Array): void {
     let v
     let c = 1
     for (let i = 0; i < 16; i++) {
@@ -914,294 +205,56 @@ class Ed25519 {
   }
 
   /**
-   * @param {Float64Array} a
-   * @private
-   * @internal
-   */
-  private static _par25519 (a: Float64Array): number {
-    const d = new Uint8Array(32)
-    this._pack25519(d, a)
-
-    return d[0] & 1
-  }
-
-  /**
-   * @param {Float64Array} o
-   * @param {Float64Array} i
-   * @private
-   * @internal
-   */
-  private static _inv25519 (o: Float64Array, i: Float64Array): void {
-    const c = new Float64Array(16)
-    let a
-    for (a = 0; a < 16; a++) {
-      c[a] = i[a]
-    }
-    for (a = 253; a >= 0; a--) {
-      this._S(c, c)
-      if (a !== 2 && a !== 4) {
-        this._M(c, c, i)
-      }
-    }
-    for (a = 0; a < 16; a++) {
-      o[a] = c[a]
-    }
-  }
-
-  /**
-   * @param {Float64Array} r
-   * @param {Float64Array} a
-   * @private
-   * @internal
-   */
-  private static _set25519 (r: Float64Array, a: Float64Array): void {
-    for (let i = 0; i < 16; i++) {
-      r[i] = a[i] | 0
-    }
-  }
-
-  /**
-   * @param {Float64Array[]} p
-   * @param {Float64Array[]} q
-   * @param {Uint8Array} s
-   * @private
-   * @internal
-   */
-  private static _scalarmult (
-    p: Float64Array[], q: Float64Array[], s: Uint8Array
-  ): void {
-    const gf0 = new Float64Array(16)
-    const gf1 = new Float64Array(
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-
-    let b: number
-    this._set25519(p[0], gf0)
-    this._set25519(p[1], gf1)
-    this._set25519(p[2], gf1)
-    this._set25519(p[3], gf0)
-    for (let i = 255; i >= 0; --i) {
-      b = (s[(i / 8) | 0] >> (i & 7)) & 1
-      this._cswap(p, q, b)
-      this._add(q, p)
-      this._add(p, p)
-      this._cswap(p, q, b)
-    }
-  }
-
-  /**
-   * @param {Float64Array[]} p
-   * @param {Uint8Array} s
-   * @private
-   * @internal
-   */
-  private static _scalarbase (p: Float64Array[], s: Uint8Array): void {
-    const q = [
-      new Float64Array(16),
-      new Float64Array(16),
-      new Float64Array(16),
-      new Float64Array(16)]
-    const gf1 = new Float64Array(
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-    const X = new Float64Array([
-      0xd51a,
-      0x8f25,
-      0x2d60,
-      0xc956,
-      0xa7b2,
-      0x9525,
-      0xc760,
-      0x692c,
-      0xdc5c,
-      0xfdd6,
-      0xe231,
-      0xc0a4,
-      0x53fe,
-      0xcd6e,
-      0x36d3,
-      0x2169])
-    const Y = new Float64Array([
-      0x6658,
-      0x6666,
-      0x6666,
-      0x6666,
-      0x6666,
-      0x6666,
-      0x6666,
-      0x6666,
-      0x6666,
-      0x6666,
-      0x6666,
-      0x6666,
-      0x6666,
-      0x6666,
-      0x6666,
-      0x6666])
-    this._set25519(q[0], X)
-    this._set25519(q[1], Y)
-    this._set25519(q[2], gf1)
-    this._M(q[3], X, Y)
-    this._scalarmult(p, q, s)
-  }
-
-  /**
-   * @param {Uint8Array} r
-   * @param {Float64Array[]} p
-   * @private
-   * @internal
-   */
-  private static _pack (r: Uint8Array, p: Float64Array[]): void {
-    const tx = new Float64Array(16)
-    const ty = new Float64Array(16)
-    const zi = new Float64Array(16)
-    this._inv25519(zi, p[2])
-    this._M(tx, p[0], zi)
-    this._M(ty, p[1], zi)
-    this._pack25519(r, ty)
-    r[31] ^= this._par25519(tx) << 7
-  }
-
-  /**
-   * @param {Float64Array[]} r
-   * @param {Uint8Array} p
-   * @private
-   * @internal
-   */
-  private static _unpackneg (r: Float64Array[], p: Uint8Array): number {
-    const gf0 = new Float64Array(16)
-    const gf1 = new Float64Array(
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-    const D = new Float64Array([
-      0x78a3,
-      0x1359,
-      0x4dca,
-      0x75eb,
-      0xd8ab,
-      0x4141,
-      0x0a4d,
-      0x0070,
-      0xe898,
-      0x7779,
-      0x4079,
-      0x8cc7,
-      0xfe73,
-      0x2b6f,
-      0x6cee,
-      0x5203])
-    const I = new Float64Array([
-      0xa0b0,
-      0x4a0e,
-      0x1b27,
-      0xc4ee,
-      0xe478,
-      0xad2f,
-      0x1806,
-      0x2f43,
-      0xd7a7,
-      0x3dfb,
-      0x0099,
-      0x2b4d,
-      0xdf0b,
-      0x4fc1,
-      0x2480,
-      0x2b83])
-    const t = new Float64Array(16)
-    const chk = new Float64Array(16)
-    const num = new Float64Array(16)
-    const den = new Float64Array(16)
-    const den2 = new Float64Array(16)
-    const den4 = new Float64Array(16)
-    const den6 = new Float64Array(16)
-
-    this._set25519(r[2], gf1)
-    this._unpack25519(r[1], p)
-    this._S(num, r[1])
-    this._M(den, num, D)
-    this._Z(num, num, r[2])
-    this._A(den, r[2], den)
-
-    this._S(den2, den)
-    this._S(den4, den2)
-    this._M(den6, den4, den2)
-    this._M(t, den6, num)
-    this._M(t, t, den)
-
-    this._pow2523(t, t)
-    this._M(t, t, num)
-    this._M(t, t, den)
-    this._M(t, t, den)
-    this._M(r[0], t, den)
-
-    this._S(chk, r[0])
-    this._M(chk, chk, den)
-    if (this._neq25519(chk, num)) {
-      this._M(r[0], r[0], I)
-    }
-
-    this._S(chk, r[0])
-    this._M(chk, chk, den)
-    /** @istanbul ignore if */
-    if (this._neq25519(chk, num)) {
-      return -1
-    }
-
-    if (this._par25519(r[0]) === (p[31] >> 7)) {
-      this._Z(r[0], gf0, r[0])
-    }
-
-    this._M(r[3], r[0], r[1])
-
-    return 0
-  }
-
-  /**
-   * @param {Uint8Array} r
-   * @private
-   * @internal
-   */
-  private static _reduce (r: Uint8Array): void {
-    const x = new Float64Array(64)
-    let i
-    for (i = 0; i < 64; i++) {
-      x[i] = r[i]
-    }
-    for (i = 0; i < 64; i++) {
-      r[i] = 0
-    }
-    this._modL(r, x)
-  }
-
-  /**
-   * @param {Uint8Array} x
-   * @param {number} xi
-   * @param {Uint8Array} y
-   * @param {number} yi
+   * @param {Uint8Array} out
+   * @param {Uint8Array} m
    * @param {number} n
    * @private
    * @internal
    */
-  private static _vn (
-    x: Uint8Array, xi: number, y: Uint8Array, yi: number, n: number
-  ): number {
-    let d = 0
-    for (let i = 0; i < n; i++) {
-      d |= x[xi + i] ^ y[yi + i]
+  private _cryptoHash (out: Uint8Array, m: Uint8Array, n: number): number {
+    const hh = new Int32Array(8)
+    const hl = new Int32Array(8)
+    const x = new Uint8Array(256)
+    let i
+    const b = n
+
+    hh[0] = 0x6a09e667
+    hh[1] = 0xbb67ae85
+    hh[2] = 0x3c6ef372
+    hh[3] = 0xa54ff53a
+    hh[4] = 0x510e527f
+    hh[5] = 0x9b05688c
+    hh[6] = 0x1f83d9ab
+    hh[7] = 0x5be0cd19
+
+    hl[0] = 0xf3bcc908
+    hl[1] = 0x84caa73b
+    hl[2] = 0xfe94f82b
+    hl[3] = 0x5f1d36f1
+    hl[4] = 0xade682d1
+    hl[5] = 0x2b3e6c1f
+    hl[6] = 0xfb41bd6b
+    hl[7] = 0x137e2179
+
+    this._cryptoHashBlocksHl(hh, hl, m, n)
+    n %= 128
+
+    for (i = 0; i < n; i++) {
+      x[i] = m[b - n + i]
     }
 
-    return (1 & ((d - 1) >>> 8)) - 1
-  }
+    x[n] = 128
 
-  /**
-   * @param {Uint8Array} x
-   * @param {number} xi
-   * @param {Uint8Array} y
-   * @param {number} yi
-   * @private
-   * @internal
-   */
-  private static _cryptoVerify32 (
-    x: Uint8Array, xi: number, y: Uint8Array, yi: number
-  ): number {
-    return this._vn(x, xi, y, yi, 32)
+    n = 256 - 128 * (n < 112 ? 1 : 0)
+    x[n - 9] = 0
+    this._ts64(x, n - 8, (b / 0x20000000) | 0, b << 3)
+    this._cryptoHashBlocksHl(hh, hl, x, n)
+
+    for (i = 0; i < 8; i++) {
+      this._ts64(out, 8 * i, hh[i], hl[i])
+    }
+
+    return 0
   }
 
   /**
@@ -1212,7 +265,7 @@ class Ed25519 {
    * @private
    * @internal
    */
-  private static _cryptoHashBlocksHl (
+  private _cryptoHashBlocksHl (
     hh: Int32Array, hl: Int32Array, m: Uint8Array, n: number
   ): number {
     const wh = new Int32Array(16)
@@ -1718,89 +771,6 @@ class Ed25519 {
   }
 
   /**
-   * @param {Uint8Array} out
-   * @param {Uint8Array} m
-   * @param {number} n
-   * @private
-   * @internal
-   */
-  private static _cryptoHash (
-    out: Uint8Array, m: Uint8Array, n: number): number {
-    const hh = new Int32Array(8)
-    const hl = new Int32Array(8)
-    const x = new Uint8Array(256)
-    let i
-    const b = n
-
-    hh[0] = 0x6a09e667
-    hh[1] = 0xbb67ae85
-    hh[2] = 0x3c6ef372
-    hh[3] = 0xa54ff53a
-    hh[4] = 0x510e527f
-    hh[5] = 0x9b05688c
-    hh[6] = 0x1f83d9ab
-    hh[7] = 0x5be0cd19
-
-    hl[0] = 0xf3bcc908
-    hl[1] = 0x84caa73b
-    hl[2] = 0xfe94f82b
-    hl[3] = 0x5f1d36f1
-    hl[4] = 0xade682d1
-    hl[5] = 0x2b3e6c1f
-    hl[6] = 0xfb41bd6b
-    hl[7] = 0x137e2179
-
-    this._cryptoHashBlocksHl(hh, hl, m, n)
-    n %= 128
-
-    for (i = 0; i < n; i++) {
-      x[i] = m[b - n + i]
-    }
-
-    x[n] = 128
-
-    n = 256 - 128 * (n < 112 ? 1 : 0)
-    x[n - 9] = 0
-    this._ts64(x, n - 8, (b / 0x20000000) | 0, b << 3)
-    this._cryptoHashBlocksHl(hh, hl, x, n)
-
-    for (i = 0; i < 8; i++) {
-      this._ts64(out, 8 * i, hh[i], hl[i])
-    }
-
-    return 0
-  }
-
-  /**
-   * @param {Uint8Array} pk
-   * @param {Uint8Array} sk
-   * @private
-   * @internal
-   */
-  private static _cryptoSignKeypair (pk: Uint8Array, sk: Uint8Array): number {
-    const d = new Uint8Array(64)
-    const p = [
-      new Float64Array(16),
-      new Float64Array(16),
-      new Float64Array(16),
-      new Float64Array(16)]
-
-    this._cryptoHash(d, sk, 32)
-    d[0] &= 248
-    d[31] &= 127
-    d[31] |= 64
-
-    this._scalarbase(p, d)
-    this._pack(pk, p)
-
-    for (let i = 0; i < 32; i++) {
-      sk[i + 32] = pk[i]
-    }
-
-    return 0
-  }
-
-  /**
    * Note: difference from C - smlen returned, not passed as argument.
    * @param {Uint8Array} sm
    * @param {Uint8Array} m
@@ -1809,8 +779,9 @@ class Ed25519 {
    * @private
    * @internal
    */
-  private static _cryptoSign (
-    sm: Uint8Array, m: Uint8Array, n: number, sk: Uint8Array): number {
+  private _cryptoSign (
+    sm: Uint8Array, m: Uint8Array, n: number, sk: Uint8Array
+  ): number {
     const d = new Uint8Array(64)
     const h = new Uint8Array(64)
     const r = new Uint8Array(64)
@@ -1865,6 +836,33 @@ class Ed25519 {
   }
 
   /**
+   * @param {Uint8Array} pk
+   * @param {Uint8Array} sk
+   * @private
+   * @internal
+   */
+  private _cryptoSignKeypair (pk: Uint8Array, sk: Uint8Array): number {
+    const d = new Uint8Array(64)
+    const p = [
+      new Float64Array(16), new Float64Array(16),
+      new Float64Array(16), new Float64Array(16)]
+
+    this._cryptoHash(d, sk, 32)
+    d[0] &= 248
+    d[31] &= 127
+    d[31] |= 64
+
+    this._scalarbase(p, d)
+    this._pack(pk, p)
+
+    for (let i = 0; i < 32; i++) {
+      sk[i + 32] = pk[i]
+    }
+
+    return 0
+  }
+
+  /**
    * @param {Uint8Array} m
    * @param {Uint8Array} sm
    * @param {number} n
@@ -1872,35 +870,27 @@ class Ed25519 {
    * @private
    * @internal
    */
-  private static _cryptoSignOpen (
+  private _cryptoSignOpen (
     m: Uint8Array, sm: Uint8Array, n: number, pk: Uint8Array
   ): number {
-    let i
     const t = new Uint8Array(32)
     const h = new Uint8Array(64)
     const p = [
-      new Float64Array(16),
-      new Float64Array(16),
-      new Float64Array(16),
-      new Float64Array(16)]
+      new Float64Array(16), new Float64Array(16),
+      new Float64Array(16), new Float64Array(16)]
     const q = [
-      new Float64Array(16),
-      new Float64Array(16),
-      new Float64Array(16),
-      new Float64Array(16)]
+      new Float64Array(16), new Float64Array(16),
+      new Float64Array(16), new Float64Array(16)]
 
-    if (n < 64) {
-      return -1
-    }
-
+    /** @istanbul ignore if */
     if (this._unpackneg(q, pk)) {
       return -1
     }
 
-    for (i = 0; i < n; i++) {
+    for (let i = 0; i < n; i++) {
       m[i] = sm[i]
     }
-    for (i = 0; i < 32; i++) {
+    for (let i = 0; i < 32; i++) {
       m[i + 32] = pk[i]
     }
     this._cryptoHash(h, m, n)
@@ -1911,19 +901,437 @@ class Ed25519 {
     this._add(p, q)
     this._pack(t, p)
 
-    n -= 64
-    if (this._cryptoVerify32(sm, 0, t, 0)) {
-      for (i = 0; i < n; i++) {
-        m[i] = 0
-      }
+    if (this._cryptoVerify32(sm, t)) {
       return -1
     }
 
-    for (i = 0; i < n; i++) {
-      m[i] = sm[i + 64]
+    return n
+  }
+
+  /**
+   * @param {Uint8Array} x
+   * @param {number} xi
+   * @param {Uint8Array} y
+   * @param {number} yi
+   * @private
+   * @internal
+   */
+  private _cryptoVerify32 (x: Uint8Array, y: Uint8Array): number {
+    let d = 0
+    for (let i = 0; i < 32; i++) {
+      d |= x[i] ^ y[i]
     }
 
-    return n
+    return (1 & ((d - 1) >>> 8)) - 1
+  }
+
+  /**
+   * @param {Float64Array[]} p
+   * @param {Float64Array[]} q
+   * @param {number} b
+   * @private
+   * @internal
+   */
+  private _cswap (p: Float64Array[], q: Float64Array[], b: number): void {
+    for (let i = 0; i < 4; i++) {
+      this._sel25519(p[i], q[i], b)
+    }
+  }
+
+  /**
+   * @param {Float64Array} o
+   * @param {Float64Array} a
+   * @param {Float64Array} b
+   * @private
+   * @internal
+   */
+  private _fnA (o: Float64Array, a: Float64Array, b: Float64Array): void {
+    for (let i = 0; i < 16; i++) {
+      o[i] = a[i] + b[i]
+    }
+  }
+
+  /**
+   * @param {Float64Array} o
+   * @param {Float64Array} a
+   * @param {Float64Array} b
+   * @private
+   * @internal
+   */
+  private _fnM (o: Float64Array, a: Float64Array, b: Float64Array): void {
+    const t = new Float64Array(31)
+    for (let i = 0; i < 31; i++) {
+      t[i] = 0
+    }
+    for (let i = 0; i < 16; i++) {
+      for (let j = 0; j < 16; j++) {
+        t[i + j] += a[i] * b[j]
+      }
+    }
+    for (let i = 0; i < 15; i++) {
+      t[i] += 38 * t[i + 16]
+    }
+    for (let i = 0; i < 16; i++) {
+      o[i] = t[i]
+    }
+    this._car25519(o)
+    this._car25519(o)
+  }
+
+  /**
+   * @param {Float64Array} o
+   * @param {Float64Array} a
+   * @private
+   * @internal
+   */
+  private _fnS (o: Float64Array, a: Float64Array): void {
+    this._fnM(o, a, a)
+  }
+
+  /**
+   * @param {Float64Array} o
+   * @param {Float64Array} a
+   * @param {Float64Array} b
+   * @private
+   * @internal
+   */
+  private _fnZ (o: Float64Array, a: Float64Array, b: Float64Array): void {
+    for (let i = 0; i < 16; i++) {
+      o[i] = a[i] - b[i]
+    }
+  }
+
+  /**
+   * @param {Float64Array} o
+   * @param {Float64Array} i
+   * @private
+   * @internal
+   */
+  private _inv25519 (o: Float64Array, i: Float64Array): void {
+    const c = new Float64Array(16)
+    for (let a = 0; a < 16; a++) {
+      c[a] = i[a]
+    }
+    for (let a = 253; a >= 0; a--) {
+      this._fnS(c, c)
+      if (a !== 2 && a !== 4) {
+        this._fnM(c, c, i)
+      }
+    }
+    for (let a = 0; a < 16; a++) {
+      o[a] = c[a]
+    }
+  }
+
+  /**
+   * @param {Uint8Array} r
+   * @param {Float64Array} x
+   * @private
+   * @internal
+   */
+  private _modL (r: Uint8Array, x: Float64Array): void {
+    let carry: number
+    let j: number
+    let k: number
+    for (let i = 63; i >= 32; --i) {
+      carry = 0
+      for (j = i - 32, k = i - 12; j < k; ++j) {
+        x[j] += carry - 16 * x[i] * this._L[j - (i - 32)]
+        carry = Math.floor((x[j] + 128) / 256) // carry = (x[j] + 128) >> 8;
+        x[j] -= carry * 256 // x[j] -= carry << 8;
+      }
+      x[j] += carry
+      x[i] = 0
+    }
+    carry = 0
+    for (let j = 0; j < 32; j++) {
+      x[j] += carry - (x[31] >> 4) * this._L[j]
+      carry = x[j] >> 8
+      x[j] &= 255
+    }
+    for (let j = 0; j < 32; j++) {
+      x[j] -= carry * this._L[j]
+    }
+    for (let i = 0; i < 32; i++) {
+      x[i + 1] += x[i] >> 8
+      r[i] = x[i] & 255
+    }
+  }
+
+  /**
+   * @param {Float64Array} a
+   * @param {Float64Array} b
+   * @private
+   * @internal
+   */
+  private _neq25519 (a: Float64Array, b: Float64Array): number {
+    const c = new Uint8Array(32)
+    const d = new Uint8Array(32)
+    this._pack25519(c, a)
+    this._pack25519(d, b)
+
+    return this._cryptoVerify32(c, d)
+  }
+
+  /**
+   * @param {Uint8Array} r
+   * @param {Float64Array[]} p
+   * @private
+   * @internal
+   */
+  private _pack (r: Uint8Array, p: Float64Array[]): void {
+    const tx = new Float64Array(16)
+    const ty = new Float64Array(16)
+    const zi = new Float64Array(16)
+    this._inv25519(zi, p[2])
+    this._fnM(tx, p[0], zi)
+    this._fnM(ty, p[1], zi)
+    this._pack25519(r, ty)
+    r[31] ^= this._par25519(tx) << 7
+  }
+
+  /**
+   * @param {Uint8Array} o
+   * @param {Float64Array} n
+   * @private
+   * @internal
+   */
+  private _pack25519 (o: Uint8Array, n: Float64Array): void {
+    let b: number
+    const m = new Float64Array(16)
+    const t = new Float64Array(16)
+    for (let i = 0; i < 16; i++) {
+      t[i] = n[i]
+    }
+    this._car25519(t)
+    this._car25519(t)
+    this._car25519(t)
+    for (let j = 0; j < 2; j++) {
+      m[0] = t[0] - 0xffed
+      for (let i = 1; i < 15; i++) {
+        m[i] = t[i] - 0xffff - ((m[i - 1] >> 16) & 1)
+        m[i - 1] &= 0xffff
+      }
+      m[15] = t[15] - 0x7fff - ((m[14] >> 16) & 1)
+      b = (m[15] >> 16) & 1
+      m[14] &= 0xffff
+      this._sel25519(t, m, 1 - b)
+    }
+    for (let i = 0; i < 16; i++) {
+      o[2 * i] = t[i] & 0xff
+      o[2 * i + 1] = t[i] >> 8
+    }
+  }
+
+  /**
+   * @param {Float64Array} a
+   * @private
+   * @internal
+   */
+  private _par25519 (a: Float64Array): number {
+    const d = new Uint8Array(32)
+    this._pack25519(d, a)
+
+    return d[0] & 1
+  }
+
+  /**
+   * @param {Float64Array} o
+   * @param {Float64Array} i
+   * @private
+   * @internal
+   */
+  private _pow2523 (o: Float64Array, i: Float64Array): void {
+    const c = new Float64Array(16)
+    for (let a = 0; a < 16; a++) {
+      c[a] = i[a]
+    }
+    for (let a = 250; a >= 0; a--) {
+      this._fnS(c, c)
+      if (a !== 1) {
+        this._fnM(c, c, i)
+      }
+    }
+    for (let a = 0; a < 16; a++) {
+      o[a] = c[a]
+    }
+  }
+
+  /**
+   * @param {Uint8Array} r
+   * @private
+   * @internal
+   */
+  private _reduce (r: Uint8Array): void {
+    const x = new Float64Array(64)
+    for (let i = 0; i < 64; i++) {
+      x[i] = r[i]
+    }
+    for (let i = 0; i < 64; i++) {
+      r[i] = 0
+    }
+    this._modL(r, x)
+  }
+
+  /**
+   * @param {Float64Array[]} p
+   * @param {Uint8Array} s
+   * @private
+   * @internal
+   */
+  private _scalarbase (p: Float64Array[], s: Uint8Array): void {
+    const q = [
+      new Float64Array(16), new Float64Array(16),
+      new Float64Array(16), new Float64Array(16)]
+
+    this._set25519(q[0], this._X)
+    this._set25519(q[1], this._Y)
+    this._set25519(q[2], this._gf1)
+    this._fnM(q[3], this._X, this._Y)
+    this._scalarmult(p, q, s)
+  }
+
+  /**
+   * @param {Float64Array[]} p
+   * @param {Float64Array[]} q
+   * @param {Uint8Array} s
+   * @private
+   * @internal
+   */
+  private _scalarmult (
+    p: Float64Array[], q: Float64Array[], s: Uint8Array
+  ): void {
+    let b: number
+
+    this._set25519(p[0], this._gf0)
+    this._set25519(p[1], this._gf1)
+    this._set25519(p[2], this._gf1)
+    this._set25519(p[3], this._gf0)
+
+    for (let i = 255; i >= 0; --i) {
+      b = (s[(i / 8) | 0] >> (i & 7)) & 1
+      this._cswap(p, q, b)
+      this._add(q, p)
+      this._add(p, p)
+      this._cswap(p, q, b)
+    }
+  }
+
+  /**
+   * @param {Float64Array} p
+   * @param {Float64Array} q
+   * @param {number} b
+   * @private
+   * @internal
+   */
+  private _sel25519 (p: Float64Array, q: Float64Array, b: number): void {
+    let t: number
+    const c = ~(b - 1)
+    for (let i = 0; i < 16; i++) {
+      t = c & (p[i] ^ q[i])
+      p[i] ^= t
+      q[i] ^= t
+    }
+  }
+
+  /**
+   * @param {Float64Array} r
+   * @param {Float64Array} a
+   * @private
+   * @internal
+   */
+  private _set25519 (r: Float64Array, a: Float64Array): void {
+    for (let i = 0; i < 16; i++) {
+      r[i] = a[i] // | 0
+    }
+  }
+
+  /**
+   * @param {Uint8Array} x
+   * @param {number} i
+   * @param {number} h
+   * @param {number} l
+   * @private
+   * @internal
+   */
+  private _ts64 (x: Uint8Array, i: number, h: number, l: number): void {
+    x[i] = (h >> 24) & 0xff
+    x[i + 1] = (h >> 16) & 0xff
+    x[i + 2] = (h >> 8) & 0xff
+    x[i + 3] = h & 0xff
+    x[i + 4] = (l >> 24) & 0xff
+    x[i + 5] = (l >> 16) & 0xff
+    x[i + 6] = (l >> 8) & 0xff
+    x[i + 7] = l & 0xff
+  }
+
+  /**
+   * @param {Float64Array} o
+   * @param {Uint8Array} n
+   * @private
+   * @internal
+   */
+  private _unpack25519 (o: Float64Array, n: Uint8Array): void {
+    for (let i = 0; i < 16; i++) {
+      o[i] = n[2 * i] + (n[2 * i + 1] << 8)
+    }
+    o[15] &= 0x7fff
+  }
+
+  /**
+   * @param {Float64Array[]} r
+   * @param {Uint8Array} p
+   * @private
+   * @internal
+   */
+  private _unpackneg (r: Float64Array[], p: Uint8Array): number {
+    const t = new Float64Array(16)
+    const chk = new Float64Array(16)
+    const num = new Float64Array(16)
+    const den = new Float64Array(16)
+    const den2 = new Float64Array(16)
+    const den4 = new Float64Array(16)
+    const den6 = new Float64Array(16)
+
+    this._set25519(r[2], this._gf1)
+    this._unpack25519(r[1], p)
+    this._fnS(num, r[1])
+    this._fnM(den, num, this._D)
+    this._fnZ(num, num, r[2])
+    this._fnA(den, r[2], den)
+
+    this._fnS(den2, den)
+    this._fnS(den4, den2)
+    this._fnM(den6, den4, den2)
+    this._fnM(t, den6, num)
+    this._fnM(t, t, den)
+
+    this._pow2523(t, t)
+    this._fnM(t, t, num)
+    this._fnM(t, t, den)
+    this._fnM(t, t, den)
+    this._fnM(r[0], t, den)
+
+    this._fnS(chk, r[0])
+    this._fnM(chk, chk, den)
+    if (this._neq25519(chk, num)) {
+      this._fnM(r[0], r[0], this._I)
+    }
+
+    this._fnS(chk, r[0])
+    this._fnM(chk, chk, den)
+    /** @istanbul ignore if */
+    if (this._neq25519(chk, num)) {
+      return -1
+    }
+
+    if (this._par25519(r[0]) === (p[31] >> 7)) {
+      this._fnZ(r[0], this._gf0, r[0])
+    }
+
+    this._fnM(r[3], r[0], r[1])
+
+    return 0
   }
 }
 

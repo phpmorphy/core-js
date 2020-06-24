@@ -21,7 +21,7 @@
 import { Bech32 } from '../util/Bech32'
 import { PublicKey } from '../key/ed25519/PublicKey'
 import { SecretKey } from '../key/ed25519/SecretKey'
-import { prefixToUint16, uint16ToPrefix } from '../util/Converter'
+import { prefixToVersion, versionToPrefix } from '../util/Converter'
 
 /**
  * Базовый класс для работы с адресами.
@@ -60,7 +60,7 @@ export class Address {
    */
   constructor (bytes?: Uint8Array) {
     if (bytes === undefined) {
-      this.prefix = 'umi'
+      this.version = Address.Umi
     } else {
       if (!(bytes instanceof Uint8Array)) {
         throw new Error('bytes type must be Uint8Array')
@@ -97,7 +97,7 @@ export class Address {
   }
 
   set version (version: number) {
-    uint16ToPrefix(version) // validation
+    versionToPrefix(version) // validation
 
     // tslint:disable-next-line:no-bitwise
     new DataView(this._bytes.buffer).setUint16(0, (version & 0x7FFF))
@@ -150,11 +150,11 @@ export class Address {
    * @throws {Error}
    */
   get prefix (): string {
-    return uint16ToPrefix(this.version)
+    return versionToPrefix(this.version)
   }
 
   set prefix (prefix: string) {
-    this.version = prefixToUint16(prefix)
+    this.version = prefixToVersion(prefix)
   }
 
   /**
@@ -180,12 +180,6 @@ export class Address {
   set bech32 (bech32: string) {
     if (typeof bech32 !== 'string') {
       throw new Error('bech32 type must be a string')
-    }
-
-    const regexp = /^(genesis|[a-z]{3})1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]{58}$/
-
-    if (!regexp.test(bech32)) {
-      throw new Error('incorrect address')
     }
 
     this._bytes.set(Bech32.decode(bech32))

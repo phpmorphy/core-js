@@ -21,19 +21,15 @@
     }
   },
   "sideEffects": false,
+  "engines": {
+    "node": ">=4"
+  },
+  "directories": {
+    "lib": "./lib"
+  },
   "scripts": {
-    "test": "nyc --reporter=text --reporter=html mocha",
-    "coverage": "nyc report --reporter=text-lcov | coveralls",
-    "lint": "eslint src/**/*.ts lib/*.js",
-    "build": "mkdir -p tmp; npm run build:concat; tsc; npm run build:format; rollup -c; npm run build:comments; npm run build:codestyle; npm run build:types; npm run build:flow; rm -r tmp",
-    "build:concat": "find ./src -type f -name '*.ts' -exec cat {} + > ./tmp/index.ts; sed -i -e '/^import/d' ./tmp/index.ts; sed -i -e '/^export {/d' ./tmp/index.ts; sed -i -e '/^\\/\\//d' ./tmp/index.ts",
-    "build:format": "sed -e 's/^/~/' -e ': r' -e 's/^\\( *\\)~    /\\1  ~/' -e 't r' -e 's/~//' ./tmp/index.js > ./tmp/index2.js; mv ./tmp/index2.js ./tmp/index.js",
-    "build:comments": "sed -e 's/\\* @is/ is/' ./lib/index.js > ./tmp/index.tmp.js; sed -e '/@internal/d' ./tmp/index.tmp.js > ./lib/index.js",
-    "build:codestyle": "standard --fix ./lib/index.js ./lib/index.mjs",
-    "build:types": "tsc --emitDeclarationOnly --declaration --declarationDir lib",
-    "build:flow": "flowgen --no-jsdoc --add-flow-header -o ./tmp/index.js.flow ./lib/index.d.ts; sed -e '/^  -/d' ./tmp/index.js.flow > ./lib/index.js.flow",
-    "jsdoc": "jsdoc --pedantic -d ./doc ./lib/index.mjs",
-    "typedoc": "typedoc"
+    "test": "nyc --reporter=text --reporter=html mocha --recursive",
+    "coverage": "nyc report --reporter=text-lcov | coveralls"
   },
   "repository": {
     "type": "git",
@@ -54,13 +50,14 @@
     "chai": "^4.2.0",
     "eslint": "^7.2.0",
     "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-compat": "^3.7.0",
     "eslint-plugin-import": "^2.21.2",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "flowgen": "^1.11.0",
     "jsdoc": "^3.6.4",
-    "mocha": "^8.0.1",
+    "mocha": "^4.1.0",
     "nyc": "^15.1.0",
     "rollup": "^2.16.1",
     "rollup-plugin-cleanup": "^3.1.1",
