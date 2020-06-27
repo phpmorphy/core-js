@@ -21,11 +21,11 @@
 // tslint:disable:no-bitwise
 
 /**
- * Ассиметричная криптография на основе эллиптической кривой Curve25519.
+ * Цифровые подписи Ed25519.
  * Implementation derived from TweetNaCl version 20140427.
  * @see http://tweetnacl.cr.yp.to/
  * @class
- * @hideconstructor
+ * @private
  */
 class Ed25519 {
   private readonly _D = new Float64Array([

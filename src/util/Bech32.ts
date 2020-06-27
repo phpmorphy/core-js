@@ -23,8 +23,9 @@ import { prefixToVersion, versionToPrefix } from './Converter'
 // tslint:disable:no-bitwise
 
 /**
- * Bech32 конвертер.
+ * Конвертер адресов в формате Bech32.
  * @class
+ * @private
  */
 class Bech32 {
   /**
@@ -125,10 +126,6 @@ class Bech32 {
     let result = prefix + '1'
     let word
     for (word of words) {
-      if ((word >> 5) !== 0) {
-        throw new Error('Non 5-bit word')
-      }
-
       chk = this._polymodStep(chk) ^ word
       result += this._ALPHABET.charAt(word)
     }
@@ -271,6 +268,7 @@ class Bech32 {
     }
 
     if (pad) {
+      /** @istanbul ignore else */
       if (bits > 0) {
         result.push((value << (outBits - bits)) & maxV)
       }

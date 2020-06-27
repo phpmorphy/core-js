@@ -36,7 +36,18 @@ describe('Address', function () {
         {
           desc: 'invalid checksum',
           args: 'umi1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqr5zcpq'
-        }
+        },
+        { desc: 'некорректный адрес - too short', args: 'a1qqq' },
+        { desc: 'некорректный адрес - mixed-case', args: 'Aa1qqqqqqqq' },
+        { desc: 'некорректный адрес - no separator', args: 'aqqqqqqqq' },
+        { desc: 'некорректный адрес - no prefix', args: '1qqqqqqqq' },
+        { desc: 'некорректный адрес - unknown char', args: 'a1qiqqqqqq' },
+        { desc: 'некорректный адрес - invalid prefix', args: 'я1qqqqqqqq' },
+        {
+          desc: 'некорректный адрес - non-zero padding',
+          args: 'tb1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3pjxtptv'
+        },
+        { desc: 'excess padding', args: 'aaa1w508d6qejxtdg4y5r3zarqqv8dkn' }
       ]
 
       tests.forEach(function (test) {
@@ -89,7 +100,28 @@ describe('Address', function () {
   describe('version', function () {
     describe('ошибка', function () {
       const tests = [
-        { desc: 'тип', args: 'ab' },
+        { desc: 'строка', args: 'ab' },
+        { desc: 'float', args: 0.123 },
+        {
+          desc: 'некорректный первый символ (26)',
+          args: (27 << 10) + (1 << 5) + 1
+        },
+        {
+          desc: 'некорректный первый символ (0)',
+          args: (0 << 10) + (1 << 5) + 1
+        },
+        {
+          desc: 'некорректный второй символ (26)',
+          args: (1 << 10) + (27 << 5) + 1
+        },
+        {
+          desc: 'некорректный второй символ (0)',
+          args: (1 << 10) + (0 << 5) + 1
+        },
+        {
+          desc: 'некорректный третий символ (26)',
+          args: (1 << 10) + (1 << 5) + 27
+        },
         { desc: 'некорректная версию', args: 65534 }
       ]
 
@@ -156,6 +188,15 @@ describe('Address', function () {
           assert.strictEqual(actual, test.expected)
         })
       })
+    })
+  })
+
+  describe('bech32', function () {
+    it('sss', function () {
+      const bytes = new Uint8Array(34)
+      const adr = new umi.Address(bytes)
+      const expected = 'genesis1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqkxaddc'
+      assert.equal(expected, adr.bech32)
     })
   })
 })

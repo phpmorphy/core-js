@@ -32,6 +32,7 @@ export class Transaction {
   /**
    * Длина транзакции в байтах.
    * @type {number}
+   * @constant
    */
   static get LENGTH (): number { return 150 }
 
@@ -40,6 +41,7 @@ export class Transaction {
    * Может быть добавлена только в Genesis-блок.
    * Адрес отправителя должен иметь префикс genesis, адрес получаетеля - umi.
    * @type {number}
+   * @constant
    * @example
    * let secKey = SecretKey.fromSeed(new Uint8Array(32))
    * let sender = Address.fromKey(secKey).setPrefix('genesis')
@@ -56,6 +58,7 @@ export class Transaction {
   /**
    * Стандартная транзакция. Перевод монет из одного кошелька в другой.
    * @type {number}
+   * @constant
    * @example
    * let secKey = SecretKey.fromSeed(new Uint8Array(32))
    * let sender = Address.fromKey(secKey).setPrefix('umi')
@@ -72,6 +75,7 @@ export class Transaction {
   /**
    * Создание новой структуры.
    * @type {number}
+   * @constant
    * @example
    * let secKey = SecretKey.fromSeed(new Uint8Array(32))
    * let sender = Address.fromKey(secKey).setPrefix('umi')
@@ -89,6 +93,7 @@ export class Transaction {
   /**
    * Обновление настроек существующей структуры.
    * @type {number}
+   * @constant
    * @example
    * let secKey = SecretKey.fromSeed(new Uint8Array(32))
    * let sender = Address.fromKey(secKey).setPrefix('umi')
@@ -106,6 +111,7 @@ export class Transaction {
   /**
    * Изменение адреса для начисления профита.
    * @type {number}
+   * @constant
    * @example
    * let secKey = SecretKey.fromSeed(new Uint8Array(32))
    * let sender = Address.fromKey(secKey).setPrefix('umi')
@@ -121,6 +127,7 @@ export class Transaction {
   /**
    * Изменение адреса на который переводоится комиссия.
    * @type {number}
+   * @constant
    * @example
    * let secKey = SecretKey.fromSeed(new Uint8Array(32))
    * let sender = Address.fromKey(secKey).setPrefix('umi')
@@ -136,6 +143,7 @@ export class Transaction {
   /**
    * Активация транзитного адреса.
    * @type {number}
+   * @constant
    * @example
    * let secKey = SecretKey.fromSeed(new Uint8Array(32))
    * let sender = Address.fromKey(secKey).setPrefix('umi')
@@ -151,6 +159,7 @@ export class Transaction {
   /**
    * Деактивация транзитного адреса.
    * @type {number}
+   * @constant
    * @example
    * let secKey = SecretKey.fromSeed(new Uint8Array(32))
    * let sender = Address.fromKey(secKey).setPrefix('umi')
@@ -180,7 +189,7 @@ export class Transaction {
   private readonly _view: DataView = new DataView(this._bytes.buffer)
 
   /**
-   * Заполнненые свойства.
+   * Заполоненные свойства.
    * @type {Object}
    * @private
    * @internal
@@ -188,10 +197,11 @@ export class Transaction {
   private readonly _fieldsMap: { [key: string]: boolean } = {}
 
   /**
-   * Проверить свойство
+   * Проверить наличие свойства.
    * @param {string[]} fields
    * @throws {Error}
    * @private
+   * @internal
    */
   private _checkFields (fields: string[]): void {
     for (const field of fields) {
@@ -202,9 +212,10 @@ export class Transaction {
   }
 
   /**
-   * Отметить свойство как установленное
+   * Отметить свойство как установленное.
    * @param {string[]} fields
    * @private
+   * @internal
    */
   private _setFields (fields: string[]): void {
     for (const field of fields) {

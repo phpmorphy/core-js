@@ -21,25 +21,28 @@
 import { Ed25519 } from '../../util/Ed25519'
 
 /**
- * Публичный ключ.
+ * Базовый класс для работы с публичными ключами.
  * @class
  */
 export class PublicKey {
   /**
    * Длина публичного ключа в формате libsodium в байтах.
    * @type {number}
+   * @constant
    */
   static get LENGTH (): number { return Ed25519.PUBLIC_KEY_BYTES }
 
   /**
    * Длина цифровой подписи в байтах.
    * @type {number}
+   * @constant
    */
   static get SIGNATURE_LENGTH (): number { return Ed25519.SIGNATURE_BYTES }
 
   /**
    * Длина цифровой подписи в байтах.
    * @type {number}
+   * @constant
    */
   get signatureLength (): number { return PublicKey.SIGNATURE_LENGTH }
 

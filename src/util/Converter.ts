@@ -21,9 +21,11 @@
 // tslint:disable:no-bitwise
 
 /**
+ * Конвертер цифровой версии префикса в текстовое представление.
  * @param {number} version
  * @returns {string}
  * @throws {Error}
+ * @private
  */
 function versionToPrefix (version: number): string {
   if (typeof version !== 'number') {
@@ -62,9 +64,11 @@ function versionToPrefix (version: number): string {
 }
 
 /**
+ * Конвертер текстовой версии префикса в числовое представление.
  * @param {string} prefix
  * @returns {number}
  * @throws {Error}
+ * @private
  */
 function prefixToVersion (prefix: string): number {
   if (typeof prefix !== 'string') {

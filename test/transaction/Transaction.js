@@ -60,23 +60,24 @@ describe('Transaction', function () {
     })
   })
 
-  describe('hash', function () {
+  describe('bytes', function () {
     it('возвращяет Uint8Array длиной 150 байта', function () {
       const expected = new Uint8Array(150)
-      const actual = new umi.Transaction().bytes
+      expected[1] = 255
+      const actual = new umi.Transaction(expected).bytes
 
       assert.deepEqual(actual, expected)
     })
   })
 
-  xdescribe('bytes', function () {
+  describe('hash', function () {
     it('возвращяет корректный хэш', function () {
-      if (typeof window !== 'undefined') {
-        this.skip()
-      }
-
-      const expected = umi.sha256(new Uint8Array(150))
-      const actual = new umi.Transaction().hash
+      const bytes = new Uint8Array(150)
+      const expected = new Uint8Array([
+        29, 131, 81, 139, 137, 123, 20, 226, 148, 57, 144, 239, 246, 85, 131,
+        130, 70, 204, 2, 7, 167, 201, 90, 95, 61, 252, 204, 46, 57, 95, 139, 191
+      ])
+      const actual = new umi.Transaction(bytes).hash
 
       assert.deepEqual(actual, expected)
     })
@@ -339,6 +340,13 @@ describe('Transaction', function () {
 
   describe('value', function () {
     describe('возвращяет ошибку если', function () {
+      it('сумма превышает 9007199254740991', function () {
+        const bytes = new Uint8Array(150)
+        bytes[69] = 1
+        const tx = new umi.Transaction(bytes)
+        assert.throws(function () { return tx.value }, Error)
+      })
+
       describe('передать', function () {
         const tests = [
           { desc: 'строку', args: 'a' },
@@ -590,17 +598,26 @@ describe('Transaction', function () {
 
     describe('устанавливает название', function () {
       describe('в транзакции типа', function () {
-        const tests = [
+        const versions = [
           { desc: 'CreateStructure', args: umi.Transaction.CreateStructure },
           { desc: 'UpdateStructure', args: umi.Transaction.UpdateStructure }
         ]
 
-        tests.forEach(function (test) {
-          it(test.desc, function () {
-            const tx = new umi.Transaction().setVersion(test.args)
-            const expected = 'aaa'
-            const actual = tx.setName(expected).name
-            assert.strictEqual(actual, expected)
+        versions.forEach(function (version) {
+          const names = [
+            { desc: 'ASCII', args: 'abc' },
+            { desc: 'BMP', args: 'Привет' },
+            { desc: 'TIP', args: '小篆' },
+            { desc: 'emoji', args: '😭😰🥰' }
+          ]
+
+          names.forEach(function (name) {
+            it(version.desc + ' - ' + name.desc, function () {
+              const tx = new umi.Transaction().setVersion(version.args)
+              const expected = name.args
+              const actual = tx.setName(expected).name
+              assert.strictEqual(actual, expected)
+            })
           })
         })
       })
@@ -799,6 +816,13 @@ describe('Transaction', function () {
 
   describe('nonce', function () {
     describe('возвращяет ошибку если', function () {
+      it('превышает 9007199254740991', function () {
+        const bytes = new Uint8Array(150)
+        bytes[77] = 1
+        const tx = new umi.Transaction(bytes)
+        assert.throws(function () { return tx.nonce }, Error)
+      })
+
       describe('передать', function () {
         const tests = [
           { desc: 'число меньше 0', args: -1 },

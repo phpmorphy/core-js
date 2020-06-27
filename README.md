@@ -1,5 +1,5 @@
 <h1 align="center">
-  <a href="https://umi.top"><img src="file:/Users/axel/umi/umi-core-js/logo.svg" alt="UMI" width="200"></a>
+  <a href="https://umi.top"><img src="../logo.svg" alt="UMI" width="200"></a>
   <br>
   UMI Core - JavaScript Library
   <br>
@@ -7,50 +7,82 @@
 </h1>
 
 <p align="center">
-  <img alt="GitHub release (latest SemVer)" src="https://img.shields.io/github/v/release/umi-top/umi-core-js.svg">
-  <!--a href="https://travis-ci.org/umi-top/umi-core-js"><img src="https://img.shields.io/travis/umi-top/umi-core-js/master.svg" alt="travis"></a-->
-  <img alt="npm type definitions" src="https://img.shields.io/npm/types/@umi-top/umi-core-js">
-  <a href="https://standardjs.com"><img src="https://img.shields.io/badge/code_style-standard-brightgreen.svg" alt="Standard - JavaScript Style Guide"></a>
-  <a href="https://www.npmjs.com/package/@umi-top/umi-core-js"><img src="https://img.shields.io/npm/l/@umi-top/umi-core-js.svg" alt="npm license"></a>
-  <a href="https://www.npmjs.com/package/@umi-top/umi-core-js"><img src="https://img.shields.io/npm/v/@umi-top/umi-core-js.svg" alt="npm version"></a>
-  <a href="https://www.npmjs.com/package/@umi-top/umi-core-js"><img src="https://img.shields.io/npm/dm/@umi-top/umi-core-js.svg" alt="npm downloads"></a>
-  <a href="https://www.npmjs.com/package/@umi-top/umi-core-js"><img src="https://img.shields.io/librariesio/release/npm/@umi-top/umi-core-js.svg" alt="Libraries.io dependency status for latest release, scoped npm package"></a>
-  <a href="https://keybase.io/umitop"><img alt="Keybase PGP" src="https://img.shields.io/keybase/pgp/umitop.svg"></a>
+  <!-- release    --><a href="https://github.com/umi-top/umi-core-js"><img alt="GitHub release (latest SemVer)" src="https://img.shields.io/github/v/release/umi-top/umi-core-js?sort=semver"></a>
+  <!-- build      --><a href="https://travis-ci.org/umi-top/umi-core-js"><img alt="travis" src="https://img.shields.io/travis/umi-top/umi-core-js/master"></a>
+  <!-- coverage   --><img alt="Coveralls github branch" src="https://img.shields.io/coveralls/github/umi-top/umi-core-js/master">
+  <!-- types      --><img alt="npm type definitions" src="https://img.shields.io/npm/types/@umi-top/umi-core-js">
+  <!-- code style --><a href="https://standardjs.com"><img alt="Standard" src="https://img.shields.io/badge/code_style-standard-green"></a>
+  <!-- license    --><a href="https://github.com/umi-top/umi-core-js/blob/master/LICENSE"><img alt="GitHub" src="https://img.shields.io/github/license/umi-top/umi-core-js"></a>
+  <!-- PGP        --><a href="https://keybase.io/umitop"><img alt="Keybase PGP" src="https://img.shields.io/keybase/pgp/umitop"></a>
+  <br/>
+  <!-- npm ver    --><a href="https://www.npmjs.com/package/@umi-top/umi-core-js"><img alt="npm version" src="https://img.shields.io/npm/v/@umi-top/umi-core-js"></a>
+  <!-- node       --><a href="https://www.npmjs.com/package/@umi-top/umi-core-js"><img alt="node-current (scoped)" src="https://img.shields.io/node/v/@umi-top/umi-core-js"></a>
+  <!-- downloads  --><a href="https://www.npmjs.com/package/@umi-top/umi-core-js"><img alt="npm downloads" src="https://img.shields.io/npm/dm/@umi-top/umi-core-js"></a>
 </p>
 
+## Оглавление
+-   Введение
 
-## Table of Contents
-- Quick start
-  - [Install](#install)
-  - [Usage](#usage)
-  - [What you might do if you're clever](#what-you-might-do-if-youre-clever)
-- FAQ
-  - [Why should I use JavaScript Standard Style?](#why-should-i-use-javascript-standard-style)
-  - [Who uses JavaScript Standard Style?](#who-uses-javascript-standard-style)
-  - [Are there text editor plugins?](#are-there-text-editor-plugins)
-  - [Is there a readme badge?](#is-there-a-readme-badge)
-  - [I disagree with rule X, can you change it?](#i-disagree-with-rule-x-can-you-change-it)
-  - [But this isn't a real web standard!](#but-this-isnt-a-real-web-standard)
-  - [Is there an automatic formatter?](#is-there-an-automatic-formatter)
-  - [How do I ignore files?](#how-do-i-ignore-files)
-  - [How do I hide a certain warning?](#how-do-i-hide-a-certain-warning)
-  - [I use a library that pollutes the global namespace. How do I prevent "variable is not defined" errors?](#i-use-a-library-that-pollutes-the-global-namespace-how-do-i-prevent-variable-is-not-defined-errors)
-  - [How do I use experimental JavaScript (ES Next) features?](#how-do-i-use-experimental-javascript-es-next-features)
-  - [Can I use a JavaScript language variant, like Flow or TypeScript?](#can-i-use-a-javascript-language-variant-like-flow-or-typescript)
-  - [What about Mocha, Jest, Jasmine, QUnit, etc?](#what-about-mocha-jest-jasmine-qunit-etc)
-  - [What about Web Workers and Service Workers?](#what-about-web-workers-and-service-workers)
-  - [Can I check code inside of Markdown or HTML files?](#can-i-check-code-inside-of-markdown-or-html-files)
-  - [Is there a Git `pre-commit` hook?](#is-there-a-git-pre-commit-hook)
-  - [How do I make the output all colorful and pretty?](#how-do-i-make-the-output-all-colorful-and-pretty)
-  - [Is there a Node.js API?](#is-there-a-nodejs-api)
-  - [How do I contribute to StandardJS?](#how-do-i-contribute-to-standardjs)
-- [License](#license)
+-   [Установка](#установка)
+    - npm
+    - yarn
 
-### Install
+-   [Подключение](#подключение)
+    - CommonJS
+    - ES Modules
+    - CDN
 
-    npm i @umi-top/umi-core-js
+-   [Примеры](#примеры)
+    -   [Ключи](#ключи)
 
-### Import
+        - Приватный ключ из seed
+        - Приватный ключ из мнемонической фразы
+        - Создание и проверка цифровой подписи
+
+    -   [Адреса](#адреса)
+        - Адреса в формате Bech32
+        - Адрес из приватного или публичного ключа
+        - Установка и смена префикса адреса
+
+    -   [Транзакции](#транзакции)
+        - Отправка монет
+        - Создание структуры
+        - Обновление настроек структуры
+        - Установка адреса для начисления профита
+        - Установка адреса для перевода комиссии
+        - Активация транзитного адреса
+        - Деактивация транзитного адреса
+
+    -   [Блоки](#блоки)
+        - Создание и подпись блоков
+        - Парсинг блоков
+
+-   [Лицензия](#лицензия)
+
+## Введение
+
+## Установка
+
+### npm
+```bash
+npm install @umi-top/umi-core-js
+```
+### yarn
+```bash
+yarn add @umi-top/umi-core-js
+```
+
+## Подключение
+
+### CommonJS
+Node
+
+### ES Modules
+Webpack, Rollup, Parcel, Node
+
+### CDN
+Browser
+
 Import as CommonJS:
 ```javascript
 const umi = require('@umi-top/umi-core-js')
@@ -67,6 +99,10 @@ Import as UMD in Browser
 <script src="bip39.browser.js"></script>
 <script src="lib/index.min.js"></script>
 ```
+
+## Примеры
+
+### Ключи
 
 ### Addresses
 Create Address from Mnemonic
@@ -174,4 +210,32 @@ console.log({
   'address': tx2.recipient.bech32,
   'verify': tx2.verify(),
 })
+```
+
+## Лицензия
+
+```text
+Лицензия MIT
+
+Copyright © 2020 UMI
+
+Данная лицензия разрешает лицам, получившим копию данного программного
+обеспечения и сопутствующей документации (в дальнейшем именуемыми
+«Программное обеспечение»), безвозмездно использовать Программное обеспечение
+без ограничений, включая неограниченное право на использование, копирование,
+изменение, слияние, публикацию, распространение, сублицензирование и/или
+продажу копий Программного обеспечения, а также лицам, которым предоставляется
+данное Программное обеспечение, при соблюдении следующих условий:
+
+Указанное выше уведомление об авторском праве и данные условия должны быть
+включены во все копии или значимые части данного Программного обеспечения.
+
+ДАННОЕ ПРОГРАММНОЕ ОБЕСПЕЧЕНИЕ ПРЕДОСТАВЛЯЕТСЯ «КАК ЕСТЬ», БЕЗ КАКИХ-ЛИБО
+ГАРАНТИЙ, ЯВНО ВЫРАЖЕННЫХ ИЛИ ПОДРАЗУМЕВАЕМЫХ, ВКЛЮЧАЯ ГАРАНТИИ ТОВАРНОЙ
+ПРИГОДНОСТИ, СООТВЕТСТВИЯ ПО ЕГО КОНКРЕТНОМУ НАЗНАЧЕНИЮ И ОТСУТСТВИЯ НАРУШЕНИЙ,
+НО НЕ ОГРАНИЧИВАЯСЬ ИМИ. НИ В КАКОМ СЛУЧАЕ АВТОРЫ ИЛИ ПРАВООБЛАДАТЕЛИ НЕ НЕСУТ
+ОТВЕТСТВЕННОСТИ ПО КАКИМ-ЛИБО ИСКАМ, ЗА УЩЕРБ ИЛИ ПО ИНЫМ ТРЕБОВАНИЯМ, В ТОМ
+ЧИСЛЕ, ПРИ ДЕЙСТВИИ КОНТРАКТА, ДЕЛИКТЕ ИЛИ ИНОЙ СИТУАЦИИ, ВОЗНИКШИМ ИЗ-ЗА
+ИСПОЛЬЗОВАНИЯ ПРОГРАММНОГО ОБЕСПЕЧЕНИЯ ИЛИ ИНЫХ ДЕЙСТВИЙ С ПРОГРАММНЫМ
+ОБЕСПЕЧЕНИЕМ. 
 ```

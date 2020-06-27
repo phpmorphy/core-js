@@ -27,6 +27,7 @@
  * @param {Uint8Array} message message
  * @returns {Uint8Array} hash
  * @throws {Error}
+ * @private
  */
 function sha256 (message: Uint8Array): Uint8Array {
   const hh = new Int32Array([
@@ -55,18 +56,8 @@ function sha256 (message: Uint8Array): Uint8Array {
   const w = new Int32Array(64)
 
   // padding
-  let l: number
-  if (message.byteLength < 56) {
-    l = 64
-  } else if (message.byteLength < 120) {
-    l = 128
-  } else if (message.byteLength < 184) {
-    l = 192
-  } else if (message.byteLength < 248) {
-    l = 256
-  } else {
-    throw new Error('Максимальная длина сообщения 247 байт')
-  }
+  let l = message.byteLength + 8
+  l += (64 - (l % 64))
 
   const m = new Uint8Array(l)
   const q = new DataView(m.buffer)

@@ -31,18 +31,21 @@ export class Address {
   /**
    * Длина адреса в байтах.
    * @type {number}
+   * @constant
    */
   static get LENGTH (): number { return 34 }
 
   /**
    * Версия Genesis-адрса.
    * @type {number}
+   * @constant
    */
   static get Genesis (): number { return 0 }
 
   /**
    * Версия Umi-адреса.
    * @type {number}
+   * @constant
    */
   static get Umi (): number { return 21929 }
 

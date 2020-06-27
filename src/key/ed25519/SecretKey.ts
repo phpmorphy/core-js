@@ -23,21 +23,16 @@ import { Ed25519 } from '../../util/Ed25519'
 import { sha256 } from '../../util/Sha256'
 
 /**
- * Приватный ключ.
+ * Базовый класс для работы с приватными ключами.
  * @class
  */
 export class SecretKey {
   /**
    * Длина приватного ключа в формате libsodium в байтах.
    * @type {number}
+   * @internal
    */
   static get LENGTH (): number { return Ed25519.SECRET_KEY_BYTES }
-
-  /**
-   * Длина цифровой подписи в байтах.
-   * @type {number}
-   */
-  static get SIGNATURE_LENGTH (): number { return Ed25519.SIGNATURE_BYTES }
 
   /**
    * Приватный ключ в бинарном виде. В формате libsodium.

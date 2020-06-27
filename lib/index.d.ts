@@ -6,6 +6,7 @@ export declare class Transaction {
     /**
      * Длина транзакции в байтах.
      * @type {number}
+     * @constant
      */
     static get LENGTH(): number;
     /**
@@ -13,6 +14,7 @@ export declare class Transaction {
      * Может быть добавлена только в Genesis-блок.
      * Адрес отправителя должен иметь префикс genesis, адрес получаетеля - umi.
      * @type {number}
+     * @constant
      * @example
      * let secKey = SecretKey.fromSeed(new Uint8Array(32))
      * let sender = Address.fromKey(secKey).setPrefix('genesis')
@@ -28,6 +30,7 @@ export declare class Transaction {
     /**
      * Стандартная транзакция. Перевод монет из одного кошелька в другой.
      * @type {number}
+     * @constant
      * @example
      * let secKey = SecretKey.fromSeed(new Uint8Array(32))
      * let sender = Address.fromKey(secKey).setPrefix('umi')
@@ -43,6 +46,7 @@ export declare class Transaction {
     /**
      * Создание новой структуры.
      * @type {number}
+     * @constant
      * @example
      * let secKey = SecretKey.fromSeed(new Uint8Array(32))
      * let sender = Address.fromKey(secKey).setPrefix('umi')
@@ -59,6 +63,7 @@ export declare class Transaction {
     /**
      * Обновление настроек существующей структуры.
      * @type {number}
+     * @constant
      * @example
      * let secKey = SecretKey.fromSeed(new Uint8Array(32))
      * let sender = Address.fromKey(secKey).setPrefix('umi')
@@ -75,6 +80,7 @@ export declare class Transaction {
     /**
      * Изменение адреса для начисления профита.
      * @type {number}
+     * @constant
      * @example
      * let secKey = SecretKey.fromSeed(new Uint8Array(32))
      * let sender = Address.fromKey(secKey).setPrefix('umi')
@@ -89,6 +95,7 @@ export declare class Transaction {
     /**
      * Изменение адреса на который переводоится комиссия.
      * @type {number}
+     * @constant
      * @example
      * let secKey = SecretKey.fromSeed(new Uint8Array(32))
      * let sender = Address.fromKey(secKey).setPrefix('umi')
@@ -103,6 +110,7 @@ export declare class Transaction {
     /**
      * Активация транзитного адреса.
      * @type {number}
+     * @constant
      * @example
      * let secKey = SecretKey.fromSeed(new Uint8Array(32))
      * let sender = Address.fromKey(secKey).setPrefix('umi')
@@ -117,6 +125,7 @@ export declare class Transaction {
     /**
      * Деактивация транзитного адреса.
      * @type {number}
+     * @constant
      * @example
      * let secKey = SecretKey.fromSeed(new Uint8Array(32))
      * let sender = Address.fromKey(secKey).setPrefix('umi')
@@ -128,19 +137,6 @@ export declare class Transaction {
      *   sign(secKey)
      */
     static get DeleteTransitAddress(): number;
-    /**
-     * Проверить свойство
-     * @param {string[]} fields
-     * @throws {Error}
-     * @private
-     */
-    private _checkFields;
-    /**
-     * Отметить свойство как установленное
-     * @param {string[]} fields
-     * @private
-     */
-    private _setFields;
     /**
      * @param {Uint8Array} [bytes] Транзакция в бинарном виде, 150 байт.
      * @throws {Error}
@@ -349,23 +345,26 @@ export declare class Transaction {
     verify(): boolean;
 }
 /**
- * Публичный ключ.
+ * Базовый класс для работы с публичными ключами.
  * @class
  */
 export declare class PublicKey {
     /**
      * Длина публичного ключа в формате libsodium в байтах.
      * @type {number}
+     * @constant
      */
     static get LENGTH(): number;
     /**
      * Длина цифровой подписи в байтах.
      * @type {number}
+     * @constant
      */
     static get SIGNATURE_LENGTH(): number;
     /**
      * Длина цифровой подписи в байтах.
      * @type {number}
+     * @constant
      */
     get signatureLength(): number;
     /**
@@ -394,20 +393,10 @@ export declare class PublicKey {
     verifySignature(signature: Uint8Array, message: Uint8Array): boolean;
 }
 /**
- * Приватный ключ.
+ * Базовый класс для работы с приватными ключами.
  * @class
  */
 export declare class SecretKey {
-    /**
-     * Длина приватного ключа в формате libsodium в байтах.
-     * @type {number}
-     */
-    static get LENGTH(): number;
-    /**
-     * Длина цифровой подписи в байтах.
-     * @type {number}
-     */
-    static get SIGNATURE_LENGTH(): number;
     /**
      * @param {Uint8Array} bytes Приватный ключ в бинарном виде.
      * В формате libsodium, 64 байта (512 бит).
@@ -458,16 +447,19 @@ export declare class Address {
     /**
      * Длина адреса в байтах.
      * @type {number}
+     * @constant
      */
     static get LENGTH(): number;
     /**
      * Версия Genesis-адрса.
      * @type {number}
+     * @constant
      */
     static get Genesis(): number;
     /**
      * Версия Umi-адреса.
      * @type {number}
+     * @constant
      */
     static get Umi(): number;
     /**
@@ -551,4 +543,16 @@ export declare class Address {
      * @throws {Error}
      */
     static fromKey(key: PublicKey | SecretKey): Address;
+}
+/**
+ * Базовый класс для работы с блоками.
+ * @class
+ */
+export declare class Block {
+}
+/**
+ * Базовый класс для работы с заголовками блоков.
+ * @class
+ */
+export declare class BlockHeader {
 }

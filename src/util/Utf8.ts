@@ -20,6 +20,13 @@
 
 // tslint:disable:no-bitwise
 
+/**
+ * Конвертер строки в типизированный массив UTF-8 байтов.
+ * @function
+ * @param {string} text
+ * @returns {Uint8Array}
+ * @private
+ */
 function Utf8Encode (text: string): Uint8Array {
   const bytes = []
   for (let i = 0; i < text.length; i++) {
@@ -51,6 +58,13 @@ function Utf8Encode (text: string): Uint8Array {
   return new Uint8Array(bytes)
 }
 
+/**
+ * Конвертер из типизированного массива UTF-8 байтов в строку.
+ * @function
+ * @param {Uint8Array} bytes
+ * @returns {string}
+ * @private
+ */
 function Utf8Decode (bytes: Uint8Array): string {
   let str = ''
   for (let i = 0; i < bytes.byteLength; i++) {

@@ -50,8 +50,6 @@ declare export class PublicKey {
   verifySignature(signature: Uint8Array, message: Uint8Array): boolean;
 }
 declare export class SecretKey {
-  LENGTH: number;
-  SIGNATURE_LENGTH: number;
   constructor(bytes: Uint8Array): this;
   bytes: Uint8Array;
   publicKey: PublicKey;
@@ -75,3 +73,5 @@ declare export class Address {
   static fromBech32(bech32: string): Address;
   static fromKey(key: PublicKey | SecretKey): Address;
 }
+declare export class Block {}
+declare export class BlockHeader {}
