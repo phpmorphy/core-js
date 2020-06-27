@@ -1,11 +1,15 @@
 {
   "source": {
-    "include": ["lib/index.js"]
+    "include": [
+      "lib/index.js"
+    ]
   },
   "sourceType": "module",
   "tags": {
     "allowUnknownTags": false,
-    "dictionaries": ["jsdoc"]
+    "dictionaries": [
+      "jsdoc"
+    ]
   },
   "templates": {
     "cleverLinks": false,
@@ -38,7 +42,9 @@
     "tutorials": "examples",
     "verbose": true
   },
-  "plugins": ["plugins/markdown"],
+  "plugins": [
+    "plugins/markdown"
+  ],
   "markdown": {
     "hardwrap": true,
     "idInHeadings": true
