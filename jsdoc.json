@@ -1,0 +1,46 @@
+{
+  "source": {
+    "include": ["lib/index.js"]
+  },
+  "sourceType": "module",
+  "tags": {
+    "allowUnknownTags": false,
+    "dictionaries": ["jsdoc"]
+  },
+  "templates": {
+    "cleverLinks": false,
+    "monospaceLinks": false,
+    "search": false,
+    "default": {
+      "outputSourceFiles": false
+    },
+    "better-docs": {
+      "name": "UMI Core - JavaScript",
+      "logo1": "../logo.svg",
+      "title": "UMI Core - JavaScript -",
+      "hideGenerator": false,
+      "navLinks": [
+        {
+          "label": "GitHub",
+          "href": "https://github.com/umi-top/umi-core-js"
+        },
+        {
+          "label": "UMI",
+          "href": "https://umi.top"
+        }
+      ]
+    }
+  },
+  "opts": {
+    "destination": "docs/",
+    "template": "node_modules/better-docs",
+    "readme": "README.md",
+    "tutorials": "examples",
+    "verbose": true
+  },
+  "plugins": ["plugins/markdown"],
+  "markdown": {
+    "hardwrap": true,
+    "idInHeadings": true
+  }
+}
