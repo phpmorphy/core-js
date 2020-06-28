@@ -4,23 +4,30 @@ build:
   environment:
     node: v10.14.2
   nodes:
-    coverage:
-      dependencies:
-        override:
-          - npm install nyc@^15 mocha@^8 chai@^4 coveralls@^3
-      tests:
-        override:
-          - command: nyc --reporter=lcov --reporter=text mocha --recursive
-            coverage:
-              file: coverage/lcov.info
-              format: lcov
     analysis:
       tests:
         override:
           - js-scrutinizer-run --enable-security-analysis
           - eslint-run
+    tests:
+      dependencies:
+        override:
+          - npm install mocha@^8 chai@^4
+      tests:
+        override:
+          - command: npx mocha --recursive
+    coverage:
+      dependencies:
+        override:
+          - npm install typescript@^3 nyc@^15 mocha@^8 chai@^4
+      tests:
+        override:
+          - command: npx nyc --reporter=lcov --reporter=text mocha --recursive
+            coverage:
+              file: coverage/lcov.info
+              format: lcov
 filter:
   paths:
-    - src/
+    - dist/
   excluded_paths:
-    - src/util/Ed25519.ts
+    - dist/util/Ed25519.ts
