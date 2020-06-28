@@ -7,9 +7,8 @@ build:
     analysis:
       dependencies:
         override:
-          - npm install typescript
+          - npm install
           - npx tsc --target es6 --outDir dist src/index.ts
-          - ls -la dist
       tests:
         override:
           - js-scrutinizer-run --enable-security-analysis
