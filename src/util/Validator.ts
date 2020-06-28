@@ -40,28 +40,28 @@ function validateInt (arg: number, min: number, max: number): void {
 
 /**
  * @param {Uint8Array} arg
- * @param {number} len
+ * @param {number} [len]
  */
-function validateUint8Array (arg: Uint8Array, len: number): void {
+function validateUint8Array (arg: Uint8Array, len?: number): void {
   if (!(arg instanceof Uint8Array)) {
     throw new Error('incorrect type')
   }
 
-  if (arg.byteLength !== len) {
+  if (len !== undefined && arg.byteLength !== len) {
     throw new Error('incorrect length')
   }
 }
 
 /**
  * @param {string} arg
- * @param {number} len
+ * @param {number} [len]
  */
-function validateStr (arg: string, len: number): void {
+function validateStr (arg: string, len?: number): void {
   if (typeof arg !== 'string') {
     throw new Error('incorrect type')
   }
 
-  if (arg.length !== len) {
+  if (len !== undefined && arg.length !== len) {
     throw new Error('incorrect length')
   }
 }

@@ -19,6 +19,7 @@
 // SOFTWARE.
 
 import { Ed25519 } from '../../util/Ed25519'
+import { validateUint8Array } from '../../util/Validator'
 
 /**
  * Базовый класс для работы с публичными ключами.
@@ -59,13 +60,7 @@ export class PublicKey {
    * @throws {Error}
    */
   constructor (bytes: Uint8Array) {
-    if (!(bytes instanceof Uint8Array)) {
-      throw new Error('bytes must be Uint8Array')
-    }
-
-    if (bytes.byteLength !== PublicKey.LENGTH) {
-      throw new Error('bytes must be 32 bytes length')
-    }
+    validateUint8Array(bytes, PublicKey.LENGTH)
 
     this._bytes.set(bytes)
   }
@@ -94,17 +89,8 @@ export class PublicKey {
    * let ver = new PublicKey(key).verifySignature(sig, msg)
    */
   verifySignature (signature: Uint8Array, message: Uint8Array): boolean {
-    if (!(signature instanceof Uint8Array)) {
-      throw new Error('signature type must be Uint8Array')
-    }
-
-    if (signature.byteLength !== PublicKey.SIGNATURE_LENGTH) {
-      throw new Error('signature length must be 64 bytes')
-    }
-
-    if (!(message instanceof Uint8Array)) {
-      throw new Error('message type must be Uint8Array')
-    }
+    validateUint8Array(signature, PublicKey.SIGNATURE_LENGTH)
+    validateUint8Array(message)
 
     return new Ed25519().verify(signature, message, this._bytes)
   }
