@@ -25,6 +25,6 @@ build:
               format: clover
 filter:
   paths:
-    - lib/index.js
+    - dist/
   excluded_paths:
     - dist/util/Ed25519.ts
