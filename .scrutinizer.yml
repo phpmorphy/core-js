@@ -7,7 +7,7 @@ build:
     analysis:
       dependencies:
         override:
-          - true
+          - echo 1
       tests:
         override:
           - js-scrutinizer-run
