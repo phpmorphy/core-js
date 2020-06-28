@@ -5,6 +5,10 @@ build:
     node: v10.14.2
   nodes:
     analysis:
+      dependencies:
+        override:
+          - npm install typescript
+          - tsc --target es6 --outDir dist
       tests:
         override:
           - js-scrutinizer-run --enable-security-analysis
@@ -15,12 +19,12 @@ build:
           - npm install nyc@^15 mocha@^8 chai@^4
       tests:
         override:
-          - command: npx nyc --reporter=lcov --reporter=text mocha --recursive
+          - command: npx nyc --reporter=clover mocha --recursive
             coverage:
-              file: coverage/lcov.info
-              format: lcov
+              file: coverage/clover.xml
+              format: clover
 filter:
   paths:
-    - lib/index.js
+    - dist/
   excluded_paths:
     - dist/util/Ed25519.ts
