@@ -37,8 +37,7 @@ describe('SecretKey', function () {
   describe('fromSeed()', function () {
     describe('ошибки', function () {
       const tests = [
-        { desc: 'тип', args: new Array(32) },
-        { desc: 'длина', args: new Uint8Array(512) }
+        { desc: 'тип', args: new Array(32) }
       ]
 
       tests.forEach(function (test) {
