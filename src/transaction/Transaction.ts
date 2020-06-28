@@ -23,6 +23,7 @@ import { Address } from '../address/Address'
 import { sha256 } from '../util/Sha256'
 import { versionToPrefix, prefixToVersion } from '../util/Converter'
 import { Utf8Decode, Utf8Encode } from '../util/Utf8'
+import { validateInt, validateUint8Array } from '../util/Validator'
 
 /**
  * Базовый класс для работы с транзакциями.
@@ -229,13 +230,7 @@ export class Transaction {
    */
   constructor (bytes?: Uint8Array) {
     if (bytes !== undefined) {
-      if (!(bytes instanceof Uint8Array)) {
-        throw new Error('bytes type must be Uint8Array')
-      }
-
-      if (bytes.byteLength !== Transaction.LENGTH) {
-        throw new Error('bytes length must be 150 bytes')
-      }
+      validateUint8Array(bytes, Transaction.LENGTH)
 
       this._bytes.set(bytes)
       this._setFields([
@@ -289,18 +284,7 @@ export class Transaction {
       throw new Error('could not update version')
     }
 
-    if (typeof version !== 'number') {
-      throw new Error('version type must be number')
-    }
-
-    if (Math.floor(version) !== version) {
-      throw new Error('version type must be integer')
-    }
-
-    if (version < Transaction.Genesis ||
-      version > Transaction.DeleteTransitAddress) {
-      throw new Error('incorrect version')
-    }
+    validateInt(version, Transaction.Genesis, Transaction.DeleteTransitAddress)
 
     this._bytes[0] = version
     this._setFields(['version'])
@@ -474,18 +458,7 @@ export class Transaction {
       throw new Error('value unavailable for this transaction type')
     }
 
-    if (typeof value !== 'number') {
-      throw new Error('value must be number')
-    }
-
-    if (Math.floor(value) !== value) {
-      throw new Error('value must be integer')
-    }
-
-    // Number.MAX_SAFE_INTEGER
-    if (value < 1 || value > 9007199254740991) {
-      throw new Error('value must be between 1 and 9007199254740991')
-    }
+    validateInt(value, 1, 9007199254740991)
 
     // value offset = 69
     // tslint:disable-next-line:no-bitwise
@@ -640,17 +613,7 @@ export class Transaction {
       throw new Error('profitPercent unavailable for this transaction type')
     }
 
-    if (typeof percent !== 'number') {
-      throw new Error('percent must be number')
-    }
-
-    if (Math.floor(percent) !== percent) {
-      throw new Error('percent must be integer')
-    }
-
-    if (percent < 100 || percent > 500) {
-      throw new Error('percent value must be between 100 and 500')
-    }
+    validateInt(percent, 100, 500)
 
     // profit offset = 37
     this._view.setUint16(37, percent)
@@ -698,17 +661,7 @@ export class Transaction {
       throw new Error('feePercent unavailable for this transaction type')
     }
 
-    if (typeof percent !== 'number') {
-      throw new Error('percent type must be number')
-    }
-
-    if (Math.floor(percent) !== percent) {
-      throw new Error('percent type must be integer')
-    }
-
-    if (percent < 0 || percent > 2000) {
-      throw new Error('percent value must be between 100 and 500')
-    }
+    validateInt(percent, 0, 2000)
 
     // fee offset = 39
     this._view.setUint16(39, percent)
@@ -747,18 +700,7 @@ export class Transaction {
   }
 
   set nonce (nonce: number) {
-    if (typeof nonce !== 'number') {
-      throw new Error('nonce type must be number')
-    }
-
-    if (Math.floor(nonce) !== nonce) {
-      throw new Error('nonce type must be integer')
-    }
-
-    // Number.MAX_SAFE_INTEGER
-    if (nonce < 0 || nonce > 9007199254740991) {
-      throw new Error('nonce value must be between 0 and 9007199254740991')
-    }
+    validateInt(nonce, 0, 9007199254740991)
 
     // nonce offset = 77
     // tslint:disable-next-line:no-bitwise
@@ -800,13 +742,7 @@ export class Transaction {
   set signature (signature: Uint8Array) {
     this._checkFields(['version', 'sender'])
 
-    if (!(signature instanceof Uint8Array)) {
-      throw new Error('signature type must be Uint8Array')
-    }
-
-    if (signature.byteLength !== this.sender.publicKey.signatureLength) {
-      throw new Error('incorrect signature length')
-    }
+    validateUint8Array(signature, this.sender.publicKey.signatureLength)
 
     // signature offset = 85
     this._bytes.set(signature, 85)
