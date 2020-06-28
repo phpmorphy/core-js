@@ -5,9 +5,9 @@ build:
     node: v10.14.2
   nodes:
     analysis:
-      before:
-        - npx tsc --target es6 --outDir dist src/index.ts
       tests:
+        before:
+          - npx tsc --target es6 --outDir dist src/index.ts
         override:
           - js-scrutinizer-run --enable-security-analysis
           - eslint-run
