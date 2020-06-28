@@ -12,14 +12,7 @@ build:
     tests:
       dependencies:
         override:
-          - npm install mocha@^8 chai@^4
-      tests:
-        override:
-          - command: npx mocha --recursive
-    coverage:
-      dependencies:
-        override:
-          - npm install typescript@^3 nyc@^15 mocha@^8 chai@^4
+          - npm install nyc@^15 mocha@^8 chai@^4
       tests:
         override:
           - command: npx nyc --reporter=lcov --reporter=text mocha --recursive
@@ -28,6 +21,6 @@ build:
               format: lcov
 filter:
   paths:
-    - dist/
+    - lib/index.js
   excluded_paths:
     - dist/util/Ed25519.ts
