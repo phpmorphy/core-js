@@ -8,7 +8,8 @@ build:
       dependencies:
         override:
           - npm install typescript
-          - tsc --target es6 --outDir dist
+          - npx tsc --target es6 --outDir dist
+          - ls -la dist
       tests:
         override:
           - js-scrutinizer-run --enable-security-analysis
@@ -25,6 +26,6 @@ build:
               format: clover
 filter:
   paths:
-    - dist/
+    - lib/index.js
   excluded_paths:
     - dist/util/Ed25519.ts
