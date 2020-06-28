@@ -5,24 +5,12 @@ build:
     node: v10.14.2
   nodes:
     analysis:
-      dependencies:
-        override:
-          - npm install
-          - npx tsc --target es6 --outDir dist src/index.ts
+      before:
+        - npx tsc --target es6 --outDir dist src/index.ts
       tests:
         override:
           - js-scrutinizer-run --enable-security-analysis
           - eslint-run
-    tests:
-      dependencies:
-        override:
-          - npm install nyc@^15 mocha@^8 chai@^4
-      tests:
-        override:
-          - command: npx nyc --reporter=clover mocha --recursive
-            coverage:
-              file: coverage/clover.xml
-              format: clover
 filter:
   paths:
     - dist/
