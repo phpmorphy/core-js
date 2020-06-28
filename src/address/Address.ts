@@ -21,6 +21,7 @@
 import { Bech32 } from '../util/Bech32'
 import { PublicKey } from '../key/ed25519/PublicKey'
 import { SecretKey } from '../key/ed25519/SecretKey'
+import { validateStr } from '../util/Validator'
 import { prefixToVersion, versionToPrefix } from '../util/Converter'
 
 /**
@@ -181,10 +182,7 @@ export class Address {
   }
 
   set bech32 (bech32: string) {
-    if (typeof bech32 !== 'string') {
-      throw new Error('bech32 type must be a string')
-    }
-
+    validateStr(bech32)
     this._bytes.set(Bech32.decode(bech32))
   }
 

@@ -61,7 +61,6 @@ export class PublicKey {
    */
   constructor (bytes: Uint8Array) {
     validateUint8Array(bytes, PublicKey.LENGTH)
-
     this._bytes.set(bytes)
   }
 

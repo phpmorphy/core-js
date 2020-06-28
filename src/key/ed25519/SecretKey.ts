@@ -20,6 +20,7 @@
 
 import { PublicKey } from './PublicKey'
 import { Ed25519 } from '../../util/Ed25519'
+import { validateUint8Array } from '../../util/Validator'
 import { sha256 } from '../../util/Sha256'
 
 /**
@@ -48,14 +49,7 @@ export class SecretKey {
    * @throws {Error}
    */
   constructor (bytes: Uint8Array) {
-    if (!(bytes instanceof Uint8Array)) {
-      throw new Error('bytes type must be Uint8Array')
-    }
-
-    if (bytes.byteLength !== SecretKey.LENGTH) {
-      throw new Error('bytes length must be 64 bytes')
-    }
-
+    validateUint8Array(bytes, SecretKey.LENGTH)
     this._bytes.set(bytes)
   }
 
@@ -90,10 +84,7 @@ export class SecretKey {
    * let sig = SecretKey.fromSeed(seed).sign(msg)
    */
   sign (message: Uint8Array): Uint8Array {
-    if (!(message instanceof Uint8Array)) {
-      throw new Error('message type must be Uint8Array')
-    }
-
+    validateUint8Array(message)
     return new Ed25519().sign(message, this._bytes)
   }
 
@@ -109,13 +100,7 @@ export class SecretKey {
    * let key = SecretKey.fromSeed(seed)
    */
   static fromSeed (seed: Uint8Array): SecretKey {
-    if (!(seed instanceof Uint8Array)) {
-      throw new Error('seed must be Uint8Array')
-    }
-
-    if (seed.byteLength > 128) {
-      throw new Error('seed length must be not greater than 128 bytes')
-    }
+    validateUint8Array(seed)
 
     if (seed.byteLength === Ed25519.SEED_BYTES) {
       return new SecretKey(new Ed25519().secretKeyFromSeed(seed))
