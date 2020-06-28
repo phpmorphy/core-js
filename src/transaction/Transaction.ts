@@ -213,6 +213,42 @@ export class Transaction {
   }
 
   /**
+   * @throws {Error}
+   * @private
+   * @internal
+   */
+  private _checkVersionIsStruct (): void {
+    const versions = [Transaction.CreateStructure, Transaction.UpdateStructure]
+    if (versions.indexOf(this.version) === -1) {
+      throw new Error('unavailable for this transaction type')
+    }
+  }
+
+  /**
+   * @throws {Error}
+   * @private
+   * @internal
+   */
+  private _checkVersionIsNotStruct (): void {
+    const versions = [Transaction.CreateStructure, Transaction.UpdateStructure]
+    if (versions.indexOf(this.version) !== -1) {
+      throw new Error('unavailable for this transaction type')
+    }
+  }
+
+  /**
+   * @throws {Error}
+   * @private
+   * @internal
+   */
+  private _checkVersionIsBasic (): void {
+    const versions = [Transaction.Genesis, Transaction.Basic]
+    if (versions.indexOf(this.version) === -1) {
+      throw new Error('unavailable for this transaction type')
+    }
+  }
+
+  /**
    * Отметить свойство как установленное.
    * @param {string[]} fields
    * @private
@@ -365,12 +401,7 @@ export class Transaction {
    */
   get recipient (): Address {
     this._checkFields(['version'])
-
-    if (this.version === Transaction.CreateStructure ||
-      this.version === Transaction.UpdateStructure) {
-      throw new Error('recipient unavailable for this transaction type')
-    }
-
+    this._checkVersionIsNotStruct()
     this._checkFields(['recipient'])
 
     // recipient length = 34
@@ -381,11 +412,7 @@ export class Transaction {
 
   set recipient (address: Address) {
     this._checkFields(['version'])
-
-    if (this.version === Transaction.CreateStructure ||
-      this.version === Transaction.UpdateStructure) {
-      throw new Error('recipient unavailable for this transaction type')
-    }
+    this._checkVersionIsNotStruct()
 
     if (!(address instanceof Address)) {
       throw new Error('recipient type must be Address')
@@ -433,12 +460,7 @@ export class Transaction {
    */
   get value (): number {
     this._checkFields(['version'])
-
-    if (this.version !== Transaction.Genesis &&
-      this.version !== Transaction.Basic) {
-      throw new Error('value unavailable for this transaction type')
-    }
-
+    this._checkVersionIsBasic()
     this._checkFields(['value'])
 
     // value offset = 69
@@ -452,12 +474,7 @@ export class Transaction {
 
   set value (value: number) {
     this._checkFields(['version'])
-
-    if (this.version !== Transaction.Genesis &&
-      this.version !== Transaction.Basic) {
-      throw new Error('value unavailable for this transaction type')
-    }
-
+    this._checkVersionIsBasic()
     validateInt(value, 1, 9007199254740991)
 
     // value offset = 69
@@ -489,12 +506,7 @@ export class Transaction {
    */
   get prefix (): string {
     this._checkFields(['version'])
-
-    if (this.version !== Transaction.CreateStructure &&
-      this.version !== Transaction.UpdateStructure) {
-      throw new Error('prefix unavailable for this transaction type')
-    }
-
+    this._checkVersionIsStruct()
     this._checkFields(['prefix'])
 
     // prefix offset = 35
@@ -503,11 +515,7 @@ export class Transaction {
 
   set prefix (prefix: string) {
     this._checkFields(['version'])
-
-    if (this.version !== Transaction.CreateStructure &&
-      this.version !== Transaction.UpdateStructure) {
-      throw new Error('prefix unavailable for this transaction type')
-    }
+    this._checkVersionIsStruct()
 
     // prefix offset = 35
     this._view.setUint16(35, prefixToVersion(prefix))
@@ -534,11 +542,7 @@ export class Transaction {
    */
   get name (): string {
     this._checkFields(['version'])
-
-    if (this.version !== Transaction.CreateStructure &&
-      this.version !== Transaction.UpdateStructure) {
-      throw new Error('name unavailable for this transaction type')
-    }
+    this._checkVersionIsStruct()
 
     this._checkFields(['name'])
 
@@ -549,11 +553,7 @@ export class Transaction {
 
   set name (name: string) {
     this._checkFields(['version'])
-
-    if (this.version !== Transaction.CreateStructure &&
-      this.version !== Transaction.UpdateStructure) {
-      throw new Error('name unavailable for this transaction type')
-    }
+    this._checkVersionIsStruct()
 
     if (typeof name !== 'string') {
       throw new Error('name type must be a string')
@@ -593,12 +593,7 @@ export class Transaction {
    */
   get profitPercent (): number {
     this._checkFields(['version'])
-
-    if (this.version !== Transaction.CreateStructure &&
-      this.version !== Transaction.UpdateStructure) {
-      throw new Error('profitPercent unavailable for this transaction type')
-    }
-
+    this._checkVersionIsStruct()
     this._checkFields(['profitPercent'])
 
     // profit offset = 37
@@ -607,12 +602,7 @@ export class Transaction {
 
   set profitPercent (percent: number) {
     this._checkFields(['version'])
-
-    if (this.version !== Transaction.CreateStructure &&
-      this.version !== Transaction.UpdateStructure) {
-      throw new Error('profitPercent unavailable for this transaction type')
-    }
-
+    this._checkVersionIsStruct()
     validateInt(percent, 100, 500)
 
     // profit offset = 37
@@ -641,12 +631,7 @@ export class Transaction {
    */
   get feePercent (): number {
     this._checkFields(['version'])
-
-    if (this.version !== Transaction.CreateStructure &&
-      this.version !== Transaction.UpdateStructure) {
-      throw new Error('feePercent unavailable for this transaction type')
-    }
-
+    this._checkVersionIsStruct()
     this._checkFields(['feePercent'])
 
     // fee offset = 39
@@ -655,12 +640,7 @@ export class Transaction {
 
   set feePercent (percent: number) {
     this._checkFields(['version'])
-
-    if (this.version !== Transaction.CreateStructure &&
-      this.version !== Transaction.UpdateStructure) {
-      throw new Error('feePercent unavailable for this transaction type')
-    }
-
+    this._checkVersionIsStruct()
     validateInt(percent, 0, 2000)
 
     // fee offset = 39
@@ -741,7 +721,6 @@ export class Transaction {
 
   set signature (signature: Uint8Array) {
     this._checkFields(['version', 'sender'])
-
     validateUint8Array(signature, this.sender.publicKey.signatureLength)
 
     // signature offset = 85

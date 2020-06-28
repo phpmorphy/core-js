@@ -20,6 +20,8 @@
 
 // tslint:disable:no-bitwise
 
+import { validateInt, validateStr } from '../util/Validator'
+
 /**
  * Конвертер цифровой версии префикса в текстовое представление.
  * @param {number} version
@@ -28,13 +30,7 @@
  * @private
  */
 function versionToPrefix (version: number): string {
-  if (typeof version !== 'number') {
-    throw new Error('version must be number')
-  }
-
-  if (Math.floor(version) !== version) {
-    throw new Error('version must be integer')
-  }
+  validateInt(version, 0, 65535)
 
   if (version === 0) {
     return 'genesis'
@@ -48,17 +44,7 @@ function versionToPrefix (version: number): string {
   const b = (version & 0x03E0) >> 5
   const c = (version & 0x001F)
 
-  if (a < 1 || a > 26) {
-    throw new Error('incorrect version - first char')
-  }
-
-  if (b < 1 || b > 26) {
-    throw new Error('incorrect version - second char')
-  }
-
-  if (c < 1 || c > 26) {
-    throw new Error('incorrect version - third char')
-  }
+  checkChars([a, b, c])
 
   return String.fromCharCode((a + 96), (b + 96), (c + 96))
 }
@@ -71,35 +57,31 @@ function versionToPrefix (version: number): string {
  * @private
  */
 function prefixToVersion (prefix: string): number {
-  if (typeof prefix !== 'string') {
-    throw new Error('prefix must be string')
-  }
-
   if (prefix === 'genesis') {
     return 0
   }
 
-  if (prefix.length !== 3) {
-    throw new Error('prefix must be 3 bytes ling')
-  }
+  validateStr(prefix, 3)
 
   const a = prefix.charCodeAt(0) - 96
   const b = prefix.charCodeAt(1) - 96
   const c = prefix.charCodeAt(2) - 96
 
-  if (a < 1 || a > 26) {
-    throw new Error('incorrect prefix - first char')
-  }
-
-  if (b < 1 || b > 26) {
-    throw new Error('incorrect prefix - second char')
-  }
-
-  if (c < 1 || c > 26) {
-    throw new Error('incorrect prefix - third char')
-  }
+  checkChars([a, b, c])
 
   return (a << 10) + (b << 5) + c
+}
+
+/**
+ * @param {number[]} chars
+ * @throws {Error}
+ */
+function checkChars (chars: number[]): void {
+  for (const chr of chars) {
+    if (chr < 1 || chr > 26) {
+      throw new Error('incorrect prefix')
+    }
+  }
 }
 
 export { versionToPrefix, prefixToVersion }
