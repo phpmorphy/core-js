@@ -11,8 +11,3 @@ build:
         override:
           - js-scrutinizer-run --enable-security-analysis
           - eslint-run
-filter:
-  paths:
-    - dist/
-  excluded_paths:
-    - dist/util/Ed25519.ts
