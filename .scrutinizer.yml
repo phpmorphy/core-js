@@ -1,0 +1,26 @@
+checks:
+  javascript: true
+build:
+  environment:
+    node: v10.14.2
+  nodes:
+    coverage:
+      dependencies:
+        override:
+          - npm install nyc@^15 mocha@^8 chai@^4 coveralls@^3
+      tests:
+        override:
+          - command: nyc --reporter=lcov --reporter=text mocha --recursive
+            coverage:
+              file: coverage/lcov.info
+              format: lcov
+    analysis:
+      tests:
+        override:
+          - js-scrutinizer-run --enable-security-analysis
+          - eslint-run
+filter:
+  paths:
+    - src/
+  excluded_paths:
+    - src/util/Ed25519.ts
