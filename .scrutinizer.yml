@@ -24,6 +24,3 @@ build:
 filter:
   paths:
     - dist/
-  dependency_paths:
-    - dist/util/Ed25519.js
-    - dist/util/Sha256.js
