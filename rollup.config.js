@@ -26,6 +26,20 @@ const license = '/**\n' +
 
 export default [
   {
+    input: 'tmp/dist/index.js',
+    output: {
+      dir: 'dist',
+      format: 'cjs',
+      banner: license,
+      esModule: false,
+      preserveModules: true,
+      preferConst: true
+    },
+    plugins: [
+      cleanup({ comments: 'jsdoc', compactComments: false })
+    ]
+  },
+  {
     input: 'tmp/index.js',
     output: [
       {

@@ -31,7 +31,7 @@
     "test": "nyc --reporter=text --reporter=html mocha --recursive",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
     "docs": "jsdoc --pedantic -c jsdoc.json",
-    "lint": "eslint src/**/*.ts lib/index.js lib/index.mjs; remark ."
+    "lint": "eslint src/**/*.ts dist/**/*.js lib/index.js lib/index.mjs; remark ."
   },
   "repository": {
     "type": "git",

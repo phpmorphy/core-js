@@ -23,7 +23,7 @@ build:
               format: clover
 filter:
   paths:
-    - src/
+    - dist/
   dependency_paths:
-    - src/util/Ed25519.ts
-    - src/util/Sha256.ts
+    - dist/util/Ed25519.ts
+    - dist/util/Sha256.ts

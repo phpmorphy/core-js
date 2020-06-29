@@ -5,9 +5,10 @@
     "declaration": false,
     "strict": true,
     "removeComments": false,
-    "stripInternal": true
+    "stripInternal": true,
+    "outDir": "tmp/dist"
   },
   "files": [
-    "./tmp/index.ts"
+    "./src/index.ts"
   ]
 }
