@@ -37,7 +37,7 @@ function versionToPrefix (version: number): string {
   }
 
   if ((version & 0x8000) === 0x8000) {
-    throw new Error('incorrect version - first bit must be zero')
+    throw new Error('bech32: incorrect version')
   }
 
   const a = (version & 0x7C00) >> 10
@@ -79,7 +79,7 @@ function prefixToVersion (prefix: string): number {
 function checkChars (chars: number[]): void {
   for (const chr of chars) {
     if (chr < 1 || chr > 26) {
-      throw new Error('incorrect prefix')
+      throw new Error('bech32: incorrect prefix character')
     }
   }
 }

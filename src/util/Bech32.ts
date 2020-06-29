@@ -33,48 +33,36 @@ class Bech32 {
    * @private
    * @internal
    */
-  static get _ALPHABET (): string { return 'qpzry9x8gf2tvdw0s3jn54khce6mua7l' }
+  static get _alphabet (): string { return 'qpzry9x8gf2tvdw0s3jn54khce6mua7l' }
 
   /**
-   * @type {Object}
-   * @private
-   * @internal
+   * @param {string} bech32
+   * @returns {Uint8Array}
+   * @throws {Error}
    */
-  static get _ALPHABET_MAP (): { [p: string]: number } {
-    return {
-      0: 15,
-      2: 10,
-      3: 17,
-      4: 21,
-      5: 20,
-      6: 26,
-      7: 30,
-      8: 7,
-      9: 5,
-      q: 0,
-      p: 1,
-      z: 2,
-      r: 3,
-      y: 4,
-      x: 6,
-      g: 8,
-      f: 9,
-      t: 11,
-      v: 12,
-      d: 13,
-      w: 14,
-      s: 16,
-      j: 18,
-      n: 19,
-      k: 22,
-      h: 23,
-      c: 24,
-      e: 25,
-      m: 27,
-      u: 28,
-      a: 29,
-      l: 31
+  static decode (bech32: string): Uint8Array {
+    if (bech32.length !== 62 && bech32.length !== 66) {
+      throw new Error('bech32: invalid length')
     }
+
+    const str = bech32.toLowerCase()
+    const sepPos = str.lastIndexOf('1')
+
+    if (sepPos === -1) {
+      throw new Error('bech32: missing separator')
+    }
+
+    const pfx = str.slice(0, sepPos)
+    const ver = prefixToVersion(pfx)
+    const data = str.slice(sepPos + 1)
+    this._checkAlphabet(data)
+    this._verifyChecksum(pfx, data)
+
+    const res = new Uint8Array(34)
+    res.set(this._convert5to8(data.slice(0, -6)), 2)
+    new DataView(res.buffer).setUint16(0, ver)
+
+    return res
   }
 
   /**
@@ -83,205 +71,183 @@ class Bech32 {
    * @throws {Error}
    */
   static encode (bytes: Uint8Array): string {
-    const prefix = versionToPrefix(new DataView(bytes.buffer).getUint16(0))
-    const data = new Uint8Array(bytes.subarray(2))
+    const version = (bytes[0] << 8) + bytes[1]
+    const prefix = versionToPrefix(version)
+    const data = this._convert8to5(bytes.subarray(2))
+    const checksum = this._createChecksum(prefix, data)
 
-    return this._encode(prefix, this._convert(data, 8, 5, true))
+    return prefix + '1' + data + checksum
   }
 
   /**
-   * @param {string} bech32
-   * @returns {Uint8Array}
-   * @throws {Error}
-   */
-  static decode (bech32: string): Uint8Array {
-    const raw = this._decode(bech32)
-    const bytes = this._convert(raw.words, 5, 8, false)
-
-    if (bytes.length !== 32) {
-      throw new Error('invalid data length')
-    }
-
-    const res = new Uint8Array(34)
-    res.set(bytes, 2)
-    new DataView(res.buffer).setUint16(0, prefixToVersion(raw.prefix))
-
-    return res
-  }
-
-  /**
-   * @param {string} prefix
-   * @param {number[]} words
-   * @returns {string}
+   * @param {string} chars
    * @throws {Error}
    * @private
    * @internal
    */
-  private static _encode (prefix: string, words: number[]): string {
-    prefix = prefix.toLowerCase()
+  private static _checkAlphabet (chars: string): void {
+    for (const chr of chars) {
+      if (this._alphabet.indexOf(chr) === -1) {
+        throw new Error('bech32: invalid character')
+      }
+    }
+  }
 
-    // determine chk mod
-    let chk = this._prefixChk(prefix)
+  /**
+   * @param {string} data
+   * @return {Uint8Array}
+   * @private
+   * @internal
+   */
+  private static _convert5to8 (data: string): Uint8Array {
+    let value = 0
+    let bits = 0
+    const bytes = this._strToBytes(data)
+    const result = []
 
-    let result = prefix + '1'
-    let word
-    for (word of words) {
-      chk = this._polymodStep(chk) ^ word
-      result += this._ALPHABET.charAt(word)
+    for (let i = 0; i < bytes.byteLength; i++) {
+      value = (value << 5) | bytes[i]
+      bits += 5
+
+      while (bits >= 8) {
+        bits -= 8
+        result.push((value >> bits) & 0xff)
+      }
     }
 
-    for (let i = 0; i < 6; ++i) {
-      chk = this._polymodStep(chk)
+    if ((bits >= 5) || (value << (8 - bits)) & 0xff) {
+      throw new Error('bech32: invalid data')
     }
-    chk ^= 1
 
-    for (let i = 0; i < 6; ++i) {
-      const v = (chk >> ((5 - i) * 5)) & 0x1f
-      result += this._ALPHABET.charAt(v)
+    return new Uint8Array(result)
+  }
+
+  /**
+   * @param {Uint8Array} data
+   * @return {string}
+   * @private
+   * @internal
+   */
+  private static _convert8to5 (data: Uint8Array): string {
+    let value = 0
+    let bits = 0
+    let result = ''
+
+    for (let i = 0; i < data.byteLength; i++) {
+      value = (value << 8) | data[i]
+      bits += 8
+
+      while (bits >= 5) {
+        bits -= 5
+        result += this._alphabet[(value >> bits) & 0x1f]
+      }
+    }
+
+    /** @istanbul ignore else */
+    if (bits > 0) {
+      result += this._alphabet[(value << (5 - bits)) & 0x1f]
     }
 
     return result
   }
 
   /**
-   * @param {string} str
-   * @returns {Object}
-   * @throws {Error}
-   * @private
-   * @internal
-   */
-  private static _decode (str: string): { prefix: string, words: Uint8Array } {
-    // don't allow mixed case
-    const lowered = str.toLowerCase()
-    const uppered = str.toUpperCase()
-    if (str !== lowered && str !== uppered) {
-      throw new Error('Mixed-case string ' + str)
-    }
-    str = lowered
-
-    const split = str.lastIndexOf('1')
-    if (split === -1) {
-      throw new Error('No separator character for ' + str)
-    }
-    if (split === 0) {
-      throw new Error('Missing prefix for ' + str)
-    }
-
-    const prefix = str.slice(0, split)
-    const wordChars = str.slice(split + 1)
-    if (wordChars.length < 6) {
-      throw new Error('Data too short')
-    }
-
-    let chk = this._prefixChk(prefix)
-
-    const words = []
-    for (let i = 0; i < wordChars.length; ++i) {
-      const c = wordChars.charAt(i)
-      const v = this._ALPHABET_MAP[c]
-      if (v === undefined) {
-        throw new Error('Unknown character ' + c)
-      }
-      chk = this._polymodStep(chk) ^ v
-
-      // not in the checksum?
-      if (i + 6 >= wordChars.length) {
-        continue
-      }
-      words.push(v)
-    }
-
-    if (chk !== 1) {
-      throw new Error('Invalid checksum for ' + str)
-    }
-
-    return { prefix, words: new Uint8Array(words) }
-  }
-
-  /**
-   * @param {number} pre
-   * @returns {number}
-   * @private
-   * @internal
-   */
-  private static _polymodStep (pre: number): number {
-    const b = pre >> 25
-    return ((pre & 0x1FFFFFF) << 5) ^
-      (-((b >> 0) & 1) & 0x3b6a57b2) ^
-      (-((b >> 1) & 1) & 0x26508e6d) ^
-      (-((b >> 2) & 1) & 0x1ea119fa) ^
-      (-((b >> 3) & 1) & 0x3d4233dd) ^
-      (-((b >> 4) & 1) & 0x2a1462b3)
-  }
-
-  /**
    * @param {string} prefix
-   * @returns {number}
-   * @throws {Error}
+   * @param {string} data
    * @private
    * @internal
    */
-  private static _prefixChk (prefix: string): number {
-    let chk = 1
-    for (let i = 0; i < prefix.length; ++i) {
-      const c = prefix.charCodeAt(i)
-      if (c < 33 || c > 126) {
-        throw Error('Invalid prefix (' + prefix + ')')
-      }
-      chk = this._polymodStep(chk) ^ (c >> 5)
-    }
-    chk = this._polymodStep(chk)
+  private static _createChecksum (prefix: string, data: string): string {
+    const bytes = this._strToBytes(data)
+    const pfx = this._prefixExpand(prefix)
+    const values = new Uint8Array(pfx.byteLength + bytes.byteLength + 6)
+    values.set(pfx)
+    values.set(bytes, pfx.byteLength)
 
-    for (let i = 0; i < prefix.length; ++i) {
-      const v = prefix.charCodeAt(i)
-      chk = this._polymodStep(chk) ^ (v & 0x1f)
+    const polyMod = this._polyMod(values) ^ 1
+
+    let checksum = ''
+    for (let i = 0; i < 6; i++) {
+      checksum += this._alphabet[(polyMod >> 5 * (5 - i)) & 31]
+    }
+
+    return checksum
+  }
+
+  /**
+   * @param {Uint8Array} values
+   * @return {number}
+   * @private
+   * @internal
+   */
+  private static _polyMod (values: Uint8Array): number {
+    const gen = [0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3]
+    let chk = 1
+    for (let i = 0; i < values.byteLength; i++) {
+      const top = chk >> 25
+      chk = (chk & 0x1ffffff) << 5 ^ values[i]
+
+      for (let j = 0; j < 5; j++) {
+        chk ^= ((top >> j) & 1)
+          ? gen[j]
+          : 0
+      }
     }
 
     return chk
   }
 
   /**
-   * @param {number[]|Uint8Array} data
-   * @param {number} inBits
-   * @param {number} outBits
-   * @param {boolean} pad
-   * @returns {number[]}
+   * @param {Uint8Array} prefix
+   * @throws {Uint8Array}
    * @private
    * @internal
    */
-  private static _convert (
-    data: Uint8Array, inBits: number, outBits: number, pad: boolean
-  ): number[] {
-    let value = 0
-    let bits = 0
-    const maxV = (1 << outBits) - 1
-
-    const result = []
-    for (let i = 0; i < data.byteLength; i++) {
-      value = (value << inBits) | data[i]
-      bits += inBits
-
-      while (bits >= outBits) {
-        bits -= outBits
-        result.push((value >> bits) & maxV)
-      }
+  private static _prefixExpand (prefix: string): Uint8Array {
+    const res = new Uint8Array((prefix.length * 2) + 1)
+    for (let i = 0; i < prefix.length; i++) {
+      const ord = prefix.charCodeAt(i)
+      res[i] = ord >> 5
+      res[i + prefix.length + 1] = ord & 31
     }
 
-    if (pad) {
-      /** @istanbul ignore else */
-      if (bits > 0) {
-        result.push((value << (outBits - bits)) & maxV)
-      }
-    } else {
-      if (bits >= inBits) {
-        throw new Error('Excess padding')
-      }
-      if ((value << (outBits - bits)) & maxV) {
-        throw new Error('Non-zero padding')
-      }
+    return res
+  }
+
+  /**
+   * @param {string} str
+   * @throws {Error}
+   * @private
+   * @internal
+   */
+  private static _strToBytes (str: string): Uint8Array {
+    const bytes = []
+    for (const chr of str) {
+      bytes.push(this._alphabet.indexOf(chr))
     }
 
-    return result
+    return new Uint8Array(bytes)
+  }
+
+  /**
+   * @param {string} prefix
+   * @param {string} data
+   * @private
+   * @internal
+   */
+  private static _verifyChecksum (prefix: string, data: string): void {
+    const pfx = this._prefixExpand(prefix)
+    const bytes = this._strToBytes(data)
+
+    const values = new Uint8Array(pfx.byteLength + bytes.byteLength)
+    values.set(pfx)
+    values.set(bytes, pfx.byteLength)
+
+    const poly = this._polyMod(values)
+
+    if (poly !== 1) {
+      throw new Error('bech32: invalid checksum')
+    }
   }
 }
 

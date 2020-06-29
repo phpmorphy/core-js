@@ -7,12 +7,23 @@ build:
     analysis:
       dependencies:
         override:
-          - echo 1
+          - true
       tests:
         override:
           - js-scrutinizer-run
+    tests:
+      dependencies:
+        override:
+          - npm install nyc@^15 mocha@^8 chai@^4
+      tests:
+        override:
+          - command: npx nyc --reporter=clover mocha --recursive
+            coverage:
+              file: coverage/clover.xml
+              format: clover
 filter:
   paths:
     - src/
   dependency_paths:
     - src/util/Ed25519.ts
+    - src/util/Sha256.ts

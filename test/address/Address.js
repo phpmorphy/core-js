@@ -22,32 +22,77 @@ describe('Address', function () {
   })
 
   describe('fromBech32()', function () {
+    describe('адреса', function () {
+      const tests = [
+        {
+          desc: 'umi 0xFF',
+          args: 'umi1lllllllllllllllllllllllllllllllllllllllllllllllllllsp2pfg9'
+        },
+        {
+          desc: 'umi 0x00',
+          args: 'umi1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqr5zcpj'
+        },
+        {
+          desc: 'genesis 0xFF',
+          args: 'genesis1llllllllllllllllllllllllllllllllllllllllllllllllllls5c7uy0'
+        },
+        {
+          desc: 'genesis 0x00',
+          args: 'genesis1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqkxaddc'
+        },
+        {
+          desc: 'aaa rand',
+          args: 'aaa1nfgzzgkr3nd69jes5kw87s2tuv46mhmrqpnw8ksffaujycenxx6sl48tkv'
+        }
+      ]
+
+      tests.forEach(function (test) {
+        it(test.desc, function () {
+          const actual = umi.Address.fromBech32(test.args).bech32
+          assert.equal(test.args, actual)
+        })
+      })
+    })
+
     describe('ошибки', function () {
       const tests = [
         { desc: 'тип', args: new Array(62) },
         {
-          desc: 'короткий',
-          args: 'umi1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqu5fmc9'
+          desc: 'invalid prefix 1',
+          args: 'geneziz1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqwa7qv0'
         },
         {
-          desc: 'длинный',
-          args: 'umi1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq63dha7'
+          desc: 'invalid prefix 2',
+          args: '+++1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq2trd4a'
+        },
+        {
+          desc: 'empty prefix',
+          args: '1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqugay46'
         },
         {
           desc: 'invalid checksum',
-          args: 'umi1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqr5zcpq'
+          args: 'umi1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqr5zcpf'
         },
-        { desc: 'некорректный адрес - too short', args: 'a1qqq' },
-        { desc: 'некорректный адрес - mixed-case', args: 'Aa1qqqqqqqq' },
-        { desc: 'некорректный адрес - no separator', args: 'aqqqqqqqq' },
-        { desc: 'некорректный адрес - no prefix', args: '1qqqqqqqq' },
-        { desc: 'некорректный адрес - unknown char', args: 'a1qiqqqqqq' },
-        { desc: 'некорректный адрес - invalid prefix', args: 'я1qqqqqqqq' },
         {
-          desc: 'некорректный адрес - non-zero padding',
-          args: 'tb1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3pjxtptv'
+          desc: 'invalid character',
+          args: 'umi1iqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqr5zcpj'
         },
-        { desc: 'excess padding', args: 'aaa1w508d6qejxtdg4y5r3zarqqv8dkn' }
+        {
+          desc: 'no separator',
+          args: 'umilqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqr5zcpj'
+        },
+        {
+          desc: 'too short',
+          args: 'umi1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqu5fmc9'
+        },
+        {
+          desc: 'too long',
+          args: 'umi1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq63dha7'
+        },
+        {
+          desc: 'non-zero padding',
+          args: 'umi1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqlfceute'
+        }
       ]
 
       tests.forEach(function (test) {
@@ -188,15 +233,6 @@ describe('Address', function () {
           assert.strictEqual(actual, test.expected)
         })
       })
-    })
-  })
-
-  describe('bech32', function () {
-    it('sss', function () {
-      const bytes = new Uint8Array(34)
-      const adr = new umi.Address(bytes)
-      const expected = 'genesis1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqkxaddc'
-      assert.equal(expected, adr.bech32)
     })
   })
 })
