@@ -662,35 +662,22 @@ class Ed25519 {
     d[0] &= 248
     d[31] &= 127
     d[31] |= 64
-    const smlen = n + 64
-    for (i = 0; i < n; i++) {
-      sm[64 + i] = m[i]
-    }
-    for (i = 0; i < 32; i++) {
-      sm[32 + i] = d[32 + i]
-    }
+    sm.set(m, 64)
+    sm.set(d.subarray(32), 32)
     this._cryptoHash(r, sm.subarray(32), n + 32)
     this._reduce(r)
     this._scalarbase(p, r)
     this._pack(sm, p)
-    for (i = 32; i < 64; i++) {
-      sm[i] = sk[i]
-    }
+    sm.set(sk.subarray(32), 32)
     this._cryptoHash(h, sm, n + 64)
     this._reduce(h)
-    for (i = 0; i < 64; i++) {
-      x[i] = 0
-    }
-    for (i = 0; i < 32; i++) {
-      x[i] = r[i]
-    }
+    x.set(r)
     for (i = 0; i < 32; i++) {
       for (j = 0; j < 32; j++) {
         x[i + j] += h[i] * d[j]
       }
     }
     this._modL(sm.subarray(32), x)
-    return smlen
   }
 
   /**
@@ -710,9 +697,7 @@ class Ed25519 {
     d[31] |= 64
     this._scalarbase(p, d)
     this._pack(pk, p)
-    for (let i = 0; i < 32; i++) {
-      sk[i + 32] = pk[i]
-    }
+    sk.set(pk, 32)
     return 0
   }
 
@@ -738,12 +723,8 @@ class Ed25519 {
     if (this._unpackneg(q, pk)) {
       return -1
     }
-    for (let i = 0; i < n; i++) {
-      m[i] = sm[i]
-    }
-    for (let i = 0; i < 32; i++) {
-      m[i + 32] = pk[i]
-    }
+    m.set(sm)
+    m.set(pk, 32)
     this._cryptoHash(h, m, n)
     this._reduce(h)
     this._scalarmult(p, q, h)
@@ -803,9 +784,6 @@ class Ed25519 {
    */
   _fnM (o, a, b) {
     const t = new Float64Array(31)
-    for (let i = 0; i < 31; i++) {
-      t[i] = 0
-    }
     for (let i = 0; i < 16; i++) {
       for (let j = 0; j < 16; j++) {
         t[i + j] += a[i] * b[j]
@@ -814,9 +792,7 @@ class Ed25519 {
     for (let i = 0; i < 15; i++) {
       t[i] += 38 * t[i + 16]
     }
-    for (let i = 0; i < 16; i++) {
-      o[i] = t[i]
-    }
+    o.set(t.slice(0, 16))
     this._car25519(o)
     this._car25519(o)
   }
@@ -849,18 +825,14 @@ class Ed25519 {
    */
   _inv25519 (o, i) {
     const c = new Float64Array(16)
-    for (let a = 0; a < 16; a++) {
-      c[a] = i[a]
-    }
+    c.set(i)
     for (let a = 253; a >= 0; a--) {
       this._fnS(c, c)
       if (a !== 2 && a !== 4) {
         this._fnM(c, c, i)
       }
     }
-    for (let a = 0; a < 16; a++) {
-      o[a] = c[a]
-    }
+    o.set(c)
   }
 
   /**
@@ -935,9 +907,7 @@ class Ed25519 {
     let b
     const m = new Float64Array(16)
     const t = new Float64Array(16)
-    for (let i = 0; i < 16; i++) {
-      t[i] = n[i]
-    }
+    t.set(n)
     this._car25519(t)
     this._car25519(t)
     this._car25519(t)
@@ -975,18 +945,14 @@ class Ed25519 {
    */
   _pow2523 (o, i) {
     const c = new Float64Array(16)
-    for (let a = 0; a < 16; a++) {
-      c[a] = i[a]
-    }
+    c.set(i)
     for (let a = 250; a >= 0; a--) {
       this._fnS(c, c)
       if (a !== 1) {
         this._fnM(c, c, i)
       }
     }
-    for (let a = 0; a < 16; a++) {
-      o[a] = c[a]
-    }
+    o.set(c)
   }
 
   /**
@@ -995,12 +961,8 @@ class Ed25519 {
    */
   _reduce (r) {
     const x = new Float64Array(64)
-    for (let i = 0; i < 64; i++) {
-      x[i] = r[i]
-    }
-    for (let i = 0; i < 64; i++) {
-      r[i] = 0
-    }
+    x.set(r)
+    r.set(new Float64Array(64))
     this._modL(r, x)
   }
 
@@ -1064,9 +1026,7 @@ class Ed25519 {
    * @private
    */
   _set25519 (r, a) {
-    for (let i = 0; i < 16; i++) {
-      r[i] = a[i]
-    }
+    r.set(a)
   }
 
   /**
