@@ -27,6 +27,7 @@ const Validator = require('../util/Validator.js')
 const Sha256 = require('../util/Sha256.js')
 const SecretKey = require('../key/ed25519/SecretKey.js')
 const Address = require('../address/Address.js')
+const AbstractTransaction = require('./AbstractTransaction.js')
 
 /**
  * Базовый класс для работы с транзакциями.
@@ -34,175 +35,7 @@ const Address = require('../address/Address.js')
  * @lends Transaction
  * @private
  */
-class TransactionBase {
-  /**
-   * @param {Uint8Array} [bytes] Транзакция в бинарном виде, 150 байт.
-   * @throws {Error}
-   * @private
-   */
-  constructor (bytes) {
-    /**
-     * Транзакция в бинарном виде.
-     * @type {Uint8Array}
-     * @private
-     */
-    this._bytes = new Uint8Array(TransactionBase.LENGTH)
-    /**
-     * Транзакция в бинарном виде.
-     * @type {DataView}
-     * @private
-     */
-    this._view = new DataView(this._bytes.buffer)
-    /**
-     * Заполоненные свойства.
-     * @type {Object}
-     * @private
-     */
-    this._fieldsMap = {}
-    if (bytes !== undefined) {
-      Validator.validateUint8Array(bytes, TransactionBase.LENGTH)
-      this._bytes.set(bytes)
-      this._setFields([
-        'version', 'sender', 'recipient', 'value', 'prefix',
-        'name', 'profitPercent', 'feePercent', 'nonce', 'signature'
-      ])
-    }
-  }
-
-  /**
-   * Длина транзакции в байтах.
-   * @type {number}
-   * @constant
-   */
-  static get LENGTH () { return 150 }
-  /**
-   * Genesis-транзакция.
-   * Может быть добавлена только в Genesis-блок.
-   * Адрес отправителя должен иметь префикс genesis, адрес получаетеля - umi.
-   * @type {number}
-   * @constant
-   * @example
-   * let secKey = SecretKey.fromSeed(new Uint8Array(32))
-   * let sender = Address.fromKey(secKey).setPrefix('genesis')
-   * let recipient = Address.fromKey(secKey).setPrefix('umi')
-   * let tx = new Transaction().
-   *   setVersion(Transaction.Genesis).
-   *   setSender(sender).
-   *   setRecipient(recipient).
-   *   setValue(42).
-   *   sign(secKey)
-   */
-  static get Genesis () { return 0 }
-  /**
-   * Стандартная транзакция. Перевод монет из одного кошелька в другой.
-   * @type {number}
-   * @constant
-   * @example
-   * let secKey = SecretKey.fromSeed(new Uint8Array(32))
-   * let sender = Address.fromKey(secKey).setPrefix('umi')
-   * let recipient = Address.fromKey(secKey).setPrefix('aaa')
-   * let tx = new Transaction().
-   *   setVersion(Transaction.Basic).
-   *   setSender(sender).
-   *   setRecipient(recipient).
-   *   setValue(42).
-   *   sign(secKey)
-   */
-  static get Basic () { return 1 }
-  /**
-   * Создание новой структуры.
-   * @type {number}
-   * @constant
-   * @example
-   * let secKey = SecretKey.fromSeed(new Uint8Array(32))
-   * let sender = Address.fromKey(secKey).setPrefix('umi')
-   * let tx = new Transaction().
-   *   setVersion(Transaction.CreateStructure).
-   *   setSender(sender).
-   *   setPrefix('aaa').
-   *   setName('🙂').
-   *   setProfitPercent(100).
-   *   setFeePercent(0).
-   *   sign(secKey)
-   */
-  static get CreateStructure () { return 2 }
-  /**
-   * Обновление настроек существующей структуры.
-   * @type {number}
-   * @constant
-   * @example
-   * let secKey = SecretKey.fromSeed(new Uint8Array(32))
-   * let sender = Address.fromKey(secKey).setPrefix('umi')
-   * let tx = new Transaction().
-   *   setVersion(Transaction.UpdateStructure).
-   *   setSender(sender).
-   *   setPrefix('aaa').
-   *   setName('🙂').
-   *   setProfitPercent(500).
-   *   setFeePercent(2000).
-   *   sign(secKey)
-   */
-  static get UpdateStructure () { return 3 }
-  /**
-   * Изменение адреса для начисления профита.
-   * @type {number}
-   * @constant
-   * @example
-   * let secKey = SecretKey.fromSeed(new Uint8Array(32))
-   * let sender = Address.fromKey(secKey).setPrefix('umi')
-   * let newPrf = Address.fromBech32('aaa18d4z00xwk6jz6c4r4rgz5mcdwdjny9thrh3y8f36cpy2rz6emg5svsuw66')
-   * let tx = new Transaction().
-   *   setVersion(Transaction.UpdateProfitAddress).
-   *   setSender(sender).
-   *   setRecipient(newPrf).
-   *   sign(secKey)
-   */
-  static get UpdateProfitAddress () { return 4 }
-  /**
-   * Изменение адреса на который переводоится комиссия.
-   * @type {number}
-   * @constant
-   * @example
-   * let secKey = SecretKey.fromSeed(new Uint8Array(32))
-   * let sender = Address.fromKey(secKey).setPrefix('umi')
-   * let newFee = Address.fromBech32('aaa18d4z00xwk6jz6c4r4rgz5mcdwdjny9thrh3y8f36cpy2rz6emg5svsuw66')
-   * let tx = new Transaction().
-   *   setVersion(Transaction.UpdateFeeAddress).
-   *   setSender(sender).
-   *   setRecipient(newFee).
-   *   sign(secKey)
-   */
-  static get UpdateFeeAddress () { return 5 }
-  /**
-   * Активация транзитного адреса.
-   * @type {number}
-   * @constant
-   * @example
-   * let secKey = SecretKey.fromSeed(new Uint8Array(32))
-   * let sender = Address.fromKey(secKey).setPrefix('umi')
-   * let transit = Address.fromBech32('aaa18d4z00xwk6jz6c4r4rgz5mcdwdjny9thrh3y8f36cpy2rz6emg5svsuw66')
-   * let tx = new Transaction().
-   *   setVersion(Transaction.CreateTransitAddress).
-   *   setSender(sender).
-   *   setRecipient(transit).
-   *   sign(secKey)
-   */
-  static get CreateTransitAddress () { return 6 }
-  /**
-   * Деактивация транзитного адреса.
-   * @type {number}
-   * @constant
-   * @example
-   * let secKey = SecretKey.fromSeed(new Uint8Array(32))
-   * let sender = Address.fromKey(secKey).setPrefix('umi')
-   * let transit = Address.fromBech32('aaa18d4z00xwk6jz6c4r4rgz5mcdwdjny9thrh3y8f36cpy2rz6emg5svsuw66')
-   * let tx = new Transaction().
-   *   setVersion(Transaction.DeleteTransitAddress).
-   *   setSender(sender).
-   *   setRecipient(transit).
-   *   sign(secKey)
-   */
-  static get DeleteTransitAddress () { return 7 }
+class AbstractTransactionBase extends AbstractTransaction.AbstractTransaction {
   /**
    * Транзакция в бинарном виде, 150 байт.
    * @type {Uint8Array}
@@ -247,7 +80,7 @@ class TransactionBase {
     if (Object.prototype.hasOwnProperty.call(this._fieldsMap, 'version')) {
       throw new Error('could not update version')
     }
-    Validator.validateInt(version, TransactionBase.Genesis, TransactionBase.DeleteTransitAddress)
+    Validator.validateInt(version, AbstractTransactionBase.Genesis, AbstractTransactionBase.DeleteTransitAddress)
     this._bytes[0] = version
     this._setFields(['version'])
   }
@@ -286,11 +119,11 @@ class TransactionBase {
     if (!(address instanceof Address.Address)) {
       throw new Error('address type must be Address')
     }
-    if (this.version === TransactionBase.Genesis &&
+    if (this.version === AbstractTransactionBase.Genesis &&
       address.version !== Address.Address.Genesis) {
       throw new Error('address version must be genesis')
     }
-    if (this.version !== TransactionBase.Genesis &&
+    if (this.version !== AbstractTransactionBase.Genesis &&
       address.version === Address.Address.Genesis) {
       throw new Error('address version must not be genesis')
     }
@@ -331,12 +164,12 @@ class TransactionBase {
     if (address.version === Address.Address.Genesis) {
       throw new Error('recipient version must not be genesis')
     }
-    if (this.version === TransactionBase.Genesis &&
+    if (this.version === AbstractTransactionBase.Genesis &&
       address.version !== Address.Address.Umi) {
       throw new Error('recipient version must be umi')
     }
-    if (this.version !== TransactionBase.Genesis &&
-      this.version !== TransactionBase.Basic &&
+    if (this.version !== AbstractTransactionBase.Genesis &&
+      this.version !== AbstractTransactionBase.Basic &&
       address.version === Address.Address.Umi) {
       throw new Error('recipient version must not be umi')
     }
@@ -490,25 +323,11 @@ class TransactionBase {
   }
 
   /**
-   * Проверить наличие свойства.
-   * @param {string[]} fields
-   * @throws {Error}
-   * @private
-   */
-  _checkFields (fields) {
-    for (const field of fields) {
-      if (!Object.prototype.hasOwnProperty.call(this._fieldsMap, field)) {
-        throw new Error(`${field} must be set`)
-      }
-    }
-  }
-
-  /**
    * @throws {Error}
    * @private
    */
   _checkVersionIsBasic () {
-    const versions = [TransactionBase.Genesis, TransactionBase.Basic]
+    const versions = [AbstractTransaction.AbstractTransaction.Genesis, AbstractTransaction.AbstractTransaction.Basic]
     if (versions.indexOf(this.version) === -1) {
       throw new Error('unavailable for this transaction type')
     }
@@ -519,22 +338,11 @@ class TransactionBase {
    * @private
    */
   _checkVersionIsNotStruct () {
-    const versions = [TransactionBase.CreateStructure, TransactionBase.UpdateStructure]
+    const versions = [AbstractTransaction.AbstractTransaction.CreateStructure, AbstractTransaction.AbstractTransaction.UpdateStructure]
     if (versions.indexOf(this.version) !== -1) {
       throw new Error('unavailable for this transaction type')
     }
   }
-
-  /**
-   * Отметить свойство как установленное.
-   * @param {string[]} fields
-   * @private
-   */
-  _setFields (fields) {
-    for (const field of fields) {
-      this._fieldsMap[field] = true
-    }
-  }
 }
 
-exports.TransactionBase = TransactionBase
+exports.AbstractTransactionBase = AbstractTransactionBase

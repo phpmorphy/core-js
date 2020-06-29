@@ -1,10 +1,221 @@
 /**
- * Базовый класс для работы с транзакциями.
+ * Базовый класс для работы с адресами.
+ * @class
+ */
+export declare class Address {
+    /**
+     * Длина адреса в байтах.
+     * @type {number}
+     * @constant
+     */
+    static get LENGTH(): number;
+    /**
+     * Версия Genesis-адрса.
+     * @type {number}
+     * @constant
+     */
+    static get Genesis(): number;
+    /**
+     * Версия Umi-адреса.
+     * @type {number}
+     * @constant
+     */
+    static get Umi(): number;
+    /**
+     * @param {Uint8Array} [bytes] Адрес в бинарном виде, длина 34 байта.
+     * @throws {Error}
+     */
+    constructor(bytes?: Uint8Array);
+    /**
+     * Адрес в бинарном виде, длина 34 байта.
+     * @type {Uint8Array}
+     * @readonly
+     */
+    get bytes(): Uint8Array;
+    /**
+     * Версия адреса, префикс в числовом виде.
+     * @type {number}
+     * @throws {Error}
+     */
+    get version(): number;
+    set version(version: number);
+    /**
+     * Устанавливает версию адреса и возвращяет this.
+     * @param {number} version Версия адреса.
+     * @returns {Address}
+     * @throws {Error}
+     */
+    setVersion(version: number): Address;
+    /**
+     * Публичный ключ.
+     * @type {PublicKey}
+     * @throws {Error}
+     */
+    get publicKey(): PublicKey;
+    set publicKey(publicKey: PublicKey);
+    /**
+     * Устанавливает публичный ключи и возвращяет this.
+     * @param {PublicKey} publicKey Публичный ключ.
+     * @returns {Address}
+     * @throws {Error}
+     */
+    setPublicKey(publicKey: PublicKey): Address;
+    /**
+     * Префикс адреса, три символа латиницы в нижнем регистре.
+     * @type {string}
+     * @throws {Error}
+     */
+    get prefix(): string;
+    set prefix(prefix: string);
+    /**
+     * Устанавливает префикс адреса и возвращяет this.
+     * @param {string} prefix Префикс адреса, три символа латиницы в нижнем регистре.
+     * @returns {Address}
+     * @throws {Error}
+     */
+    setPrefix(prefix: string): Address;
+    /**
+     * Адрес в формате Bech32, длина 62 символа.
+     * @type {string}
+     * @throws {Error}
+     */
+    get bech32(): string;
+    set bech32(bech32: string);
+    /**
+     * Устанавливает адрес в формате Bech32.
+     * @param {string} bech32 Адрес в формате Bech32, длина 62 символа.
+     * @returns {Address}
+     * @throws {Error}
+     */
+    setBech32(bech32: string): Address;
+    /**
+     * Статический фабричный метод, создающий объект из адреса в формате Bech32.
+     * @param {string} bech32 Адрес в формате Bech32, длина 62 символа.
+     * @returns {Address}
+     * @throws {Error}
+     */
+    static fromBech32(bech32: string): Address;
+    /**
+     * Статический фабричный метод, создающий объект из публичного или приватного ключа.
+     * @param {PublicKey|SecretKey} key Публичный или приватный ключ.
+     * @returns {Address}
+     * @throws {Error}
+     */
+    static fromKey(key: PublicKey | SecretKey): Address;
+}
+/**
+ * Базовый класс для работы с блоками.
+ * @class
+ */
+export declare class Block {
+}
+/**
+ * Базовый класс для работы с заголовками блоков.
+ * @class
+ */
+export declare class BlockHeader {
+}
+/**
+ * Базовый класс для работы с публичными ключами.
+ * @class
+ */
+export declare class PublicKey {
+    /**
+     * Длина публичного ключа в формате libsodium в байтах.
+     * @type {number}
+     * @constant
+     */
+    static get LENGTH(): number;
+    /**
+     * Длина цифровой подписи в байтах.
+     * @type {number}
+     * @constant
+     */
+    static get SIGNATURE_LENGTH(): number;
+    /**
+     * Длина цифровой подписи в байтах.
+     * @type {number}
+     * @constant
+     */
+    get signatureLength(): number;
+    /**
+     * @param {Uint8Array} bytes Публичный ключ в формате libsodium, 32 байта (256 бит).
+     * @throws {Error}
+     */
+    constructor(bytes: Uint8Array);
+    /**
+     * Публичный ключ в формате libsodium, 32 байта (256 бит).
+     * @type {Uint8Array}
+     * @readonly
+     */
+    get bytes(): Uint8Array;
+    /**
+     * Проверяет цифровую подпись.
+     * @param {Uint8Array} signature Подпись, 64 байта.
+     * @param {Uint8Array} message Сообщение
+     * @returns {boolean}
+     * @throws {Error}
+     * @example
+     * let key = new Uint8Array(32)
+     * let sig = new Uint8Array(64)
+     * let msg = new Uint8Array(1)
+     * let ver = new PublicKey(key).verifySignature(sig, msg)
+     */
+    verifySignature(signature: Uint8Array, message: Uint8Array): boolean;
+}
+/**
+ * Базовый класс для работы с приватными ключами.
+ * @class
+ */
+export declare class SecretKey {
+    /**
+     * @param {Uint8Array} bytes Приватный ключ в бинарном виде.
+     * В формате libsodium, 64 байта (512 бит).
+     * @throws {Error}
+     */
+    constructor(bytes: Uint8Array);
+    /**
+     * Приватный ключ в бинарном виде. В формате libsodium, 64 байта (512 бит).
+     * @type {Uint8Array}
+     * @readonly
+     */
+    get bytes(): Uint8Array;
+    /**
+     * Публичный ключ, соотвествующий приватному ключу.
+     * @type {PublicKey}
+     * @readonly
+     */
+    get publicKey(): PublicKey;
+    /**
+     * Создает цифровую подпись сообщения.
+     * @param {Uint8Array} message Сообщение, которое необходимо подписать.
+     * @returns {Uint8Array} Цифровая подпись длиной 64 байта (512 бит).
+     * @throws {Error}
+     * @example
+     * let seed = new Uint8Array(32)
+     * let msg = new Uint8Array(1)
+     * let sig = SecretKey.fromSeed(seed).sign(msg)
+     */
+    sign(message: Uint8Array): Uint8Array;
+    /**
+     * Статический фабричный метод, создающий приватный ключ из seed.
+     * Libsodium принимает seed длиной 32 байта (256 бит), если длина
+     * отличается, то берется sha256 хэш.
+     * @param {Uint8Array} seed Seed длиной от 0 до 128 байт.
+     * @returns {SecretKey}
+     * @throws {Error}
+     * @example
+     * let seed = new Uint8Array(32)
+     * let key = SecretKey.fromSeed(seed)
+     */
+    static fromSeed(seed: Uint8Array): SecretKey;
+}
+/**
  * @class
  * @lends Transaction
  * @private
  */
-declare abstract class TransactionBase {
+declare abstract class AbstractTransaction {
     /**
      * Длина транзакции в байтах.
      * @type {number}
@@ -145,6 +356,14 @@ declare abstract class TransactionBase {
      * @private
      */
     protected constructor(bytes?: Uint8Array);
+}
+/**
+ * Базовый класс для работы с транзакциями.
+ * @class
+ * @lends Transaction
+ * @private
+ */
+declare abstract class AbstractTransactionBase extends AbstractTransaction {
     /**
      * Транзакция в бинарном виде, 150 байт.
      * @type {Uint8Array}
@@ -288,7 +507,7 @@ declare abstract class TransactionBase {
  * @param {Uint8Array} [bytes] Транзакция в бинарном виде, 150 байт.
  * @throws {Error}
  */
-export declare class Transaction extends TransactionBase {
+export declare class Transaction extends AbstractTransactionBase {
     /**
      * Префикс адресов, принадлежащих структуре.
      * Доступно только для CreateStructure и UpdateStructure.
@@ -355,217 +574,5 @@ export declare class Transaction extends TransactionBase {
      * @throws {Error}
      */
     setFeePercent(percent: number): this;
-}
-/**
- * Базовый класс для работы с публичными ключами.
- * @class
- */
-export declare class PublicKey {
-    /**
-     * Длина публичного ключа в формате libsodium в байтах.
-     * @type {number}
-     * @constant
-     */
-    static get LENGTH(): number;
-    /**
-     * Длина цифровой подписи в байтах.
-     * @type {number}
-     * @constant
-     */
-    static get SIGNATURE_LENGTH(): number;
-    /**
-     * Длина цифровой подписи в байтах.
-     * @type {number}
-     * @constant
-     */
-    get signatureLength(): number;
-    /**
-     * @param {Uint8Array} bytes Публичный ключ в формате libsodium, 32 байта (256 бит).
-     * @throws {Error}
-     */
-    constructor(bytes: Uint8Array);
-    /**
-     * Публичный ключ в формате libsodium, 32 байта (256 бит).
-     * @type {Uint8Array}
-     * @readonly
-     */
-    get bytes(): Uint8Array;
-    /**
-     * Проверяет цифровую подпись.
-     * @param {Uint8Array} signature Подпись, 64 байта.
-     * @param {Uint8Array} message Сообщение
-     * @returns {boolean}
-     * @throws {Error}
-     * @example
-     * let key = new Uint8Array(32)
-     * let sig = new Uint8Array(64)
-     * let msg = new Uint8Array(1)
-     * let ver = new PublicKey(key).verifySignature(sig, msg)
-     */
-    verifySignature(signature: Uint8Array, message: Uint8Array): boolean;
-}
-/**
- * Базовый класс для работы с приватными ключами.
- * @class
- */
-export declare class SecretKey {
-    /**
-     * @param {Uint8Array} bytes Приватный ключ в бинарном виде.
-     * В формате libsodium, 64 байта (512 бит).
-     * @throws {Error}
-     */
-    constructor(bytes: Uint8Array);
-    /**
-     * Приватный ключ в бинарном виде. В формате libsodium, 64 байта (512 бит).
-     * @type {Uint8Array}
-     * @readonly
-     */
-    get bytes(): Uint8Array;
-    /**
-     * Публичный ключ, соотвествующий приватному ключу.
-     * @type {PublicKey}
-     * @readonly
-     */
-    get publicKey(): PublicKey;
-    /**
-     * Создает цифровую подпись сообщения.
-     * @param {Uint8Array} message Сообщение, которое необходимо подписать.
-     * @returns {Uint8Array} Цифровая подпись длиной 64 байта (512 бит).
-     * @throws {Error}
-     * @example
-     * let seed = new Uint8Array(32)
-     * let msg = new Uint8Array(1)
-     * let sig = SecretKey.fromSeed(seed).sign(msg)
-     */
-    sign(message: Uint8Array): Uint8Array;
-    /**
-     * Статический фабричный метод, создающий приватный ключ из seed.
-     * Libsodium принимает seed длиной 32 байта (256 бит), если длина
-     * отличается, то берется sha256 хэш.
-     * @param {Uint8Array} seed Seed длиной от 0 до 128 байт.
-     * @returns {SecretKey}
-     * @throws {Error}
-     * @example
-     * let seed = new Uint8Array(32)
-     * let key = SecretKey.fromSeed(seed)
-     */
-    static fromSeed(seed: Uint8Array): SecretKey;
-}
-/**
- * Базовый класс для работы с адресами.
- * @class
- */
-export declare class Address {
-    /**
-     * Длина адреса в байтах.
-     * @type {number}
-     * @constant
-     */
-    static get LENGTH(): number;
-    /**
-     * Версия Genesis-адрса.
-     * @type {number}
-     * @constant
-     */
-    static get Genesis(): number;
-    /**
-     * Версия Umi-адреса.
-     * @type {number}
-     * @constant
-     */
-    static get Umi(): number;
-    /**
-     * @param {Uint8Array} [bytes] Адрес в бинарном виде, длина 34 байта.
-     * @throws {Error}
-     */
-    constructor(bytes?: Uint8Array);
-    /**
-     * Адрес в бинарном виде, длина 34 байта.
-     * @type {Uint8Array}
-     * @readonly
-     */
-    get bytes(): Uint8Array;
-    /**
-     * Версия адреса, префикс в числовом виде.
-     * @type {number}
-     * @throws {Error}
-     */
-    get version(): number;
-    set version(version: number);
-    /**
-     * Устанавливает версию адреса и возвращяет this.
-     * @param {number} version Версия адреса.
-     * @returns {Address}
-     * @throws {Error}
-     */
-    setVersion(version: number): Address;
-    /**
-     * Публичный ключ.
-     * @type {PublicKey}
-     * @throws {Error}
-     */
-    get publicKey(): PublicKey;
-    set publicKey(publicKey: PublicKey);
-    /**
-     * Устанавливает публичный ключи и возвращяет this.
-     * @param {PublicKey} publicKey Публичный ключ.
-     * @returns {Address}
-     * @throws {Error}
-     */
-    setPublicKey(publicKey: PublicKey): Address;
-    /**
-     * Префикс адреса, три символа латиницы в нижнем регистре.
-     * @type {string}
-     * @throws {Error}
-     */
-    get prefix(): string;
-    set prefix(prefix: string);
-    /**
-     * Устанавливает префикс адреса и возвращяет this.
-     * @param {string} prefix Префикс адреса, три символа латиницы в нижнем регистре.
-     * @returns {Address}
-     * @throws {Error}
-     */
-    setPrefix(prefix: string): Address;
-    /**
-     * Адрес в формате Bech32, длина 62 символа.
-     * @type {string}
-     * @throws {Error}
-     */
-    get bech32(): string;
-    set bech32(bech32: string);
-    /**
-     * Устанавливает адрес в формате Bech32.
-     * @param {string} bech32 Адрес в формате Bech32, длина 62 символа.
-     * @returns {Address}
-     * @throws {Error}
-     */
-    setBech32(bech32: string): Address;
-    /**
-     * Статический фабричный метод, создающий объект из адреса в формате Bech32.
-     * @param {string} bech32 Адрес в формате Bech32, длина 62 символа.
-     * @returns {Address}
-     * @throws {Error}
-     */
-    static fromBech32(bech32: string): Address;
-    /**
-     * Статический фабричный метод, создающий объект из публичного или приватного ключа.
-     * @param {PublicKey|SecretKey} key Публичный или приватный ключ.
-     * @returns {Address}
-     * @throws {Error}
-     */
-    static fromKey(key: PublicKey | SecretKey): Address;
-}
-/**
- * Базовый класс для работы с блоками.
- * @class
- */
-export declare class Block {
-}
-/**
- * Базовый класс для работы с заголовками блоков.
- * @class
- */
-export declare class BlockHeader {
 }
 export {};

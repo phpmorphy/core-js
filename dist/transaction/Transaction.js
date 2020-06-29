@@ -26,7 +26,7 @@
 const Validator = require('../util/Validator.js')
 const Converter = require('../util/Converter.js')
 const Utf8 = require('../util/Utf8.js')
-const TransactionBase = require('./TransactionBase.js')
+const AbstractTransactionBase = require('./AbstractTransactionBase.js')
 
 /**
  * Класс для работы с транзакциями.
@@ -34,7 +34,7 @@ const TransactionBase = require('./TransactionBase.js')
  * @param {Uint8Array} [bytes] Транзакция в бинарном виде, 150 байт.
  * @throws {Error}
  */
-class Transaction extends TransactionBase.TransactionBase {
+class Transaction extends AbstractTransactionBase.AbstractTransactionBase {
   /**
    * @throws {Error}
    * @private

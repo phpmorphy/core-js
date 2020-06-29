@@ -12,7 +12,7 @@ fi
 mkdir "$(pwd)/tmp"
 
 # concat ts files
-find "$(pwd)/src" -type f -name '*.ts' -exec cat {} + >"$(pwd)/tmp/index.ts"
+find -s "$(pwd)/src" -type f -name '*.ts' -exec cat {} + >"$(pwd)/tmp/index.ts"
 # drop imports, exports, comments
 sed -i -e '/^import/d' -e '/^export {/d' -e '/^\/\//d' "$(pwd)/tmp/index.ts"
 

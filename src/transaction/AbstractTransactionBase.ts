@@ -20,6 +20,7 @@
 
 import { Address } from '../address/Address'
 import { SecretKey } from '../key/ed25519/SecretKey'
+import { AbstractTransaction } from './AbstractTransaction'
 import { sha256 } from '../util/Sha256'
 import { validateInt, validateUint8Array } from '../util/Validator'
 
@@ -29,190 +30,7 @@ import { validateInt, validateUint8Array } from '../util/Validator'
  * @lends Transaction
  * @private
  */
-abstract class TransactionBase {
-  /**
-   * Длина транзакции в байтах.
-   * @type {number}
-   * @constant
-   */
-  static get LENGTH (): number { return 150 }
-
-  /**
-   * Genesis-транзакция.
-   * Может быть добавлена только в Genesis-блок.
-   * Адрес отправителя должен иметь префикс genesis, адрес получаетеля - umi.
-   * @type {number}
-   * @constant
-   * @example
-   * let secKey = SecretKey.fromSeed(new Uint8Array(32))
-   * let sender = Address.fromKey(secKey).setPrefix('genesis')
-   * let recipient = Address.fromKey(secKey).setPrefix('umi')
-   * let tx = new Transaction().
-   *   setVersion(Transaction.Genesis).
-   *   setSender(sender).
-   *   setRecipient(recipient).
-   *   setValue(42).
-   *   sign(secKey)
-   */
-  static get Genesis (): number { return 0 }
-
-  /**
-   * Стандартная транзакция. Перевод монет из одного кошелька в другой.
-   * @type {number}
-   * @constant
-   * @example
-   * let secKey = SecretKey.fromSeed(new Uint8Array(32))
-   * let sender = Address.fromKey(secKey).setPrefix('umi')
-   * let recipient = Address.fromKey(secKey).setPrefix('aaa')
-   * let tx = new Transaction().
-   *   setVersion(Transaction.Basic).
-   *   setSender(sender).
-   *   setRecipient(recipient).
-   *   setValue(42).
-   *   sign(secKey)
-   */
-  static get Basic (): number { return 1 }
-
-  /**
-   * Создание новой структуры.
-   * @type {number}
-   * @constant
-   * @example
-   * let secKey = SecretKey.fromSeed(new Uint8Array(32))
-   * let sender = Address.fromKey(secKey).setPrefix('umi')
-   * let tx = new Transaction().
-   *   setVersion(Transaction.CreateStructure).
-   *   setSender(sender).
-   *   setPrefix('aaa').
-   *   setName('🙂').
-   *   setProfitPercent(100).
-   *   setFeePercent(0).
-   *   sign(secKey)
-   */
-  static get CreateStructure (): number { return 2 }
-
-  /**
-   * Обновление настроек существующей структуры.
-   * @type {number}
-   * @constant
-   * @example
-   * let secKey = SecretKey.fromSeed(new Uint8Array(32))
-   * let sender = Address.fromKey(secKey).setPrefix('umi')
-   * let tx = new Transaction().
-   *   setVersion(Transaction.UpdateStructure).
-   *   setSender(sender).
-   *   setPrefix('aaa').
-   *   setName('🙂').
-   *   setProfitPercent(500).
-   *   setFeePercent(2000).
-   *   sign(secKey)
-   */
-  static get UpdateStructure (): number { return 3 }
-
-  /**
-   * Изменение адреса для начисления профита.
-   * @type {number}
-   * @constant
-   * @example
-   * let secKey = SecretKey.fromSeed(new Uint8Array(32))
-   * let sender = Address.fromKey(secKey).setPrefix('umi')
-   * let newPrf = Address.fromBech32('aaa18d4z00xwk6jz6c4r4rgz5mcdwdjny9thrh3y8f36cpy2rz6emg5svsuw66')
-   * let tx = new Transaction().
-   *   setVersion(Transaction.UpdateProfitAddress).
-   *   setSender(sender).
-   *   setRecipient(newPrf).
-   *   sign(secKey)
-   */
-  static get UpdateProfitAddress (): number { return 4 }
-
-  /**
-   * Изменение адреса на который переводоится комиссия.
-   * @type {number}
-   * @constant
-   * @example
-   * let secKey = SecretKey.fromSeed(new Uint8Array(32))
-   * let sender = Address.fromKey(secKey).setPrefix('umi')
-   * let newFee = Address.fromBech32('aaa18d4z00xwk6jz6c4r4rgz5mcdwdjny9thrh3y8f36cpy2rz6emg5svsuw66')
-   * let tx = new Transaction().
-   *   setVersion(Transaction.UpdateFeeAddress).
-   *   setSender(sender).
-   *   setRecipient(newFee).
-   *   sign(secKey)
-   */
-  static get UpdateFeeAddress (): number { return 5 }
-
-  /**
-   * Активация транзитного адреса.
-   * @type {number}
-   * @constant
-   * @example
-   * let secKey = SecretKey.fromSeed(new Uint8Array(32))
-   * let sender = Address.fromKey(secKey).setPrefix('umi')
-   * let transit = Address.fromBech32('aaa18d4z00xwk6jz6c4r4rgz5mcdwdjny9thrh3y8f36cpy2rz6emg5svsuw66')
-   * let tx = new Transaction().
-   *   setVersion(Transaction.CreateTransitAddress).
-   *   setSender(sender).
-   *   setRecipient(transit).
-   *   sign(secKey)
-   */
-  static get CreateTransitAddress (): number { return 6 }
-
-  /**
-   * Деактивация транзитного адреса.
-   * @type {number}
-   * @constant
-   * @example
-   * let secKey = SecretKey.fromSeed(new Uint8Array(32))
-   * let sender = Address.fromKey(secKey).setPrefix('umi')
-   * let transit = Address.fromBech32('aaa18d4z00xwk6jz6c4r4rgz5mcdwdjny9thrh3y8f36cpy2rz6emg5svsuw66')
-   * let tx = new Transaction().
-   *   setVersion(Transaction.DeleteTransitAddress).
-   *   setSender(sender).
-   *   setRecipient(transit).
-   *   sign(secKey)
-   */
-  static get DeleteTransitAddress (): number { return 7 }
-
-  /**
-   * Транзакция в бинарном виде.
-   * @type {Uint8Array}
-   * @private
-   * @internal
-   */
-  protected readonly _bytes: Uint8Array = new Uint8Array(TransactionBase.LENGTH)
-
-  /**
-   * Транзакция в бинарном виде.
-   * @type {DataView}
-   * @private
-   * @internal
-   */
-  protected readonly _view: DataView = new DataView(this._bytes.buffer)
-
-  /**
-   * Заполоненные свойства.
-   * @type {Object}
-   * @private
-   * @internal
-   */
-  protected readonly _fieldsMap: { [key: string]: boolean } = {}
-
-  /**
-   * @param {Uint8Array} [bytes] Транзакция в бинарном виде, 150 байт.
-   * @throws {Error}
-   * @private
-   */
-  protected constructor (bytes?: Uint8Array) {
-    if (bytes !== undefined) {
-      validateUint8Array(bytes, TransactionBase.LENGTH)
-
-      this._bytes.set(bytes)
-      this._setFields([
-        'version', 'sender', 'recipient', 'value', 'prefix',
-        'name', 'profitPercent', 'feePercent', 'nonce', 'signature'])
-    }
-  }
-
+abstract class AbstractTransactionBase extends AbstractTransaction {
   /**
    * Транзакция в бинарном виде, 150 байт.
    * @type {Uint8Array}
@@ -258,7 +76,7 @@ abstract class TransactionBase {
       throw new Error('could not update version')
     }
 
-    validateInt(version, TransactionBase.Genesis, TransactionBase.DeleteTransitAddress)
+    validateInt(version, AbstractTransactionBase.Genesis, AbstractTransactionBase.DeleteTransitAddress)
 
     this._bytes[0] = version
     this._setFields(['version'])
@@ -304,12 +122,12 @@ abstract class TransactionBase {
       throw new Error('address type must be Address')
     }
 
-    if (this.version === TransactionBase.Genesis &&
+    if (this.version === AbstractTransactionBase.Genesis &&
       address.version !== Address.Genesis) {
       throw new Error('address version must be genesis')
     }
 
-    if (this.version !== TransactionBase.Genesis &&
+    if (this.version !== AbstractTransactionBase.Genesis &&
       address.version === Address.Genesis) {
       throw new Error('address version must not be genesis')
     }
@@ -360,13 +178,13 @@ abstract class TransactionBase {
       throw new Error('recipient version must not be genesis')
     }
 
-    if (this.version === TransactionBase.Genesis &&
+    if (this.version === AbstractTransactionBase.Genesis &&
       address.version !== Address.Umi) {
       throw new Error('recipient version must be umi')
     }
 
-    if (this.version !== TransactionBase.Genesis &&
-      this.version !== TransactionBase.Basic &&
+    if (this.version !== AbstractTransactionBase.Genesis &&
+      this.version !== AbstractTransactionBase.Basic &&
       address.version === Address.Umi) {
       throw new Error('recipient version must not be umi')
     }
@@ -550,27 +368,12 @@ abstract class TransactionBase {
   }
 
   /**
-   * Проверить наличие свойства.
-   * @param {string[]} fields
    * @throws {Error}
    * @private
    * @internal
    */
-  protected _checkFields (fields: string[]): void {
-    for (const field of fields) {
-      if (!Object.prototype.hasOwnProperty.call(this._fieldsMap, field)) {
-        throw new Error(`${field} must be set`)
-      }
-    }
-  }
-
-  /**
-   * @throws {Error}
-   * @private
-   * @internal
-   */
-  private _checkVersionIsBasic (): void {
-    const versions = [TransactionBase.Genesis, TransactionBase.Basic]
+  protected _checkVersionIsBasic (): void {
+    const versions = [AbstractTransaction.Genesis, AbstractTransaction.Basic]
     if (versions.indexOf(this.version) === -1) {
       throw new Error('unavailable for this transaction type')
     }
@@ -581,24 +384,12 @@ abstract class TransactionBase {
    * @private
    * @internal
    */
-  private _checkVersionIsNotStruct (): void {
-    const versions = [TransactionBase.CreateStructure, TransactionBase.UpdateStructure]
+  protected _checkVersionIsNotStruct (): void {
+    const versions = [AbstractTransaction.CreateStructure, AbstractTransaction.UpdateStructure]
     if (versions.indexOf(this.version) !== -1) {
       throw new Error('unavailable for this transaction type')
     }
   }
-
-  /**
-   * Отметить свойство как установленное.
-   * @param {string[]} fields
-   * @private
-   * @internal
-   */
-  protected _setFields (fields: string[]): void {
-    for (const field of fields) {
-      this._fieldsMap[field] = true
-    }
-  }
 }
 
-export { TransactionBase }
+export { AbstractTransactionBase }

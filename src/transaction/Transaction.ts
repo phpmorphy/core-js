@@ -21,7 +21,7 @@
 import { versionToPrefix, prefixToVersion } from '../util/Converter'
 import { Utf8Decode, Utf8Encode } from '../util/Utf8'
 import { validateInt } from '../util/Validator'
-import { TransactionBase } from './TransactionBase'
+import { AbstractTransactionBase } from './AbstractTransactionBase'
 
 /**
  * Класс для работы с транзакциями.
@@ -29,7 +29,7 @@ import { TransactionBase } from './TransactionBase'
  * @param {Uint8Array} [bytes] Транзакция в бинарном виде, 150 байт.
  * @throws {Error}
  */
-export class Transaction extends TransactionBase {
+export class Transaction extends AbstractTransactionBase {
   /**
    * @throws {Error}
    * @private
