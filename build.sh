@@ -66,4 +66,4 @@ rm -r "$(pwd)/tmp"
 # typedoc
 
 # lint (lib)
-eslint "$(pwd)/lib/index.js" "$(pwd)/lib/index.mjs"
+eslint "$(pwd)/dist" "$(pwd)/lib/index.js" "$(pwd)/lib/index.mjs"

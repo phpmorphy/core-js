@@ -5,7 +5,7 @@
  * @flow
  */
 
-declare export class Transaction {
+declare class TransactionBase {
   LENGTH: number;
   Genesis: number;
   Basic: number;
@@ -19,27 +19,29 @@ declare export class Transaction {
   bytes: Uint8Array;
   hash: Uint8Array;
   version: number;
-  setVersion(version: number): Transaction;
+  setVersion(version: number): this;
   sender: Address;
-  setSender(address: Address): Transaction;
+  setSender(address: Address): this;
   recipient: Address;
-  setRecipient(address: Address): Transaction;
+  setRecipient(address: Address): this;
   value: number;
-  setValue(value: number): Transaction;
-  prefix: string;
-  setPrefix(prefix: string): Transaction;
-  name: string;
-  setName(name: string): Transaction;
-  profitPercent: number;
-  setProfitPercent(percent: number): Transaction;
-  feePercent: number;
-  setFeePercent(percent: number): Transaction;
+  setValue(value: number): this;
   nonce: number;
-  setNonce(nonce: number): Transaction;
+  setNonce(nonce: number): this;
   signature: Uint8Array;
-  setSignature(signature: Uint8Array): Transaction;
-  sign(secretKey: SecretKey): Transaction;
+  setSignature(signature: Uint8Array): this;
+  sign(secretKey: SecretKey): this;
   verify(): boolean;
+}
+declare export class Transaction mixins TransactionBase {
+  prefix: string;
+  setPrefix(prefix: string): this;
+  name: string;
+  setName(name: string): this;
+  profitPercent: number;
+  setProfitPercent(percent: number): this;
+  feePercent: number;
+  setFeePercent(percent: number): this;
 }
 declare export class PublicKey {
   LENGTH: number;
@@ -75,3 +77,4 @@ declare export class Address {
 }
 declare export class Block {}
 declare export class BlockHeader {}
+declare export {};

@@ -70,6 +70,7 @@ export default [
         ' * MIT Licensed\n' +
         ' */\n'
     },
+    context: 'this',
     plugins: [
       terser()
     ]

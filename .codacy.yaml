@@ -1,6 +1,7 @@
 ---
 exclude_paths:
-  - 'lib/index.min.js'
+  - 'lib/**'
   - 'test/**'
+  - 'src/**'
   - 'mocha.html'
   - 'package.json'
