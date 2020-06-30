@@ -46,6 +46,7 @@ function sha256 (message: Uint8Array): Uint8Array {
   ])
 
   const w = new Int32Array(64)
+  const h = new Int32Array(8)
 
   // padding
   let l = message.byteLength + 8
@@ -59,7 +60,6 @@ function sha256 (message: Uint8Array): Uint8Array {
 
   q.setUint32(q.byteLength - 4, message.byteLength * 8)
 
-  // chunks
   for (let j = 0; j < m.byteLength; j += 64) {
     for (let i = 0; i < 16; i++) {
       w[i] = q.getInt32(j + (i * 4))
@@ -71,41 +71,32 @@ function sha256 (message: Uint8Array): Uint8Array {
       w[i] = w[i - 16] + s0 + w[i - 7] + s1
     }
 
-    let a = hh[0]
-    let b = hh[1]
-    let c = hh[2]
-    let d = hh[3]
-    let e = hh[4]
-    let f = hh[5]
-    let g = hh[6]
-    let h = hh[7]
+    h.set(hh)
 
     for (let i = 0; i < 64; i++) {
-      const S0 = ((a >>> 2) | (a << 30)) ^ ((a >>> 13) | (a << 19)) ^ ((a >>> 22) | (a << 10))
-      const Ma = (a & b) ^ (a & c) ^ (b & c)
-      const t2 = S0 + Ma
-      const S1 = ((e >>> 6) | (e << 26)) ^ ((e >>> 11) | (e << 21)) ^ ((e >>> 25) | (e << 7))
-      const Ch = (e & f) ^ ((~e) & g)
-      const t1 = h + S1 + Ch + k[i] + w[i]
+      const S0 = ((h[0] >>> 2) | (h[0] << 30)) ^ ((h[0] >>> 13) | (h[0] << 19)) ^ ((h[0] >>> 22) | (h[0] << 10))
+      const Ma = (h[0] & h[1]) ^ (h[0] & h[2]) ^ (h[1] & h[2])
+      const S1 = ((h[4] >>> 6) | (h[4] << 26)) ^ ((h[4] >>> 11) | (h[4] << 21)) ^ ((h[4] >>> 25) | (h[4] << 7))
+      const t1 = h[7] + S1 + ((h[4] & h[5]) ^ ((~h[4]) & h[6])) + k[i] + w[i]
 
-      h = g
-      g = f
-      f = e
-      e = d + t1
-      d = c
-      c = b
-      b = a
-      a = t1 + t2
+      h[7] = h[6]
+      h[6] = h[5]
+      h[5] = h[4]
+      h[4] = h[3] + t1
+      h[3] = h[2]
+      h[2] = h[1]
+      h[1] = h[0]
+      h[0] = t1 + S0 + Ma
     }
 
-    hh[0] += a
-    hh[1] += b
-    hh[2] += c
-    hh[3] += d
-    hh[4] += e
-    hh[5] += f
-    hh[6] += g
-    hh[7] += h
+    hh[0] += h[0]
+    hh[1] += h[1]
+    hh[2] += h[2]
+    hh[3] += h[3]
+    hh[4] += h[4]
+    hh[5] += h[5]
+    hh[6] += h[6]
+    hh[7] += h[7]
   }
 
   return convertEndianness(hh)
