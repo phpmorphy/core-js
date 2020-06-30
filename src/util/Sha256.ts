@@ -52,15 +52,13 @@ function sha256 (message: Uint8Array): Uint8Array {
   let l = message.byteLength + 8
   l += (64 - (l % 64))
 
-  const m = new Uint8Array(l)
-  const q = new DataView(m.buffer)
+  const q = new DataView(new ArrayBuffer(l))
 
-  m.set(message)
-  m[message.byteLength] = 0x80
-
+  new Uint8Array(q.buffer).set(message)
+  q.setInt8(message.byteLength, 0x80)
   q.setUint32(q.byteLength - 4, message.byteLength * 8)
 
-  for (let j = 0; j < m.byteLength; j += 64) {
+  for (let j = 0; j < q.byteLength; j += 64) {
     for (let i = 0; i < 16; i++) {
       w[i] = q.getInt32(j + (i * 4))
     }
@@ -89,36 +87,24 @@ function sha256 (message: Uint8Array): Uint8Array {
       h[0] = t1 + S0 + Ma
     }
 
-    hh[0] += h[0]
-    hh[1] += h[1]
-    hh[2] += h[2]
-    hh[3] += h[3]
-    hh[4] += h[4]
-    hh[5] += h[5]
-    hh[6] += h[6]
-    hh[7] += h[7]
+    for (let i = 0; i < 8; i++) {
+      hh[i] += h[i]
+    }
   }
 
   return convertEndianness(hh)
 }
 
 /**
- * @param {Int32Array} arr
+ * @param {Int32Array} lil
  * @return {Uint8Array}
  */
-function convertEndianness (arr: Int32Array): Uint8Array {
-  const hsh = new DataView(arr.buffer)
-
-  hsh.setUint32(0, arr[0])
-  hsh.setUint32(4, arr[1])
-  hsh.setUint32(8, arr[2])
-  hsh.setUint32(12, arr[3])
-  hsh.setUint32(16, arr[4])
-  hsh.setUint32(20, arr[5])
-  hsh.setUint32(24, arr[6])
-  hsh.setUint32(28, arr[7])
-
-  return new Uint8Array(hsh.buffer)
+function convertEndianness (lil: Int32Array): Uint8Array {
+  const d = new DataView(lil.buffer)
+  for (let i = 0; i < 32; i += 4) {
+    d.setUint32(i, d.getUint32(i, true))
+  }
+  return new Uint8Array(d.buffer)
 }
 
 export { sha256 }
