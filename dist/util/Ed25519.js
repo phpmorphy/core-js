@@ -23,10 +23,9 @@
 
 'use strict'
 
-const sha512 = require('./ed25519/sha512.js')
-const common = require('./ed25519/common.js')
 const sign = require('./ed25519/sign.js')
 const verify = require('./ed25519/verify.js')
+const key = require('./ed25519/key.js')
 
 /**
  * Цифровые подписи Ed25519.
@@ -64,11 +63,7 @@ class Ed25519 {
    * @returns {Uint8Array}
    */
   secretKeyFromSeed (seed) {
-    const pk = new Uint8Array(32)
-    const sk = new Uint8Array(64)
-    sk.set(seed)
-    this._cryptoSignKeypair(pk, sk)
-    return sk
+    return key.secretKeyFromSeed(seed)
   }
 
   /**
@@ -77,30 +72,7 @@ class Ed25519 {
    * @returns {Uint8Array}
    */
   publicKeyFromSecretKey (secretKey) {
-    const b = new Uint8Array(32)
-    b.set(new Uint8Array(secretKey.buffer, 32, 32))
-    return b
-  }
-
-  /**
-   * @param {Uint8Array} pk
-   * @param {Uint8Array} sk
-   * @private
-   */
-  _cryptoSignKeypair (pk, sk) {
-    const d = new Uint8Array(64)
-    const p = [
-      new Float64Array(16), new Float64Array(16),
-      new Float64Array(16), new Float64Array(16)
-    ]
-    sha512.cryptoHash(d, sk, 32)
-    d[0] &= 248
-    d[31] &= 127
-    d[31] |= 64
-    common.scalarbase(p, d)
-    common.pack(pk, p)
-    sk.set(pk, 32)
-    return 0
+    return key.publicKeyFromSecretKey(secretKey)
   }
 }
 

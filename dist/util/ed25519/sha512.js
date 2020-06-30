@@ -52,27 +52,15 @@ const K = new Float64Array([
  * @private
  */
 function cryptoHash (out, m, n) {
-  const hh = new Int32Array(8)
-  const hl = new Int32Array(8)
+  const hh = new Int32Array([
+    0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
+  ])
+  const hl = new Int32Array([
+    0xf3bcc908, 0x84caa73b, 0xfe94f82b, 0x5f1d36f1, 0xade682d1, 0x2b3e6c1f, 0xfb41bd6b, 0x137e2179
+  ])
   const x = new Uint8Array(256)
   let i
   const b = n
-  hh[0] = 0x6a09e667
-  hh[1] = 0xbb67ae85
-  hh[2] = 0x3c6ef372
-  hh[3] = 0xa54ff53a
-  hh[4] = 0x510e527f
-  hh[5] = 0x9b05688c
-  hh[6] = 0x1f83d9ab
-  hh[7] = 0x5be0cd19
-  hl[0] = 0xf3bcc908
-  hl[1] = 0x84caa73b
-  hl[2] = 0xfe94f82b
-  hl[3] = 0x5f1d36f1
-  hl[4] = 0xade682d1
-  hl[5] = 0x2b3e6c1f
-  hl[6] = 0xfb41bd6b
-  hl[7] = 0x137e2179
   cryptoHashBlocksHl(hh, hl, m, n)
   n %= 128
   for (i = 0; i < n; i++) {
@@ -98,90 +86,48 @@ function cryptoHash (out, m, n) {
 function cryptoHashBlocksHl (hh, hl, m, n) {
   const wh = new Int32Array(16)
   const wl = new Int32Array(16)
-  let bh0
-  let bh1
-  let bh2
-  let bh3
-  let bh4
-  let bh5
-  let bh6
-  let bh7
-  let bl0
-  let bl1
-  let bl2
-  let bl3
-  let bl4
-  let bl5
-  let bl6
-  let bl7
+  const bh = new Int32Array(8)
+  const bl = new Int32Array(8)
   let th
   let tl
-  let i
-  let j
   let h
   let l
   let a
   let b
   let c
   let d
-  let ah0 = hh[0]
-  let ah1 = hh[1]
-  let ah2 = hh[2]
-  let ah3 = hh[3]
-  let ah4 = hh[4]
-  let ah5 = hh[5]
-  let ah6 = hh[6]
-  let ah7 = hh[7]
-  let al0 = hl[0]
-  let al1 = hl[1]
-  let al2 = hl[2]
-  let al3 = hl[3]
-  let al4 = hl[4]
-  let al5 = hl[5]
-  let al6 = hl[6]
-  let al7 = hl[7]
+  const ah = new Int32Array(8)
+  ah.set(hh)
+  const al = new Int32Array(8)
+  al.set(hl)
   let pos = 0
   while (n >= 128) {
-    for (i = 0; i < 16; i++) {
-      j = 8 * i + pos
-      wh[i] = (m[j + 0] << 24) | (m[j + 1] << 16) | (m[j + 2] << 8) | m[j + 3]
+    for (let i = 0; i < 16; i++) {
+      const j = 8 * i + pos
+      wh[i] = (m[j] << 24) | (m[j + 1] << 16) | (m[j + 2] << 8) | m[j + 3]
       wl[i] = (m[j + 4] << 24) | (m[j + 5] << 16) | (m[j + 6] << 8) | m[j + 7]
     }
-    for (i = 0; i < 80; i++) {
-      bh0 = ah0
-      bh1 = ah1
-      bh2 = ah2
-      bh3 = ah3
-      bh4 = ah4
-      bh5 = ah5
-      bh6 = ah6
-      bh7 = ah7
-      bl0 = al0
-      bl1 = al1
-      bl2 = al2
-      bl3 = al3
-      bl4 = al4
-      bl5 = al5
-      bl6 = al6
-      bl7 = al7
-      h = ah7
-      l = al7
+    for (let i = 0; i < 80; i++) {
+      bh.set(ah)
+      bl.set(al)
+      h = ah[7]
+      l = al[7]
       a = l & 0xffff
       b = l >>> 16
       c = h & 0xffff
       d = h >>> 16
-      h = ((ah4 >>> 14) | (al4 << (32 - 14))) ^
-        ((ah4 >>> 18) | (al4 << (32 - 18))) ^
-        ((al4 >>> (41 - 32)) | (ah4 << (32 - (41 - 32))))
-      l = ((al4 >>> 14) | (ah4 << (32 - 14))) ^
-        ((al4 >>> 18) | (ah4 << (32 - 18))) ^
-        ((ah4 >>> (41 - 32)) | (al4 << (32 - (41 - 32))))
+      h = ((ah[4] >>> 14) | (al[4] << (32 - 14))) ^
+        ((ah[4] >>> 18) | (al[4] << (32 - 18))) ^
+        ((al[4] >>> (41 - 32)) | (ah[4] << (32 - (41 - 32))))
+      l = ((al[4] >>> 14) | (ah[4] << (32 - 14))) ^
+        ((al[4] >>> 18) | (ah[4] << (32 - 18))) ^
+        ((ah[4] >>> (41 - 32)) | (al[4] << (32 - (41 - 32))))
       a += l & 0xffff
       b += l >>> 16
       c += h & 0xffff
       d += h >>> 16
-      h = (ah4 & ah5) ^ (~ah4 & ah6)
-      l = (al4 & al5) ^ (~al4 & al6)
+      h = (ah[4] & ah[5]) ^ (~ah[4] & ah[6])
+      l = (al[4] & al[5]) ^ (~al[4] & al[6])
       a += l & 0xffff
       b += l >>> 16
       c += h & 0xffff
@@ -209,18 +155,18 @@ function cryptoHashBlocksHl (hh, hl, m, n) {
       b = l >>> 16
       c = h & 0xffff
       d = h >>> 16
-      h = ((ah0 >>> 28) | (al0 << (32 - 28))) ^
-        ((al0 >>> (34 - 32)) | (ah0 << (32 - (34 - 32)))) ^
-        ((al0 >>> (39 - 32)) | (ah0 << (32 - (39 - 32))))
-      l = ((al0 >>> 28) | (ah0 << (32 - 28))) ^
-        ((ah0 >>> (34 - 32)) | (al0 << (32 - (34 - 32)))) ^
-        ((ah0 >>> (39 - 32)) | (al0 << (32 - (39 - 32))))
+      h = ((ah[0] >>> 28) | (al[0] << (32 - 28))) ^
+        ((al[0] >>> (34 - 32)) | (ah[0] << (32 - (34 - 32)))) ^
+        ((al[0] >>> (39 - 32)) | (ah[0] << (32 - (39 - 32))))
+      l = ((al[0] >>> 28) | (ah[0] << (32 - 28))) ^
+        ((ah[0] >>> (34 - 32)) | (al[0] << (32 - (34 - 32)))) ^
+        ((ah[0] >>> (39 - 32)) | (al[0] << (32 - (39 - 32))))
       a += l & 0xffff
       b += l >>> 16
       c += h & 0xffff
       d += h >>> 16
-      h = (ah0 & ah1) ^ (ah0 & ah2) ^ (ah1 & ah2)
-      l = (al0 & al1) ^ (al0 & al2) ^ (al1 & al2)
+      h = (ah[0] & ah[1]) ^ (ah[0] & ah[2]) ^ (ah[1] & ah[2])
+      l = (al[0] & al[1]) ^ (al[0] & al[2]) ^ (al[1] & al[2])
       a += l & 0xffff
       b += l >>> 16
       c += h & 0xffff
@@ -228,10 +174,10 @@ function cryptoHashBlocksHl (hh, hl, m, n) {
       b += a >>> 16
       c += b >>> 16
       d += c >>> 16
-      bh7 = (c & 0xffff) | (d << 16)
-      bl7 = (a & 0xffff) | (b << 16)
-      h = bh3
-      l = bl3
+      bh[7] = (c & 0xffff) | (d << 16)
+      bl[7] = (a & 0xffff) | (b << 16)
+      h = bh[3]
+      l = bl[3]
       a = l & 0xffff
       b = l >>> 16
       c = h & 0xffff
@@ -245,26 +191,26 @@ function cryptoHashBlocksHl (hh, hl, m, n) {
       b += a >>> 16
       c += b >>> 16
       d += c >>> 16
-      bh3 = (c & 0xffff) | (d << 16)
-      bl3 = (a & 0xffff) | (b << 16)
-      ah1 = bh0
-      ah2 = bh1
-      ah3 = bh2
-      ah4 = bh3
-      ah5 = bh4
-      ah6 = bh5
-      ah7 = bh6
-      ah0 = bh7
-      al1 = bl0
-      al2 = bl1
-      al3 = bl2
-      al4 = bl3
-      al5 = bl4
-      al6 = bl5
-      al7 = bl6
-      al0 = bl7
+      bh[3] = (c & 0xffff) | (d << 16)
+      bl[3] = (a & 0xffff) | (b << 16)
+      ah[1] = bh[0]
+      ah[2] = bh[1]
+      ah[3] = bh[2]
+      ah[4] = bh[3]
+      ah[5] = bh[4]
+      ah[6] = bh[5]
+      ah[7] = bh[6]
+      ah[0] = bh[7]
+      al[1] = bl[0]
+      al[2] = bl[1]
+      al[3] = bl[2]
+      al[4] = bl[3]
+      al[5] = bl[4]
+      al[6] = bl[5]
+      al[7] = bl[6]
+      al[0] = bl[7]
       if (i % 16 === 15) {
-        for (j = 0; j < 16; j++) {
+        for (let j = 0; j < 16; j++) {
           h = wh[j]
           l = wl[j]
           a = l & 0xffff
@@ -306,142 +252,25 @@ function cryptoHashBlocksHl (hh, hl, m, n) {
         }
       }
     }
-    h = ah0
-    l = al0
-    a = l & 0xffff
-    b = l >>> 16
-    c = h & 0xffff
-    d = h >>> 16
-    h = hh[0]
-    l = hl[0]
-    a += l & 0xffff
-    b += l >>> 16
-    c += h & 0xffff
-    d += h >>> 16
-    b += a >>> 16
-    c += b >>> 16
-    d += c >>> 16
-    hh[0] = ah0 = (c & 0xffff) | (d << 16)
-    hl[0] = al0 = (a & 0xffff) | (b << 16)
-    h = ah1
-    l = al1
-    a = l & 0xffff
-    b = l >>> 16
-    c = h & 0xffff
-    d = h >>> 16
-    h = hh[1]
-    l = hl[1]
-    a += l & 0xffff
-    b += l >>> 16
-    c += h & 0xffff
-    d += h >>> 16
-    b += a >>> 16
-    c += b >>> 16
-    d += c >>> 16
-    hh[1] = ah1 = (c & 0xffff) | (d << 16)
-    hl[1] = al1 = (a & 0xffff) | (b << 16)
-    h = ah2
-    l = al2
-    a = l & 0xffff
-    b = l >>> 16
-    c = h & 0xffff
-    d = h >>> 16
-    h = hh[2]
-    l = hl[2]
-    a += l & 0xffff
-    b += l >>> 16
-    c += h & 0xffff
-    d += h >>> 16
-    b += a >>> 16
-    c += b >>> 16
-    d += c >>> 16
-    hh[2] = ah2 = (c & 0xffff) | (d << 16)
-    hl[2] = al2 = (a & 0xffff) | (b << 16)
-    h = ah3
-    l = al3
-    a = l & 0xffff
-    b = l >>> 16
-    c = h & 0xffff
-    d = h >>> 16
-    h = hh[3]
-    l = hl[3]
-    a += l & 0xffff
-    b += l >>> 16
-    c += h & 0xffff
-    d += h >>> 16
-    b += a >>> 16
-    c += b >>> 16
-    d += c >>> 16
-    hh[3] = ah3 = (c & 0xffff) | (d << 16)
-    hl[3] = al3 = (a & 0xffff) | (b << 16)
-    h = ah4
-    l = al4
-    a = l & 0xffff
-    b = l >>> 16
-    c = h & 0xffff
-    d = h >>> 16
-    h = hh[4]
-    l = hl[4]
-    a += l & 0xffff
-    b += l >>> 16
-    c += h & 0xffff
-    d += h >>> 16
-    b += a >>> 16
-    c += b >>> 16
-    d += c >>> 16
-    hh[4] = ah4 = (c & 0xffff) | (d << 16)
-    hl[4] = al4 = (a & 0xffff) | (b << 16)
-    h = ah5
-    l = al5
-    a = l & 0xffff
-    b = l >>> 16
-    c = h & 0xffff
-    d = h >>> 16
-    h = hh[5]
-    l = hl[5]
-    a += l & 0xffff
-    b += l >>> 16
-    c += h & 0xffff
-    d += h >>> 16
-    b += a >>> 16
-    c += b >>> 16
-    d += c >>> 16
-    hh[5] = ah5 = (c & 0xffff) | (d << 16)
-    hl[5] = al5 = (a & 0xffff) | (b << 16)
-    h = ah6
-    l = al6
-    a = l & 0xffff
-    b = l >>> 16
-    c = h & 0xffff
-    d = h >>> 16
-    h = hh[6]
-    l = hl[6]
-    a += l & 0xffff
-    b += l >>> 16
-    c += h & 0xffff
-    d += h >>> 16
-    b += a >>> 16
-    c += b >>> 16
-    d += c >>> 16
-    hh[6] = ah6 = (c & 0xffff) | (d << 16)
-    hl[6] = al6 = (a & 0xffff) | (b << 16)
-    h = ah7
-    l = al7
-    a = l & 0xffff
-    b = l >>> 16
-    c = h & 0xffff
-    d = h >>> 16
-    h = hh[7]
-    l = hl[7]
-    a += l & 0xffff
-    b += l >>> 16
-    c += h & 0xffff
-    d += h >>> 16
-    b += a >>> 16
-    c += b >>> 16
-    d += c >>> 16
-    hh[7] = ah7 = (c & 0xffff) | (d << 16)
-    hl[7] = al7 = (a & 0xffff) | (b << 16)
+    for (let i = 0; i < 8; i++) {
+      h = ah[i]
+      l = al[i]
+      a = l & 0xffff
+      b = l >>> 16
+      c = h & 0xffff
+      d = h >>> 16
+      h = hh[i]
+      l = hl[i]
+      a += l & 0xffff
+      b += l >>> 16
+      c += h & 0xffff
+      d += h >>> 16
+      b += a >>> 16
+      c += b >>> 16
+      d += c >>> 16
+      hh[i] = ah[i] = (c & 0xffff) | (d << 16)
+      hl[i] = al[i] = (a & 0xffff) | (b << 16)
+    }
     pos += 128
     n -= 128
   }

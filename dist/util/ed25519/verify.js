@@ -26,6 +26,14 @@
 const sha512 = require('./sha512.js')
 const common = require('./common.js')
 
+const D = new Float64Array([
+  0x78a3, 0x1359, 0x4dca, 0x75eb, 0xd8ab, 0x4141, 0x0a4d, 0x0070,
+  0xe898, 0x7779, 0x4079, 0x8cc7, 0xfe73, 0x2b6f, 0x6cee, 0x5203
+])
+const I = new Float64Array([
+  0xa0b0, 0x4a0e, 0x1b27, 0xc4ee, 0xe478, 0xad2f, 0x1806, 0x2f43,
+  0xd7a7, 0x3dfb, 0x0099, 0x2b4d, 0xdf0b, 0x4fc1, 0x2480, 0x2b83
+])
 function verify (signature, message, publicKey) {
   const sm = new Uint8Array(64 + message.byteLength)
   const m = new Uint8Array(64 + message.byteLength)
@@ -85,7 +93,7 @@ function unpackneg (r, p) {
   common.set25519(r[2], common.gf1)
   unpack25519(r[1], p)
   common.fnS(num, r[1])
-  common.fnM(den, num, common.D)
+  common.fnM(den, num, D)
   common.fnZ(num, num, r[2])
   common.fnA(den, r[2], den)
   common.fnS(den2, den)
@@ -101,7 +109,7 @@ function unpackneg (r, p) {
   common.fnS(chk, r[0])
   common.fnM(chk, chk, den)
   if (neq25519(chk, num)) {
-    common.fnM(r[0], r[0], common.I)
+    common.fnM(r[0], r[0], I)
   }
   common.fnS(chk, r[0])
   common.fnM(chk, chk, den)

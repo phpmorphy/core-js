@@ -1,14 +1,10 @@
-const D = new Float64Array([
-  0x78a3, 0x1359, 0x4dca, 0x75eb, 0xd8ab, 0x4141, 0x0a4d, 0x0070,
-  0xe898, 0x7779, 0x4079, 0x8cc7, 0xfe73, 0x2b6f, 0x6cee, 0x5203])
+const gf0 = new Float64Array(16)
+
+const gf1 = new Float64Array([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
 
 const D2 = new Float64Array([
   0xf159, 0x26b2, 0x9b94, 0xebd6, 0xb156, 0x8283, 0x149a, 0x00e0,
   0xd130, 0xeef3, 0x80f2, 0x198e, 0xfce7, 0x56df, 0xd9dc, 0x2406])
-
-const I = new Float64Array([
-  0xa0b0, 0x4a0e, 0x1b27, 0xc4ee, 0xe478, 0xad2f, 0x1806, 0x2f43,
-  0xd7a7, 0x3dfb, 0x0099, 0x2b4d, 0xdf0b, 0x4fc1, 0x2480, 0x2b83])
 
 const X = new Float64Array([
   0xd51a, 0x8f25, 0x2d60, 0xc956, 0xa7b2, 0x9525, 0xc760, 0x692c,
@@ -17,11 +13,6 @@ const X = new Float64Array([
 const Y = new Float64Array([
   0x6658, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666,
   0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666])
-
-const gf0 = new Float64Array(16)
-
-const gf1 = new Float64Array(
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
 
 const L = new Float64Array([
   0xed, 0xd3, 0xf5, 0x5c, 0x1a, 0x63, 0x12, 0x58, 0xd6, 0x9c, 0xf7, 0xa2,
@@ -59,7 +50,11 @@ function modL (r: Uint8Array, x: Float64Array): void {
     x[j] += carry
     x[i] = 0
   }
-  carry = 0
+  modLSub(r, x)
+}
+
+function modLSub (r: Uint8Array, x: Float64Array) {
+  let carry = 0
   for (let j = 0; j < 32; j++) {
     x[j] += carry - (x[31] >> 4) * L[j]
     carry = x[j] >> 8
@@ -348,4 +343,4 @@ function pack25519 (o: Uint8Array, n: Float64Array): void {
   }
 }
 
-export { D, D2, I, X, Y, gf0, gf1, L, fnA, fnS, fnM, fnZ, reduce, modL, par25519, scalarmult, scalarbase, car25519, add, set25519, pack, pack25519 }
+export { gf0, gf1, fnA, fnS, fnM, fnZ, modL, reduce, par25519, scalarmult, scalarbase, car25519, add, set25519, pack, pack25519 }

@@ -1,5 +1,13 @@
 import { cryptoHash } from './sha512'
-import { gf0, gf1, reduce, scalarmult, scalarbase, add, set25519, pack, fnA, fnM, fnS, fnZ, D, pack25519, par25519, I } from './common'
+import { gf0, gf1, reduce, scalarmult, scalarbase, add, set25519, pack, fnA, fnM, fnS, fnZ, pack25519, par25519 } from './common'
+
+const D = new Float64Array([
+  0x78a3, 0x1359, 0x4dca, 0x75eb, 0xd8ab, 0x4141, 0x0a4d, 0x0070,
+  0xe898, 0x7779, 0x4079, 0x8cc7, 0xfe73, 0x2b6f, 0x6cee, 0x5203])
+
+const I = new Float64Array([
+  0xa0b0, 0x4a0e, 0x1b27, 0xc4ee, 0xe478, 0xad2f, 0x1806, 0x2f43,
+  0xd7a7, 0x3dfb, 0x0099, 0x2b4d, 0xdf0b, 0x4fc1, 0x2480, 0x2b83])
 
 function verify (
   signature: Uint8Array, message: Uint8Array, publicKey: Uint8Array): boolean {
