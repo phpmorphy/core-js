@@ -31,14 +31,14 @@ export class PublicKey {
    * @type {number}
    * @constant
    */
-  static get LENGTH (): number { return Ed25519.PUBLIC_KEY_BYTES }
+  static get LENGTH (): number { return 32 }
 
   /**
    * Длина цифровой подписи в байтах.
    * @type {number}
    * @constant
    */
-  static get SIGNATURE_LENGTH (): number { return Ed25519.SIGNATURE_BYTES }
+  static get SIGNATURE_LENGTH (): number { return 64 }
 
   /**
    * Длина цифровой подписи в байтах.

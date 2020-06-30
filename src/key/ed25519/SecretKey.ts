@@ -33,7 +33,7 @@ export class SecretKey {
    * @type {number}
    * @internal
    */
-  static get LENGTH (): number { return Ed25519.SECRET_KEY_BYTES }
+  static get LENGTH (): number { return 64 }
 
   /**
    * Приватный ключ в бинарном виде. В формате libsodium.
@@ -102,7 +102,7 @@ export class SecretKey {
   static fromSeed (seed: Uint8Array): SecretKey {
     validateUint8Array(seed)
 
-    if (seed.byteLength === Ed25519.SEED_BYTES) {
+    if (seed.byteLength === 32) {
       return new SecretKey(new Ed25519().secretKeyFromSeed(seed))
     }
 

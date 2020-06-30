@@ -51,13 +51,13 @@ class PublicKey {
    * @type {number}
    * @constant
    */
-  static get LENGTH () { return Ed25519.Ed25519.PUBLIC_KEY_BYTES }
+  static get LENGTH () { return 32 }
   /**
    * Длина цифровой подписи в байтах.
    * @type {number}
    * @constant
    */
-  static get SIGNATURE_LENGTH () { return Ed25519.Ed25519.SIGNATURE_BYTES }
+  static get SIGNATURE_LENGTH () { return 64 }
   /**
    * Длина цифровой подписи в байтах.
    * @type {number}

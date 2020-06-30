@@ -53,7 +53,7 @@ class SecretKey {
    * Длина приватного ключа в формате libsodium в байтах.
    * @type {number}
    */
-  static get LENGTH () { return Ed25519.Ed25519.SECRET_KEY_BYTES }
+  static get LENGTH () { return 64 }
   /**
    * Приватный ключ в бинарном виде. В формате libsodium, 64 байта (512 бит).
    * @type {Uint8Array}
@@ -102,7 +102,7 @@ class SecretKey {
    */
   static fromSeed (seed) {
     Validator.validateUint8Array(seed)
-    if (seed.byteLength === Ed25519.Ed25519.SEED_BYTES) {
+    if (seed.byteLength === 32) {
       return new SecretKey(new Ed25519.Ed25519().secretKeyFromSeed(seed))
     }
     return new SecretKey(new Ed25519.Ed25519().secretKeyFromSeed(Sha256.sha256(seed)))
