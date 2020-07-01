@@ -20,11 +20,86 @@
 
 // tslint:disable:no-bitwise
 
-function sha512 (message: Uint8Array): Uint8Array {
-  const hh: [number, number][] = [
+/**
+ * Безопасный алгоритм хеширования, SHA2-512.
+ * @see https://en.wikipedia.org/wiki/SHA-2
+ * @param {number[]} message message
+ * @returns {number[]} hash
+ * @private
+ * @internal
+ */
+function sha512 (message: number[]): number[] {
+  // SHA-512 initial hash values.
+  const h: [number, number][] = [
     [0x6a09e667, 0xf3bcc908], [0xbb67ae85, 0x84caa73b], [0x3c6ef372, 0xfe94f82b], [0xa54ff53a, 0x5f1d36f1],
     [0x510e527f, 0xade682d1], [0x9b05688c, 0x2b3e6c1f], [0x1f83d9ab, 0xfb41bd6b], [0x5be0cd19, 0x137e2179]]
 
+  // Chunk contains first 16 words w[0..15] of the message schedule array.
+  const chunks: [number, number][][] = sha512PreProcess(message)
+
+  // Process the message in successive 1024-bit chunks / 16 64-bit words.
+  chunks.forEach(function (w: [number, number][]) {
+    // Extend the first 16 words into the remaining 48 words w[16..63] of the message schedule array.
+    for (let i = 16; i < 80; i++) {
+      const s0 = xor64(xor64(rotr64(w[i - 15], 1), rotr64(w[i - 15], 8)), shft64(w[i - 15], 7))
+      const s1 = xor64(xor64(rotr64(w[i - 2], 19), rotr64(w[i - 2], 61)), shft64(w[i - 2], 6))
+      w[i] = sum64(sum64(w[i - 16], s0), sum64(w[i - 7], s1))
+    }
+
+    // Compression function main loop.
+    sha512Block(h, w)
+  })
+
+  const digest: number[] = []
+  h.forEach(function (v: [number, number]) {
+    digest.push((v[0] >>> 24 & 0xff), (v[0] >>> 16 & 0xff), (v[0] >>> 8 & 0xff), (v[0] & 0xff))
+    digest.push((v[1] >>> 24 & 0xff), (v[1] >>> 16 & 0xff), (v[1] >>> 8 & 0xff), (v[1] & 0xff))
+  })
+
+  return digest
+}
+
+/**
+ * @param {number[]} message
+ * @returns {[number, number][][]}
+ */
+function sha512PreProcess (message: number[]): [number, number][][] {
+  const mLen = message.length
+  const bLen = mLen + 8 + (128 - ((mLen + 8) % 128))
+  const bytes: number[] = []
+  bytes.length = bLen // Padding
+
+  for (let i = 0; i < bLen; i++) {
+    bytes[i] = message[i] || 0
+  }
+  bytes[mLen] = 0x80 // Append a single '1' bit
+  // Append message length in bits as a 64-bit big-endian integer
+  bytes[bLen - 2] = ((mLen * 8) >>> 8) & 0xff
+  bytes[bLen - 1] = (mLen * 8) & 0xff
+
+  const chunks: [number, number][][] = []
+
+  for (let i = 0, l = bytes.length; i < l; i += 128) {
+    const chunk: [number, number][] = []
+    for (let j = 0; j < 128; j += 8) {
+      let n = i + j
+      chunk.push([
+        (bytes[n] << 24) + (bytes[++n] << 16) + (bytes[++n] << 8) + bytes[++n],
+        (bytes[++n] << 24) + (bytes[++n] << 16) + (bytes[++n] << 8) + bytes[++n]
+      ])
+    }
+    chunks.push(chunk)
+  }
+
+  return chunks
+}
+
+/**
+ * @param {[number, number][]} h
+ * @param {[number, number][]} w
+ */
+function sha512Block (h: [number, number][], w: [number, number][]) {
+  // SHA-512 round constants.
   const k: [number, number][] = [
     [0x428a2f98, 0xd728ae22], [0x71374491, 0x23ef65cd], [0xb5c0fbcf, 0xec4d3b2f], [0xe9b5dba5, 0x8189dbbc],
     [0x3956c25b, 0xf348b538], [0x59f111f1, 0xb605d019], [0x923f82a4, 0xaf194f9b], [0xab1c5ed5, 0xda6d8118],
@@ -47,80 +122,41 @@ function sha512 (message: Uint8Array): Uint8Array {
     [0x28db77f5, 0x23047d84], [0x32caab7b, 0x40c72493], [0x3c9ebe0a, 0x15c9bebc], [0x431d67c4, 0x9c100d4c],
     [0x4cc5d4be, 0xcb3e42b6], [0x597f299c, 0xfc657e2a], [0x5fcb6fab, 0x3ad6faec], [0x6c44198c, 0x4a475817]]
 
-  const m = new Uint8Array(128)
-  m.set(message)
-  m[0] = 0x80
-
-  const q = new DataView(m.buffer)
-
-  const w: [number, number][] = []
-
-  // Process the message in successive 1024-bit chunks.
-  for (let j = 0; j < m.length; j += 128) {
-    // Copy chunk into first 16 words w[0..15] of the message schedule array
-    for (let i = 0; i < 16; i += 1) {
-      w[i] = [q.getInt32(j + (i * 8)), q.getInt32(j + (i * 8) + 4)]
-    }
-
-    for (let i = 16; i < 80; i++) {
-      const s0 = xor64(xor64(rightRotate64(w[i - 15], 1), rightRotate64(w[i - 15], 8)), rightShift64(w[i - 15], 7))
-      const s1 = xor64(xor64(rightRotate64(w[i - 2], 19), rightRotate64(w[i - 2], 61)), rightShift64(w[i - 2], 6))
-      w[i] = sum64(sum64(w[i - 16], s0), sum64(w[i - 7], s1))
-    }
-
-    // Initialize working variables to current hash value:
-    let a = hh[0]
-    let b = hh[1]
-    let c = hh[2]
-    let d = hh[3]
-    let e = hh[4]
-    let f = hh[5]
-    let g = hh[6]
-    let h = hh[7]
-
-    for (let i = 0; i < 80; i++) {
-      const S1 = xor64(xor64(rightRotate64(e, 14), rightRotate64(e, 18)), rightRotate64(e, 41))
-      const ch = xor64(and64(e, f), and64(not64(e), g))
-      const temp1 = sum64(sum64(sum64(h, S1), sum64(ch, k[i])), w[i])
-      const S0 = xor64(xor64(rightRotate64(a, 28), rightRotate64(a, 34)), rightRotate64(a, 39))
-      const maj = xor64(xor64(and64(a, b), and64(a, c)), and64(b, c))
-      const temp2 = sum64(S0, maj)
-
-      h = g
-      g = f
-      f = e
-      e = sum64(d, temp1)
-      d = c
-      c = b
-      b = a
-      a = sum64(temp1, temp2)
-    }
-
-    // Add the compressed chunk to the current hash value
-    hh[0] = sum64(hh[0], a)
-    hh[1] = sum64(hh[1], b)
-    hh[2] = sum64(hh[2], c)
-    hh[3] = sum64(hh[3], d)
-    hh[4] = sum64(hh[4], e)
-    hh[5] = sum64(hh[5], f)
-    hh[6] = sum64(hh[6], g)
-    hh[7] = sum64(hh[7], h)
-  }
-
-  const b = new DataView(new ArrayBuffer(64))
-  hh.forEach(function (v: [number, number], i: number) {
-    b.setInt32((i * 8), v[0])
-    b.setInt32(((i * 8) + 4), v[1])
+  // Initialize working variables to current hash value.
+  const a: [number, number][] = []
+  h.forEach(function (v: [number, number], i: number) {
+    a[i] = [v[0], v[1]] // deep copy
   })
 
-  return new Uint8Array(b.buffer)
+  // Compression function main loop.
+  for (let i = 0; i < 80; i++) {
+    const S1 = xor64(xor64(rotr64(a[4], 14), rotr64(a[4], 18)), rotr64(a[4], 41))
+    const ch = xor64(and64(a[4], a[5]), and64(not64(a[4]), a[6]))
+    const t1 = sum64(sum64(sum64(a[7], S1), sum64(ch, k[i])), w[i])
+    const S0 = xor64(xor64(rotr64(a[0], 28), rotr64(a[0], 34)), rotr64(a[0], 39))
+    const ma = xor64(xor64(and64(a[0], a[1]), and64(a[0], a[2])), and64(a[1], a[2]))
+    const t2 = sum64(S0, ma)
+    a[7] = a[6]
+    a[6] = a[5]
+    a[5] = a[4]
+    a[4] = sum64(a[3], t1)
+    a[3] = a[2]
+    a[2] = a[1]
+    a[1] = a[0]
+    a[0] = sum64(t1, t2)
+  }
+
+  // Add the compressed chunk to the current hash value.
+  a.forEach(function (v: [number, number], i: number) {
+    h[i] = sum64(h[i], v)
+  })
 }
 
-function rightShift64 (n: [number, number], i: number): [number, number] {
+function shft64 (n: [number, number], i: number): [number, number] {
   return [(n[0] >>> i), (n[1] >>> i) | (n[0] << (32 - i))]
 }
 
-function rightRotate64 (n: [number, number], i: number): [number, number] {
+function rotr64 (n: [number, number], i: number): [number, number] {
   if (i < 32) {
     return [n[0] >>> i | n[1] << (32 - i), n[1] >>> i | n[0] << (32 - i)]
   }
@@ -145,6 +181,8 @@ function not64 (n: [number, number]): [number, number] {
  * @param {[number, number]} a
  * @param {[number, number]} b
  * @returns {[number, number]}
+ * @private
+ * @internal
  */
 function sum64 (a: [number, number], b: [number, number]): [number, number] {
   const x = [0, 0, 0, 0]

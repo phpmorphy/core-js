@@ -71,12 +71,11 @@ describe('Transaction', function () {
   })
 
   describe('hash', function () {
-    it('возвращяет корректный хэш', function () {
+    it('возвращает корректный хэш', function () {
       const bytes = new Uint8Array(150)
-      const expected = new Uint8Array([
+      const expected = [
         29, 131, 81, 139, 137, 123, 20, 226, 148, 57, 144, 239, 246, 85, 131,
-        130, 70, 204, 2, 7, 167, 201, 90, 95, 61, 252, 204, 46, 57, 95, 139, 191
-      ])
+        130, 70, 204, 2, 7, 167, 201, 90, 95, 61, 252, 204, 46, 57, 95, 139, 191]
       const actual = new umi.Transaction(bytes).hash
 
       assert.deepEqual(actual, expected)
@@ -84,7 +83,7 @@ describe('Transaction', function () {
   })
 
   describe('version', function () {
-    describe('возвращяет ошибку если', function () {
+    describe('возвращает ошибку если', function () {
       it('запросить значение не установив его перед этим', function () {
         const tx = new umi.Transaction()
         assert.throws(function () { tx.version }, Error) // eslint-disable-line
@@ -98,7 +97,7 @@ describe('Transaction', function () {
       })
     })
 
-    describe('возвращяет ошибку если передать', function () {
+    describe('возвращает ошибку если передать', function () {
       const tests = [
         { desc: 'строку', args: 'a' },
         { desc: 'массив', args: [1, 2] },
@@ -131,7 +130,7 @@ describe('Transaction', function () {
   })
 
   describe('sender', function () {
-    describe('возвращяет ошибку если', function () {
+    describe('возвращает ошибку если', function () {
       it('запросить отправителя не установив версию', function () {
         const tx = new umi.Transaction()
         assert.throws(function () { tx.sender }, Error) // eslint-disable-line
@@ -161,7 +160,7 @@ describe('Transaction', function () {
       })
     })
 
-    describe('возвращяет ошибку если передать', function () {
+    describe('возвращает ошибку если передать', function () {
       const tests = [
         { desc: 'строку', args: 'a' },
         { desc: 'массив', args: [1, 2] },
@@ -201,7 +200,7 @@ describe('Transaction', function () {
   })
 
   describe('recipient', function () {
-    describe('возвращяет ошибку если', function () {
+    describe('возвращает ошибку если', function () {
       describe('передать', function () {
         const tests = [
           { desc: 'строку', args: 'a' },
@@ -339,7 +338,7 @@ describe('Transaction', function () {
   })
 
   describe('value', function () {
-    describe('возвращяет ошибку если', function () {
+    describe('возвращает ошибку если', function () {
       it('сумма превышает 9007199254740991', function () {
         const bytes = new Uint8Array(150)
         bytes[69] = 1

@@ -18,11 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { Bech32 } from '../util/Bech32'
 import { PublicKey } from '../key/ed25519/PublicKey'
 import { SecretKey } from '../key/ed25519/SecretKey'
 import { validateStr } from '../util/validator'
 import { prefixToVersion, versionToPrefix } from '../util/converter'
+import { decode, encode } from '../util/bech32'
 
 /**
  * Базовый класс для работы с адресами.
@@ -178,12 +178,12 @@ export class Address {
    * @throws {Error}
    */
   get bech32 (): string {
-    return Bech32.encode(this._bytes)
+    return encode(this._bytes)
   }
 
   set bech32 (bech32: string) {
     validateStr(bech32)
-    this._bytes.set(Bech32.decode(bech32))
+    this._bytes.set(decode(bech32))
   }
 
   /**

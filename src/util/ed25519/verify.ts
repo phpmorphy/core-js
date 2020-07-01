@@ -1,4 +1,4 @@
-import { cryptoHash } from './sha512'
+import { sha512 } from '../sha512'
 import { gf0, gf1, reduce, scalarmult, scalarbase, add, set25519, pack, fnA, fnM, fnS, fnZ, pack25519, par25519 } from './common'
 
 const D = new Float64Array([
@@ -34,7 +34,6 @@ function cryptoSignOpen (
   m: Uint8Array, sm: Uint8Array, n: number, pk: Uint8Array
 ): number {
   const t = new Uint8Array(32)
-  const h = new Uint8Array(64)
   const p = [
     new Float64Array(16), new Float64Array(16),
     new Float64Array(16), new Float64Array(16)]
@@ -50,7 +49,7 @@ function cryptoSignOpen (
   m.set(sm)
   m.set(pk, 32)
 
-  cryptoHash(h, m, n)
+  const h = new Uint8Array(sha512(m))
   reduce(h)
   scalarmult(p, q, h)
 

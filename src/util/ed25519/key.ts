@@ -1,4 +1,4 @@
-import { cryptoHash } from './sha512'
+import { sha512 } from '../sha512'
 import { pack, scalarbase } from './common'
 
 function secretKeyFromSeed (seed: Uint8Array): Uint8Array {
@@ -25,12 +25,11 @@ function publicKeyFromSecretKey (secretKey: Uint8Array): Uint8Array {
  * @internal
  */
 function cryptoSignKeypair (pk: Uint8Array, sk: Uint8Array): number {
-  const d = new Uint8Array(64)
   const p = [
     new Float64Array(16), new Float64Array(16),
     new Float64Array(16), new Float64Array(16)]
 
-  cryptoHash(d, sk, 32)
+  const d = new Uint8Array(sha512(sk.slice(0, 32)))
   d[0] &= 248
   d[31] &= 127
   d[31] |= 64
