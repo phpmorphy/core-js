@@ -55,48 +55,6 @@ function sha512 (message: Uint8Array): Uint8Array {
 
   const w: [number, number][] = []
 
-  function rightShift64 (n: [number, number], i: number): [number, number] {
-    if (i < 32) {
-      return [(n[0] >>> i), (n[1] >>> i) | (n[0] << (32 - i))]
-    }
-    return [0, (n[0] >>> (i - 32))]
-  }
-
-  function rightRotate64 (n: [number, number], i: number): [number, number] {
-    if (i < 32) {
-      return [n[0] >>> i | n[1] << (32 - i), n[1] >>> i | n[0] << (32 - i)]
-    }
-    return [
-      n[1] >>> (i - 32) | n[0] << (32 - (i - 32)),
-      n[0] >>> (i - 32) | n[1] << (32 - (i - 32))]
-  }
-
-  function xor64 (a: [number, number], b: [number, number]): [number, number] {
-    return [(a[0] ^ b[0]), (a[1] ^ b[1])]
-  }
-
-  function and64 (a: [number, number], b: [number, number]): [number, number] {
-    return [(a[0] & b[0]), (a[1] & b[1])]
-  }
-
-  function not64 (n: [number, number]): [number, number] {
-    return [~n[0], ~n[1]]
-  }
-
-  /**
-   * @param {[number, number]} a
-   * @param {[number, number]} b
-   * @returns {[number, number]}
-   */
-  function sum64 (a: [number, number], b: [number, number]): [number, number] {
-    const x = [0, 0, 0, 0]
-    x[3] = (a[1] & 0xffff) + (b[1] & 0xffff)
-    x[2] = (a[1] >>> 16) + (b[1] >>> 16) + (x[3] >>> 16)
-    x[1] = (a[0] & 0xffff) + (b[0] & 0xffff) + (x[2] >>> 16)
-    x[0] = (a[0] >>> 16) + (b[0] >>> 16) + (x[1] >>> 16)
-    return [((x[0] & 0xffff) << 16) + (x[1] & 0xffff), ((x[2] & 0xffff) << 16) + (x[3] & 0xffff)]
-  }
-
   // Process the message in successive 1024-bit chunks.
   for (let j = 0; j < m.length; j += 128) {
     // Copy chunk into first 16 words w[0..15] of the message schedule array
@@ -156,6 +114,45 @@ function sha512 (message: Uint8Array): Uint8Array {
   })
 
   return new Uint8Array(b.buffer)
+}
+
+function rightShift64 (n: [number, number], i: number): [number, number] {
+  return [(n[0] >>> i), (n[1] >>> i) | (n[0] << (32 - i))]
+}
+
+function rightRotate64 (n: [number, number], i: number): [number, number] {
+  if (i < 32) {
+    return [n[0] >>> i | n[1] << (32 - i), n[1] >>> i | n[0] << (32 - i)]
+  }
+  return [
+    n[1] >>> (i - 32) | n[0] << (32 - (i - 32)),
+    n[0] >>> (i - 32) | n[1] << (32 - (i - 32))]
+}
+
+function xor64 (a: [number, number], b: [number, number]): [number, number] {
+  return [(a[0] ^ b[0]), (a[1] ^ b[1])]
+}
+
+function and64 (a: [number, number], b: [number, number]): [number, number] {
+  return [(a[0] & b[0]), (a[1] & b[1])]
+}
+
+function not64 (n: [number, number]): [number, number] {
+  return [~n[0], ~n[1]]
+}
+
+/**
+ * @param {[number, number]} a
+ * @param {[number, number]} b
+ * @returns {[number, number]}
+ */
+function sum64 (a: [number, number], b: [number, number]): [number, number] {
+  const x = [0, 0, 0, 0]
+  x[3] = (a[1] & 0xffff) + (b[1] & 0xffff)
+  x[2] = (a[1] >>> 16) + (b[1] >>> 16) + (x[3] >>> 16)
+  x[1] = (a[0] & 0xffff) + (b[0] & 0xffff) + (x[2] >>> 16)
+  x[0] = (a[0] >>> 16) + (b[0] >>> 16) + (x[1] >>> 16)
+  return [((x[0] & 0xffff) << 16) + (x[1] & 0xffff), ((x[2] & 0xffff) << 16) + (x[3] & 0xffff)]
 }
 
 export { sha512 }

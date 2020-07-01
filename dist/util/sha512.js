@@ -51,55 +51,10 @@ function sha512 (message) {
     [0x4cc5d4be, 0xcb3e42b6], [0x597f299c, 0xfc657e2a], [0x5fcb6fab, 0x3ad6faec], [0x6c44198c, 0x4a475817]
   ]
   const m = new Uint8Array(128)
+  m.set(message)
   m[0] = 0x80
   const q = new DataView(m.buffer)
   const w = []
-  function rightShift64 (n, i) {
-    const r = [0, 0]
-    if (i < 32) {
-      r[0] = (n[0] >>> i)
-      r[1] = (n[1] >>> i) | (n[0] << (32 - i))
-    } else {
-      r[1] = (n[0] >>> (i - 32))
-    }
-    return r
-  }
-  function rightRotate64 (n, i) {
-    const r = [0, 0]
-    if (i < 32) {
-      r[0] = n[0] >>> i | n[1] << (32 - i)
-      r[1] = n[1] >>> i | n[0] << (32 - i)
-    } else {
-      r[0] = n[1] >>> (i - 32) | n[0] << (32 - (i - 32))
-      r[1] = n[0] >>> (i - 32) | n[1] << (32 - (i - 32))
-    }
-    return r
-  }
-  function xor64 (a, b) {
-    return [(a[0] ^ b[0]), (a[1] ^ b[1])]
-  }
-  function and64 (a, b) {
-    return [(a[0] & b[0]), (a[1] & b[1])]
-  }
-  function not64 (n) {
-    return [~n[0], ~n[1]]
-  }
-  /**
-   * @param {[number, number]} a
-   * @param {[number, number]} b
-   * @returns {[number, number]}
-   */
-  function sum64 (a, b) {
-    const x = [0, 0, 0, 0]
-    x[3] = (a[1] & 0xffff) + (b[1] & 0xffff)
-    x[2] = (a[1] >>> 16) + (b[1] >>> 16) + (x[3] >>> 16)
-    x[1] = (a[0] & 0xffff) + (b[0] & 0xffff) + (x[2] >>> 16)
-    x[0] = (a[0] >>> 16) + (b[0] >>> 16) + (x[1] >>> 16)
-    const n = [0, 0]
-    n[0] = ((x[0] & 0xffff) << 16) + (x[1] & 0xffff)
-    n[1] = ((x[2] & 0xffff) << 16) + (x[3] & 0xffff)
-    return n
-  }
   for (let j = 0; j < m.length; j += 128) {
     for (let i = 0; i < 16; i += 1) {
       w[i] = [q.getInt32(j + (i * 8)), q.getInt32(j + (i * 8) + 4)]
@@ -143,11 +98,45 @@ function sha512 (message) {
     hh[7] = sum64(hh[7], h)
   }
   const b = new DataView(new ArrayBuffer(64))
-  for (let i = 0; i < 8; i++) {
-    b.setInt32((i * 8), hh[i][0])
-    b.setInt32(((i * 8) + 4), hh[i][1])
-  }
+  hh.forEach(function (v, i) {
+    b.setInt32((i * 8), v[0])
+    b.setInt32(((i * 8) + 4), v[1])
+  })
   return new Uint8Array(b.buffer)
+}
+function rightShift64 (n, i) {
+  return [(n[0] >>> i), (n[1] >>> i) | (n[0] << (32 - i))]
+}
+function rightRotate64 (n, i) {
+  if (i < 32) {
+    return [n[0] >>> i | n[1] << (32 - i), n[1] >>> i | n[0] << (32 - i)]
+  }
+  return [
+    n[1] >>> (i - 32) | n[0] << (32 - (i - 32)),
+    n[0] >>> (i - 32) | n[1] << (32 - (i - 32))
+  ]
+}
+function xor64 (a, b) {
+  return [(a[0] ^ b[0]), (a[1] ^ b[1])]
+}
+function and64 (a, b) {
+  return [(a[0] & b[0]), (a[1] & b[1])]
+}
+function not64 (n) {
+  return [~n[0], ~n[1]]
+}
+/**
+ * @param {[number, number]} a
+ * @param {[number, number]} b
+ * @returns {[number, number]}
+ */
+function sum64 (a, b) {
+  const x = [0, 0, 0, 0]
+  x[3] = (a[1] & 0xffff) + (b[1] & 0xffff)
+  x[2] = (a[1] >>> 16) + (b[1] >>> 16) + (x[3] >>> 16)
+  x[1] = (a[0] & 0xffff) + (b[0] & 0xffff) + (x[2] >>> 16)
+  x[0] = (a[0] >>> 16) + (b[0] >>> 16) + (x[1] >>> 16)
+  return [((x[0] & 0xffff) << 16) + (x[1] & 0xffff), ((x[2] & 0xffff) << 16) + (x[3] & 0xffff)]
 }
 
 exports.sha512 = sha512
