@@ -23,8 +23,7 @@
 function sha512 (message: Uint8Array): Uint8Array {
   const hh: [number, number][] = [
     [0x6a09e667, 0xf3bcc908], [0xbb67ae85, 0x84caa73b], [0x3c6ef372, 0xfe94f82b], [0xa54ff53a, 0x5f1d36f1],
-    [0x510e527f, 0xade682d1], [0x9b05688c, 0x2b3e6c1f], [0x1f83d9ab, 0xfb41bd6b], [0x5be0cd19, 0x137e2179]
-  ]
+    [0x510e527f, 0xade682d1], [0x9b05688c, 0x2b3e6c1f], [0x1f83d9ab, 0xfb41bd6b], [0x5be0cd19, 0x137e2179]]
 
   const k: [number, number][] = [
     [0x428a2f98, 0xd728ae22], [0x71374491, 0x23ef65cd], [0xb5c0fbcf, 0xec4d3b2f], [0xe9b5dba5, 0x8189dbbc],
@@ -124,11 +123,8 @@ function sha512 (message: Uint8Array): Uint8Array {
     }
 
     for (let i = 16; i < 80; i++) {
-      // s0 := (w[i-15] rightrotate 1) xor (w[i-15] rightrotate 8) xor (w[i-15] rightshift 7)
       const s0 = xor64(xor64(rightRotate64(w[i - 15], 1), rightRotate64(w[i - 15], 8)), rightShift64(w[i - 15], 7))
-      // s1 := (w[i-2] rightrotate 19) xor (w[i-2] rightrotate 61) xor (w[i-2] rightshift 6)
       const s1 = xor64(xor64(rightRotate64(w[i - 2], 19), rightRotate64(w[i - 2], 61)), rightShift64(w[i - 2], 6))
-      // w[i] := w[i-16] + s0 + w[i-7] + s1
       w[i] = sum64(sum64(w[i - 16], s0), sum64(w[i - 7], s1))
     }
 
@@ -143,17 +139,11 @@ function sha512 (message: Uint8Array): Uint8Array {
     let h = hh[7]
 
     for (let i = 0; i < 80; i++) {
-      // S1 := (e rightrotate 14) xor (e rightrotate 18) xor (e rightrotate 41)
       const S1 = xor64(xor64(rightRotate64(e, 14), rightRotate64(e, 18)), rightRotate64(e, 41))
-      // ch := (e and f) xor ((not e) and g)
       const ch = xor64(and64(e, f), and64(not64(e), g))
-      // temp1 := h + S1 + ch + k[i] + w[i]
       const temp1 = sum64(sum64(sum64(h, S1), sum64(ch, k[i])), w[i])
-      // S0 := (a rightrotate 28) xor (a rightrotate 34) xor (a rightrotate 39)
       const S0 = xor64(xor64(rightRotate64(a, 28), rightRotate64(a, 34)), rightRotate64(a, 39))
-      // maj := (a and b) xor (a and c) xor (b and c)
       const maj = xor64(xor64(and64(a, b), and64(a, c)), and64(b, c))
-      // temp2 := S0 + maj
       const temp2 = sum64(S0, maj)
 
       h = g
@@ -166,7 +156,7 @@ function sha512 (message: Uint8Array): Uint8Array {
       a = sum64(temp1, temp2)
     }
 
-    // Add the compressed chunk to the current hash value:
+    // Add the compressed chunk to the current hash value
     hh[0] = sum64(hh[0], a)
     hh[1] = sum64(hh[1], b)
     hh[2] = sum64(hh[2], c)
