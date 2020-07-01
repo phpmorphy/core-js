@@ -107,10 +107,9 @@ function sha256 (message: Uint8Array): Uint8Array {
 
     a.set(h)
     block(a, w)
-
-    for (let i = 0; i < 8; i++) {
-      h[i] += a[i]
-    }
+    a.forEach(function (v: number, i: number) {
+      h[i] += v
+    })
   }
 
   return new Uint8Array(convertEndianness(h))

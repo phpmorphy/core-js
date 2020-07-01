@@ -102,10 +102,7 @@ function sha512 (message) {
   }
   for (let j = 0; j < m.length; j += 128) {
     for (let i = 0; i < 16; i += 1) {
-      w[i] = [
-        q.getInt32(j + (i * 8)),
-        q.getInt32(j + (i * 8) + 4)
-      ]
+      w[i] = [q.getInt32(j + (i * 8)), q.getInt32(j + (i * 8) + 4)]
     }
     for (let i = 16; i < 80; i++) {
       const s0 = xor64(xor64(rightRotate64(w[i - 15], 1), rightRotate64(w[i - 15], 8)), rightShift64(w[i - 15], 7))

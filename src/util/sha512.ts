@@ -116,10 +116,7 @@ function sha512 (message: Uint8Array): Uint8Array {
   for (let j = 0; j < m.length; j += 128) {
     // Copy chunk into first 16 words w[0..15] of the message schedule array
     for (let i = 0; i < 16; i += 1) {
-      w[i] = [
-        q.getInt32(j + (i * 8)),
-        q.getInt32(j + (i * 8) + 4)
-      ]
+      w[i] = [q.getInt32(j + (i * 8)), q.getInt32(j + (i * 8) + 4)]
     }
 
     for (let i = 16; i < 80; i++) {
