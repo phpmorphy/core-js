@@ -48,6 +48,7 @@ function sha512 (message: Uint8Array): Uint8Array {
     [0x4cc5d4be, 0xcb3e42b6], [0x597f299c, 0xfc657e2a], [0x5fcb6fab, 0x3ad6faec], [0x6c44198c, 0x4a475817]]
 
   const m = new Uint8Array(128)
+  m.set(message)
   m[0] = 0x80
 
   const q = new DataView(m.buffer)
@@ -55,30 +56,19 @@ function sha512 (message: Uint8Array): Uint8Array {
   const w: [number, number][] = []
 
   function rightShift64 (n: [number, number], i: number): [number, number] {
-    const r: [number, number] = [0, 0]
-
     if (i < 32) {
-      r[0] = (n[0] >>> i)
-      r[1] = (n[1] >>> i) | (n[0] << (32 - i))
-    } else {
-      r[1] = (n[0] >>> (i - 32))
+      return [(n[0] >>> i), (n[1] >>> i) | (n[0] << (32 - i))]
     }
-
-    return r
+    return [0, (n[0] >>> (i - 32))]
   }
 
   function rightRotate64 (n: [number, number], i: number): [number, number] {
-    const r: [number, number] = [0, 0]
-
     if (i < 32) {
-      r[0] = n[0] >>> i | n[1] << (32 - i)
-      r[1] = n[1] >>> i | n[0] << (32 - i)
-    } else {
-      r[0] = n[1] >>> (i - 32) | n[0] << (32 - (i - 32))
-      r[1] = n[0] >>> (i - 32) | n[1] << (32 - (i - 32))
+      return [n[0] >>> i | n[1] << (32 - i), n[1] >>> i | n[0] << (32 - i)]
     }
-
-    return r
+    return [
+      n[1] >>> (i - 32) | n[0] << (32 - (i - 32)),
+      n[0] >>> (i - 32) | n[1] << (32 - (i - 32))]
   }
 
   function xor64 (a: [number, number], b: [number, number]): [number, number] {
@@ -104,12 +94,7 @@ function sha512 (message: Uint8Array): Uint8Array {
     x[2] = (a[1] >>> 16) + (b[1] >>> 16) + (x[3] >>> 16)
     x[1] = (a[0] & 0xffff) + (b[0] & 0xffff) + (x[2] >>> 16)
     x[0] = (a[0] >>> 16) + (b[0] >>> 16) + (x[1] >>> 16)
-
-    const n: [number, number] = [0, 0]
-    n[0] = ((x[0] & 0xffff) << 16) + (x[1] & 0xffff)
-    n[1] = ((x[2] & 0xffff) << 16) + (x[3] & 0xffff)
-
-    return n
+    return [((x[0] & 0xffff) << 16) + (x[1] & 0xffff), ((x[2] & 0xffff) << 16) + (x[3] & 0xffff)]
   }
 
   // Process the message in successive 1024-bit chunks.
@@ -165,10 +150,10 @@ function sha512 (message: Uint8Array): Uint8Array {
   }
 
   const b = new DataView(new ArrayBuffer(64))
-  for (let i = 0; i < 8; i++) {
-    b.setInt32((i * 8), hh[i][0])
-    b.setInt32(((i * 8) + 4), hh[i][1])
-  }
+  hh.forEach(function (v: [number, number], i: number) {
+    b.setInt32((i * 8), v[0])
+    b.setInt32(((i * 8) + 4), v[1])
+  })
 
   return new Uint8Array(b.buffer)
 }
