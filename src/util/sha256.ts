@@ -81,9 +81,9 @@ function sha256 (message: Uint8Array): Uint8Array {
    */
   function convertEndianness (arr: Int32Array): ArrayBuffer {
     const d = new DataView(arr.buffer)
-    for (let i = 0; i < arr.byteLength; i += 4) {
-      d.setUint32(i, d.getUint32(i, true))
-    }
+    arr.forEach(function (v: number, i: number) {
+      d.setInt32(i * 4, v)
+    })
     return d.buffer
   }
 
