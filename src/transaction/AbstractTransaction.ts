@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { validateUint8Array } from '../util/Validator'
+import { validateUint8Array } from '../util/validator'
 
 /**
  * @class

@@ -19,9 +19,10 @@
 // SOFTWARE.
 
 import { PublicKey } from './PublicKey'
-import { Ed25519 } from '../../util/Ed25519'
-import { validateUint8Array } from '../../util/Validator'
-import { sha256 } from '../../util/Sha256'
+import { sign } from '../../util/ed25519/sign'
+import { secretKeyFromSeed, publicKeyFromSecretKey } from '../../util/ed25519/key'
+import { validateUint8Array } from '../../util/validator'
+import { sha256 } from '../../util/sha256'
 
 /**
  * Базовый класс для работы с приватными ключами.
@@ -70,7 +71,7 @@ export class SecretKey {
    * @readonly
    */
   get publicKey (): PublicKey {
-    return new PublicKey(new Ed25519().publicKeyFromSecretKey(this._bytes))
+    return new PublicKey(publicKeyFromSecretKey(this._bytes))
   }
 
   /**
@@ -85,7 +86,7 @@ export class SecretKey {
    */
   sign (message: Uint8Array): Uint8Array {
     validateUint8Array(message)
-    return new Ed25519().sign(message, this._bytes)
+    return sign(message, this._bytes)
   }
 
   /**
@@ -103,9 +104,9 @@ export class SecretKey {
     validateUint8Array(seed)
 
     if (seed.byteLength === 32) {
-      return new SecretKey(new Ed25519().secretKeyFromSeed(seed))
+      return new SecretKey(secretKeyFromSeed(seed))
     }
 
-    return new SecretKey(new Ed25519().secretKeyFromSeed(sha256(seed)))
+    return new SecretKey(secretKeyFromSeed(sha256(seed)))
   }
 }

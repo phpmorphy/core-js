@@ -23,7 +23,7 @@
 
 'use strict'
 
-const Validator = require('../util/Validator.js')
+const validator = require('../util/validator.js')
 
 /**
  * @class
@@ -56,7 +56,7 @@ class AbstractTransaction {
      */
     this._fieldsMap = {}
     if (bytes !== undefined) {
-      Validator.validateUint8Array(bytes, AbstractTransaction.LENGTH)
+      validator.validateUint8Array(bytes, AbstractTransaction.LENGTH)
       this._bytes.set(bytes)
       this._setFields([
         'version', 'sender', 'recipient', 'value', 'prefix',

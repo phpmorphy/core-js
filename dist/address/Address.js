@@ -23,10 +23,10 @@
 
 'use strict'
 
-const Validator = require('../util/Validator.js')
+const validator = require('../util/validator.js')
 const PublicKey = require('../key/ed25519/PublicKey.js')
 const SecretKey = require('../key/ed25519/SecretKey.js')
-const Converter = require('../util/Converter.js')
+const converter = require('../util/converter.js')
 const Bech32 = require('../util/Bech32.js')
 
 /**
@@ -97,7 +97,7 @@ class Address {
   }
 
   set version (version) {
-    Converter.versionToPrefix(version)
+    converter.versionToPrefix(version)
     new DataView(this._bytes.buffer).setUint16(0, (version & 0x7FFF))
   }
 
@@ -145,11 +145,11 @@ class Address {
    * @throws {Error}
    */
   get prefix () {
-    return Converter.versionToPrefix(this.version)
+    return converter.versionToPrefix(this.version)
   }
 
   set prefix (prefix) {
-    this.version = Converter.prefixToVersion(prefix)
+    this.version = converter.prefixToVersion(prefix)
   }
 
   /**
@@ -173,7 +173,7 @@ class Address {
   }
 
   set bech32 (bech32) {
-    Validator.validateStr(bech32)
+    validator.validateStr(bech32)
     this._bytes.set(Bech32.Bech32.decode(bech32))
   }
 

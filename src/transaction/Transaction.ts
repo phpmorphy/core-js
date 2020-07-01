@@ -18,9 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { versionToPrefix, prefixToVersion } from '../util/Converter'
-import { Utf8Decode, Utf8Encode } from '../util/Utf8'
-import { validateInt } from '../util/Validator'
+import { versionToPrefix, prefixToVersion } from '../util/converter'
+import { Utf8Decode, Utf8Encode } from '../util/utf8'
+import { validateInt } from '../util/validator'
 import { AbstractTransactionBase } from './AbstractTransactionBase'
 
 /**

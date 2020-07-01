@@ -23,10 +23,11 @@
 
 'use strict'
 
-const Ed25519 = require('../../util/Ed25519.js')
-const Validator = require('../../util/Validator.js')
+const validator = require('../../util/validator.js')
 const PublicKey = require('./PublicKey.js')
-const Sha256 = require('../../util/Sha256.js')
+const sign = require('../../util/ed25519/sign.js')
+const key = require('../../util/ed25519/key.js')
+const sha256 = require('../../util/sha256.js')
 
 /**
  * Базовый класс для работы с приватными ключами.
@@ -45,7 +46,7 @@ class SecretKey {
      * @private
      */
     this._bytes = new Uint8Array(SecretKey.LENGTH)
-    Validator.validateUint8Array(bytes, SecretKey.LENGTH)
+    validator.validateUint8Array(bytes, SecretKey.LENGTH)
     this._bytes.set(bytes)
   }
 
@@ -71,7 +72,7 @@ class SecretKey {
    * @readonly
    */
   get publicKey () {
-    return new PublicKey.PublicKey(new Ed25519.Ed25519().publicKeyFromSecretKey(this._bytes))
+    return new PublicKey.PublicKey(key.publicKeyFromSecretKey(this._bytes))
   }
 
   /**
@@ -85,8 +86,8 @@ class SecretKey {
    * let sig = SecretKey.fromSeed(seed).sign(msg)
    */
   sign (message) {
-    Validator.validateUint8Array(message)
-    return new Ed25519.Ed25519().sign(message, this._bytes)
+    validator.validateUint8Array(message)
+    return sign.sign(message, this._bytes)
   }
 
   /**
@@ -101,11 +102,11 @@ class SecretKey {
    * let key = SecretKey.fromSeed(seed)
    */
   static fromSeed (seed) {
-    Validator.validateUint8Array(seed)
+    validator.validateUint8Array(seed)
     if (seed.byteLength === 32) {
-      return new SecretKey(new Ed25519.Ed25519().secretKeyFromSeed(seed))
+      return new SecretKey(key.secretKeyFromSeed(seed))
     }
-    return new SecretKey(new Ed25519.Ed25519().secretKeyFromSeed(Sha256.sha256(seed)))
+    return new SecretKey(key.secretKeyFromSeed(sha256.sha256(seed)))
   }
 }
 

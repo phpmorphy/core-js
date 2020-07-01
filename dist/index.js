@@ -27,8 +27,10 @@ const PublicKey = require('./key/ed25519/PublicKey.js')
 const SecretKey = require('./key/ed25519/SecretKey.js')
 const Address = require('./address/Address.js')
 const Transaction = require('./transaction/Transaction.js')
+const sha512 = require('./util/sha512.js')
 
 exports.PublicKey = PublicKey.PublicKey
 exports.SecretKey = SecretKey.SecretKey
 exports.Address = Address.Address
 exports.Transaction = Transaction.Transaction
+exports.sha512 = sha512.sha512

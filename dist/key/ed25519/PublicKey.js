@@ -23,8 +23,8 @@
 
 'use strict'
 
-const Ed25519 = require('../../util/Ed25519.js')
-const Validator = require('../../util/Validator.js')
+const verify = require('../../util/ed25519/verify.js')
+const validator = require('../../util/validator.js')
 
 /**
  * Базовый класс для работы с публичными ключами.
@@ -42,7 +42,7 @@ class PublicKey {
      * @private
      */
     this._bytes = new Uint8Array(PublicKey.LENGTH)
-    Validator.validateUint8Array(bytes, PublicKey.LENGTH)
+    validator.validateUint8Array(bytes, PublicKey.LENGTH)
     this._bytes.set(bytes)
   }
 
@@ -88,9 +88,9 @@ class PublicKey {
    * let ver = new PublicKey(key).verifySignature(sig, msg)
    */
   verifySignature (signature, message) {
-    Validator.validateUint8Array(signature, PublicKey.SIGNATURE_LENGTH)
-    Validator.validateUint8Array(message)
-    return new Ed25519.Ed25519().verify(signature, message, this._bytes)
+    validator.validateUint8Array(signature, PublicKey.SIGNATURE_LENGTH)
+    validator.validateUint8Array(message)
+    return verify.verify(signature, message, this._bytes)
   }
 }
 

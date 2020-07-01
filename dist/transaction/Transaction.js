@@ -23,9 +23,9 @@
 
 'use strict'
 
-const Validator = require('../util/Validator.js')
-const Converter = require('../util/Converter.js')
-const Utf8 = require('../util/Utf8.js')
+const validator = require('../util/validator.js')
+const converter = require('../util/converter.js')
+const utf8 = require('../util/utf8.js')
 const AbstractTransactionBase = require('./AbstractTransactionBase.js')
 
 /**
@@ -56,13 +56,13 @@ class Transaction extends AbstractTransactionBase.AbstractTransactionBase {
     this._checkFields(['version'])
     this._checkVersionIsStruct()
     this._checkFields(['prefix'])
-    return Converter.versionToPrefix(this._view.getUint16(35))
+    return converter.versionToPrefix(this._view.getUint16(35))
   }
 
   set prefix (prefix) {
     this._checkFields(['version'])
     this._checkVersionIsStruct()
-    this._view.setUint16(35, Converter.prefixToVersion(prefix))
+    this._view.setUint16(35, converter.prefixToVersion(prefix))
     this._setFields(['prefix'])
   }
 
@@ -89,7 +89,7 @@ class Transaction extends AbstractTransactionBase.AbstractTransactionBase {
     this._checkVersionIsStruct()
     this._checkFields(['name'])
     const txt = this._bytes.subarray(41 + 1, 41 + 1 + this._bytes[41])
-    return Utf8.Utf8Decode(txt)
+    return utf8.Utf8Decode(txt)
   }
 
   set name (name) {
@@ -98,7 +98,7 @@ class Transaction extends AbstractTransactionBase.AbstractTransactionBase {
     if (typeof name !== 'string') {
       throw new Error('name type must be a string')
     }
-    const txt = Utf8.Utf8Encode(name)
+    const txt = utf8.Utf8Encode(name)
     if (txt.byteLength >= 36) {
       throw new Error('name is too long')
     }
@@ -136,7 +136,7 @@ class Transaction extends AbstractTransactionBase.AbstractTransactionBase {
   set profitPercent (percent) {
     this._checkFields(['version'])
     this._checkVersionIsStruct()
-    Validator.validateInt(percent, 100, 500)
+    validator.validateInt(percent, 100, 500)
     this._view.setUint16(37, percent)
     this._setFields(['profitPercent'])
   }
@@ -170,7 +170,7 @@ class Transaction extends AbstractTransactionBase.AbstractTransactionBase {
   set feePercent (percent) {
     this._checkFields(['version'])
     this._checkVersionIsStruct()
-    Validator.validateInt(percent, 0, 2000)
+    validator.validateInt(percent, 0, 2000)
     this._view.setUint16(39, percent)
     this._setFields(['feePercent'])
   }

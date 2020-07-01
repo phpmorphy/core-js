@@ -21,8 +21,8 @@
 import { Bech32 } from '../util/Bech32'
 import { PublicKey } from '../key/ed25519/PublicKey'
 import { SecretKey } from '../key/ed25519/SecretKey'
-import { validateStr } from '../util/Validator'
-import { prefixToVersion, versionToPrefix } from '../util/Converter'
+import { validateStr } from '../util/validator'
+import { prefixToVersion, versionToPrefix } from '../util/converter'
 
 /**
  * Базовый класс для работы с адресами.

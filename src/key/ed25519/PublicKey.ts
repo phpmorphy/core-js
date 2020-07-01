@@ -18,8 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { Ed25519 } from '../../util/Ed25519'
-import { validateUint8Array } from '../../util/Validator'
+import { verify } from '../../util/ed25519/verify'
+import { validateUint8Array } from '../../util/validator'
 
 /**
  * Базовый класс для работы с публичными ключами.
@@ -91,6 +91,6 @@ export class PublicKey {
     validateUint8Array(signature, PublicKey.SIGNATURE_LENGTH)
     validateUint8Array(message)
 
-    return new Ed25519().verify(signature, message, this._bytes)
+    return verify(signature, message, this._bytes)
   }
 }

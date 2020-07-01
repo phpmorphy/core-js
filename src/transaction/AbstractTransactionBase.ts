@@ -21,8 +21,8 @@
 import { Address } from '../address/Address'
 import { SecretKey } from '../key/ed25519/SecretKey'
 import { AbstractTransaction } from './AbstractTransaction'
-import { sha256 } from '../util/Sha256'
-import { validateInt, validateUint8Array } from '../util/Validator'
+import { sha256 } from '../util/sha256'
+import { validateInt, validateUint8Array } from '../util/validator'
 
 /**
  * Базовый класс для работы с транзакциями.

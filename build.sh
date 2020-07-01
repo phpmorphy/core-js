@@ -8,6 +8,11 @@ if [[ -d "$(pwd)/tmp" ]]; then
   rm -r "$(pwd)/tmp"
 fi
 
+# clean dist
+if [[ -d "$(pwd)/dist" ]]; then
+  rm -r "$(pwd)/dist"
+fi
+
 # create tmp dir
 mkdir "$(pwd)/tmp"
 

@@ -75,8 +75,6 @@ function cryptoHashBlocksHl (hh: Int32Array, hl: Int32Array, m: Uint8Array, n: n
   let th
   let tl
 
-  // let i
-  // let j
   let h
   let l
 
@@ -112,12 +110,9 @@ function cryptoHashBlocksHl (hh: Int32Array, hl: Int32Array, m: Uint8Array, n: n
       d = h >>> 16
 
       // Sigma1
-      h = ((ah[4] >>> 14) | (al[4] << (32 - 14))) ^
-        ((ah[4] >>> 18) | (al[4] << (32 - 18))) ^
-        ((al[4] >>> (41 - 32)) | (ah[4] << (32 - (41 - 32))))
-      l = ((al[4] >>> 14) | (ah[4] << (32 - 14))) ^
-        ((al[4] >>> 18) | (ah[4] << (32 - 18))) ^
-        ((ah[4] >>> (41 - 32)) | (al[4] << (32 - (41 - 32))))
+      h = ((ah[4] >>> 14) | (al[4] << (32 - 14))) ^ ((ah[4] >>> 18) | (al[4] << (32 - 18))) ^ ((al[4] >>> (41 - 32)) | (ah[4] << (32 - (41 - 32))))
+
+      l = ((al[4] >>> 14) | (ah[4] << (32 - 14))) ^ ((al[4] >>> 18) | (ah[4] << (32 - 18))) ^ ((ah[4] >>> (41 - 32)) | (al[4] << (32 - (41 - 32))))
 
       a += l & 0xffff
       b += l >>> 16
@@ -168,12 +163,9 @@ function cryptoHashBlocksHl (hh: Int32Array, hl: Int32Array, m: Uint8Array, n: n
       d = h >>> 16
 
       // Sigma0
-      h = ((ah[0] >>> 28) | (al[0] << (32 - 28))) ^
-        ((al[0] >>> (34 - 32)) | (ah[0] << (32 - (34 - 32)))) ^
-        ((al[0] >>> (39 - 32)) | (ah[0] << (32 - (39 - 32))))
-      l = ((al[0] >>> 28) | (ah[0] << (32 - 28))) ^
-        ((ah[0] >>> (34 - 32)) | (al[0] << (32 - (34 - 32)))) ^
-        ((ah[0] >>> (39 - 32)) | (al[0] << (32 - (39 - 32))))
+      h = ((ah[0] >>> 28) | (al[0] << (32 - 28))) ^ ((al[0] >>> (34 - 32)) | (ah[0] << (32 - (34 - 32)))) ^ ((al[0] >>> (39 - 32)) | (ah[0] << (32 - (39 - 32))))
+
+      l = ((al[0] >>> 28) | (ah[0] << (32 - 28))) ^ ((ah[0] >>> (34 - 32)) | (al[0] << (32 - (34 - 32)))) ^ ((ah[0] >>> (39 - 32)) | (al[0] << (32 - (39 - 32))))
 
       a += l & 0xffff
       b += l >>> 16
@@ -273,11 +265,9 @@ function cryptoHashBlocksHl (hh: Int32Array, hl: Int32Array, m: Uint8Array, n: n
           // sigma1
           th = wh[(j + 14) % 16]
           tl = wl[(j + 14) % 16]
-          h = ((th >>> 19) | (tl << (32 - 19))) ^
-            ((tl >>> (61 - 32)) | (th << (32 - (61 - 32)))) ^ (th >>> 6)
-          l = ((tl >>> 19) | (th << (32 - 19))) ^
-            ((th >>> (61 - 32)) | (tl << (32 - (61 - 32)))) ^
-            ((tl >>> 6) | (th << (32 - 6)))
+
+          h = ((th >>> 19) | (tl << (32 - 19))) ^ ((tl >>> (61 - 32)) | (th << (32 - (61 - 32)))) ^ (th >>> 6)
+          l = ((tl >>> 19) | (th << (32 - 19))) ^ ((th >>> (61 - 32)) | (tl << (32 - (61 - 32)))) ^ ((tl >>> 6) | (th << (32 - 6)))
 
           a += l & 0xffff
           b += l >>> 16
@@ -294,37 +284,40 @@ function cryptoHashBlocksHl (hh: Int32Array, hl: Int32Array, m: Uint8Array, n: n
       }
     }
 
-    // add
-    for (let i = 0; i < 8; i++) {
-      h = ah[i]
-      l = al[i]
-
-      a = l & 0xffff
-      b = l >>> 16
-      c = h & 0xffff
-      d = h >>> 16
-
-      h = hh[i]
-      l = hl[i]
-
-      a += l & 0xffff
-      b += l >>> 16
-      c += h & 0xffff
-      d += h >>> 16
-
-      b += a >>> 16
-      c += b >>> 16
-      d += c >>> 16
-
-      hh[i] = ah[i] = (c & 0xffff) | (d << 16)
-      hl[i] = al[i] = (a & 0xffff) | (b << 16)
-    }
+    array64Sum(hh, hl, ah, al)
 
     pos += 128
     n -= 128
   }
 
   return n
+}
+
+function array64Sum (hh: Int32Array, hl: Int32Array, ah: Int32Array, al: Int32Array): void {
+  for (let i = 0; i < 8; i++) {
+    let h = ah[i]
+    let l = al[i]
+
+    let a = l & 0xffff
+    let b = l >>> 16
+    let c = h & 0xffff
+    let d = h >>> 16
+
+    h = hh[i]
+    l = hl[i]
+
+    a += l & 0xffff
+    b += l >>> 16
+    c += h & 0xffff
+    d += h >>> 16
+
+    b += a >>> 16
+    c += b >>> 16
+    d += c >>> 16
+
+    hh[i] = ah[i] = (c & 0xffff) | (d << 16)
+    hl[i] = al[i] = (a & 0xffff) | (b << 16)
+  }
 }
 
 /**

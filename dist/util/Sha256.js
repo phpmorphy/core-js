@@ -33,7 +33,7 @@
  * @private
  */
 function sha256 (message) {
-  const hh = new Int32Array([
+  const h = new Int32Array([
     0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A, 0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19
   ])
   const k = new Int32Array([
@@ -46,53 +46,68 @@ function sha256 (message) {
     0x19A4C116, 0x1E376C08, 0x2748774C, 0x34B0BCB5, 0x391C0CB3, 0x4ED8AA4A, 0x5B9CCA4F, 0x682E6FF3,
     0x748F82EE, 0x78A5636F, 0x84C87814, 0x8CC70208, 0x90BEFFFA, 0xA4506CEB, 0xBEF9A3F7, 0xC67178F2
   ])
+  /**
+   * @param {Int32Array} h
+   * @param {Int32Array} w
+   */
+  function block (h, w) {
+    for (let i = 0; i < 64; i++) {
+      const s1 = rotr(h[4], 6) ^ rotr(h[4], 11) ^ rotr(h[4], 25)
+      const ch = (h[4] & h[5]) ^ ((~h[4]) & h[6])
+      const t1 = h[7] + s1 + ch + k[i] + w[i]
+      const s0 = rotr(h[0], 2) ^ rotr(h[0], 13) ^ rotr(h[0], 22)
+      const ma = (h[0] & h[1]) ^ (h[0] & h[2]) ^ (h[1] & h[2])
+      const t2 = s0 + ma
+      h[7] = h[6]
+      h[6] = h[5]
+      h[5] = h[4]
+      h[4] = h[3] + t1
+      h[3] = h[2]
+      h[2] = h[1]
+      h[1] = h[0]
+      h[0] = t1 + t2
+    }
+  }
+  /**
+   * @param {number} n
+   * @param {number} i
+   * @returns {number}
+   */
+  function rotr (n, i) {
+    return (n >>> i) | (n << (32 - i))
+  }
+  /**
+   * @param {Int32Array} arr
+   * @returns {ArrayBuffer}
+   */
+  function convertEndianness (arr) {
+    const d = new DataView(arr.buffer)
+    for (let i = 0; i < arr.byteLength; i += 4) {
+      d.setUint32(i, d.getUint32(i, true))
+    }
+    return d.buffer
+  }
   const w = new Int32Array(64)
-  const h = new Int32Array(8)
+  const a = new Int32Array(8)
   const q = new Int32Array(new ArrayBuffer(message.length + 8 + (64 - ((message.length + 8) % 64))))
   new Uint8Array(q.buffer).set(message)
   new DataView(q.buffer).setInt8(message.byteLength, 0x80)
   new DataView(q.buffer).setUint32(q.byteLength - 4, message.byteLength * 8)
   convertEndianness(q)
   for (let j = 0; j < q.length; j += 16) {
-    h.set(hh)
     w.set(q.subarray(j))
     for (let i = 16; i < 64; i++) {
-      const s0 = ((w[i - 15] >>> 7) | (w[i - 15] << 25)) ^ ((w[i - 15] >>> 18) | (w[i - 15] << 14)) ^ (w[i - 15] >>> 3)
-      const s1 = ((w[i - 2] >>> 17) | (w[i - 2] << 15)) ^ ((w[i - 2] >>> 19) | (w[i - 2] << 13)) ^ (w[i - 2] >>> 10)
+      const s0 = rotr(w[i - 15], 7) ^ rotr(w[i - 15], 18) ^ (w[i - 15] >>> 3)
+      const s1 = rotr(w[i - 2], 17) ^ rotr(w[i - 2], 19) ^ (w[i - 2] >>> 10)
       w[i] = w[i - 16] + s0 + w[i - 7] + s1
     }
-    shiftRegister(h, k, w)
-    arraySum(hh, h)
+    a.set(h)
+    block(a, w)
+    for (let i = 0; i < 8; i++) {
+      h[i] += a[i]
+    }
   }
-  return new Uint8Array(convertEndianness(hh))
-}
-function shiftRegister (h, k, w) {
-  for (let i = 0; i < 64; i++) {
-    const S0 = ((h[0] >>> 2) | (h[0] << 30)) ^ ((h[0] >>> 13) | (h[0] << 19)) ^ ((h[0] >>> 22) | (h[0] << 10))
-    const Ma = (h[0] & h[1]) ^ (h[0] & h[2]) ^ (h[1] & h[2])
-    const S1 = ((h[4] >>> 6) | (h[4] << 26)) ^ ((h[4] >>> 11) | (h[4] << 21)) ^ ((h[4] >>> 25) | (h[4] << 7))
-    const t1 = h[7] + S1 + ((h[4] & h[5]) ^ ((~h[4]) & h[6])) + k[i] + w[i]
-    h[7] = h[6]
-    h[6] = h[5]
-    h[5] = h[4]
-    h[4] = h[3] + t1
-    h[3] = h[2]
-    h[2] = h[1]
-    h[1] = h[0]
-    h[0] = t1 + S0 + Ma
-  }
-}
-function arraySum (a, b) {
-  for (let i = 0; i < 8; i++) {
-    a[i] += b[i]
-  }
-}
-function convertEndianness (arr) {
-  const d = new DataView(arr.buffer)
-  for (let i = 0; i < arr.byteLength; i += 4) {
-    d.setUint32(i, d.getUint32(i, true))
-  }
-  return d.buffer
+  return new Uint8Array(convertEndianness(h))
 }
 
 exports.sha256 = sha256

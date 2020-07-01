@@ -20,7 +20,7 @@
 
 // tslint:disable:no-bitwise
 
-import { validateInt, validateStr } from '../util/Validator'
+import { validateInt, validateStr } from '../util/validator'
 
 /**
  * Конвертер цифровой версии префикса в текстовое представление.

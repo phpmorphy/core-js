@@ -23,8 +23,8 @@
 
 'use strict'
 
-const Validator = require('../util/Validator.js')
-const Sha256 = require('../util/Sha256.js')
+const validator = require('../util/validator.js')
+const sha256 = require('../util/sha256.js')
 const SecretKey = require('../key/ed25519/SecretKey.js')
 const Address = require('../address/Address.js')
 const AbstractTransaction = require('./AbstractTransaction.js')
@@ -53,7 +53,7 @@ class AbstractTransactionBase extends AbstractTransaction.AbstractTransaction {
    * @readonly
    */
   get hash () {
-    return Sha256.sha256(this._bytes)
+    return sha256.sha256(this._bytes)
   }
 
   /**
@@ -80,7 +80,7 @@ class AbstractTransactionBase extends AbstractTransaction.AbstractTransaction {
     if (Object.prototype.hasOwnProperty.call(this._fieldsMap, 'version')) {
       throw new Error('could not update version')
     }
-    Validator.validateInt(version, AbstractTransactionBase.Genesis, AbstractTransactionBase.DeleteTransitAddress)
+    validator.validateInt(version, AbstractTransactionBase.Genesis, AbstractTransactionBase.DeleteTransitAddress)
     this._bytes[0] = version
     this._setFields(['version'])
   }
@@ -210,7 +210,7 @@ class AbstractTransactionBase extends AbstractTransaction.AbstractTransaction {
   set value (value) {
     this._checkFields(['version'])
     this._checkVersionIsBasic()
-    Validator.validateInt(value, 1, 9007199254740991)
+    validator.validateInt(value, 1, 9007199254740991)
     this._view.setInt32(69 + 4, value | 0)
     this._view.setInt32(69, (value - this._view.getUint32(69 + 4)) / 4294967296)
     this._setFields(['value'])
@@ -246,7 +246,7 @@ class AbstractTransactionBase extends AbstractTransaction.AbstractTransaction {
   }
 
   set nonce (nonce) {
-    Validator.validateInt(nonce, 0, 9007199254740991)
+    validator.validateInt(nonce, 0, 9007199254740991)
     this._view.setInt32(77 + 4, nonce | 0)
     this._view.setInt32(77, (nonce - this._view.getUint32(77 + 4)) / 4294967296)
     this._setFields(['nonce'])
@@ -279,7 +279,7 @@ class AbstractTransactionBase extends AbstractTransaction.AbstractTransaction {
 
   set signature (signature) {
     this._checkFields(['version', 'sender'])
-    Validator.validateUint8Array(signature, this.sender.publicKey.signatureLength)
+    validator.validateUint8Array(signature, this.sender.publicKey.signatureLength)
     this._bytes.set(signature, 85)
     this._setFields(['signature'])
   }

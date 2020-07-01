@@ -23,7 +23,7 @@
 
 'use strict'
 
-const Converter = require('./Converter.js')
+const converter = require('./converter.js')
 
 /**
  * Конвертер адресов в формате Bech32.
@@ -51,7 +51,7 @@ class Bech32 {
       throw new Error('bech32: missing separator')
     }
     const pfx = str.slice(0, sepPos)
-    const ver = Converter.prefixToVersion(pfx)
+    const ver = converter.prefixToVersion(pfx)
     const data = str.slice(sepPos + 1)
     this._checkAlphabet(data)
     this._verifyChecksum(pfx, data)
@@ -68,7 +68,7 @@ class Bech32 {
    */
   static encode (bytes) {
     const version = (bytes[0] << 8) + bytes[1]
-    const prefix = Converter.versionToPrefix(version)
+    const prefix = converter.versionToPrefix(version)
     const data = this._convert8to5(bytes.subarray(2))
     const checksum = this._createChecksum(prefix, data)
     return prefix + '1' + data + checksum

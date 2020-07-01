@@ -23,7 +23,7 @@
 
 'use strict'
 
-const Validator = require('./Validator.js')
+const validator = require('./validator.js')
 
 /**
  * Конвертер цифровой версии префикса в текстовое представление.
@@ -33,7 +33,7 @@ const Validator = require('./Validator.js')
  * @private
  */
 function versionToPrefix (version) {
-  Validator.validateInt(version, 0, 65535)
+  validator.validateInt(version, 0, 65535)
   if (version === 0) {
     return 'genesis'
   }
@@ -57,7 +57,7 @@ function prefixToVersion (prefix) {
   if (prefix === 'genesis') {
     return 0
   }
-  Validator.validateStr(prefix, 3)
+  validator.validateStr(prefix, 3)
   const a = prefix.charCodeAt(0) - 96
   const b = prefix.charCodeAt(1) - 96
   const c = prefix.charCodeAt(2) - 96
