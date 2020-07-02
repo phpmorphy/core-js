@@ -22,5 +22,3 @@ export { SecretKey } from './key/ed25519/SecretKey'
 export { PublicKey } from './key/ed25519/PublicKey'
 export { Address } from './address/Address'
 export { Transaction } from './transaction/Transaction'
-
-export { sha512 } from './util/sha512'

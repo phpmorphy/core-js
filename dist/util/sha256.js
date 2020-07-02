@@ -26,7 +26,7 @@
 /**
  * Безопасный алгоритм хеширования, SHA2-256.
  * @see https://en.wikipedia.org/wiki/SHA-2
- * @param {number[]} message message
+ * @param {number[]|Uint8Array|Buffer} message message
  * @returns {number[]} hash
  * @private
  */
@@ -48,20 +48,17 @@ function sha256 (message) {
   return digest
 }
 /**
- * @param {number[]} message
+ * @param {number[]|Uint8Array|Buffer} message
  * @returns {number[][]}
  */
 function sha256PreProcess (message) {
-  const mLen = message.length
-  const bLen = mLen + 8 + (64 - ((mLen + 8) % 64))
   const bytes = []
-  bytes.length = bLen
-  for (let i = 0; i < bLen; i++) {
+  for (let i = 0, l = message.length + 8 + (64 - ((message.length + 8) % 64)); i < l; i++) {
     bytes[i] = message[i] || 0
   }
-  bytes[mLen] = 0x80
-  bytes[bLen - 2] = ((mLen * 8) >>> 8) & 0xff
-  bytes[bLen - 1] = (mLen * 8) & 0xff
+  bytes[message.length] = 0x80
+  bytes[bytes.length - 2] = ((message.length * 8) >>> 8) & 0xff
+  bytes[bytes.length - 1] = (message.length * 8) & 0xff
   const chunks = []
   for (let i = 0, l = bytes.length; i < l; i += 64) {
     const chunk = []

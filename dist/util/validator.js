@@ -41,18 +41,6 @@ function validateInt (arg, min, max) {
   }
 }
 /**
- * @param {Uint8Array} arg
- * @param {number} [len]
- */
-function validateUint8Array (arg, len) {
-  if (!(arg instanceof Uint8Array)) {
-    throw new Error('incorrect type')
-  }
-  if (len !== undefined && arg.byteLength !== len) {
-    throw new Error('incorrect length')
-  }
-}
-/**
  * @param {string} arg
  * @param {number} [len]
  */
@@ -67,4 +55,3 @@ function validateStr (arg, len) {
 
 exports.validateInt = validateInt
 exports.validateStr = validateStr
-exports.validateUint8Array = validateUint8Array

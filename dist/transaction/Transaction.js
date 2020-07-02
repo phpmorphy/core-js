@@ -31,7 +31,7 @@ const AbstractTransactionBase = require('./AbstractTransactionBase.js')
 /**
  * Класс для работы с транзакциями.
  * @class
- * @param {Uint8Array} [bytes] Транзакция в бинарном виде, 150 байт.
+ * @param {number[]} [bytes] Транзакция в бинарном виде, 150 байт.
  * @throws {Error}
  */
 class Transaction extends AbstractTransactionBase.AbstractTransactionBase {
@@ -56,13 +56,16 @@ class Transaction extends AbstractTransactionBase.AbstractTransactionBase {
     this._checkFields(['version'])
     this._checkVersionIsStruct()
     this._checkFields(['prefix'])
-    return converter.versionToPrefix(this._view.getUint16(35))
+    const ver = (this._bytes[35] << 8) + this._bytes[36]
+    return converter.versionToPrefix(ver)
   }
 
   set prefix (prefix) {
     this._checkFields(['version'])
     this._checkVersionIsStruct()
-    this._view.setUint16(35, converter.prefixToVersion(prefix))
+    const ver = converter.prefixToVersion(prefix)
+    this._bytes[35] = (ver >>> 8) & 0xff
+    this._bytes[36] = ver & 0xff
     this._setFields(['prefix'])
   }
 
@@ -88,7 +91,7 @@ class Transaction extends AbstractTransactionBase.AbstractTransactionBase {
     this._checkFields(['version'])
     this._checkVersionIsStruct()
     this._checkFields(['name'])
-    const txt = this._bytes.subarray(41 + 1, 41 + 1 + this._bytes[41])
+    const txt = this._bytes.slice(42, 42 + this._bytes[41])
     return utf8.Utf8Decode(txt)
   }
 
@@ -99,11 +102,13 @@ class Transaction extends AbstractTransactionBase.AbstractTransactionBase {
       throw new Error('name type must be a string')
     }
     const txt = utf8.Utf8Encode(name)
-    if (txt.byteLength >= 36) {
+    if (txt.length >= 36) {
       throw new Error('name is too long')
     }
-    this._bytes[41] = txt.byteLength
-    this._bytes.set(txt, 41 + 1)
+    this._bytes[41] = txt.length
+    for (let i = 0; i < 35; i++) {
+      this._bytes[42 + i] = txt[i] || 0
+    }
     this._setFields(['name'])
   }
 
@@ -130,14 +135,15 @@ class Transaction extends AbstractTransactionBase.AbstractTransactionBase {
     this._checkFields(['version'])
     this._checkVersionIsStruct()
     this._checkFields(['profitPercent'])
-    return this._view.getUint16(37)
+    return (this._bytes[37] << 8) + this._bytes[38]
   }
 
   set profitPercent (percent) {
     this._checkFields(['version'])
     this._checkVersionIsStruct()
     validator.validateInt(percent, 100, 500)
-    this._view.setUint16(37, percent)
+    this._bytes[37] = (percent >>> 8) & 0xff
+    this._bytes[38] = percent & 0xff
     this._setFields(['profitPercent'])
   }
 
@@ -164,19 +170,20 @@ class Transaction extends AbstractTransactionBase.AbstractTransactionBase {
     this._checkFields(['version'])
     this._checkVersionIsStruct()
     this._checkFields(['feePercent'])
-    return this._view.getUint16(39)
+    return (this._bytes[39] << 8) + this._bytes[40]
   }
 
   set feePercent (percent) {
     this._checkFields(['version'])
     this._checkVersionIsStruct()
     validator.validateInt(percent, 0, 2000)
-    this._view.setUint16(39, percent)
+    this._bytes[39] = (percent >>> 8) & 0xff
+    this._bytes[40] = percent & 0xff
     this._setFields(['feePercent'])
   }
 
   /**
-   * Устанавливает размер комисии и возвращяет this.
+   * Устанавливает размер комиссии и возвращает this.
    * Доступно только для CreateStructure и UpdateStructure.
    * @param {number} percent Комиссия в сотых долях процента с шагом в 0.01%. Валидные значения от 0 до 2000 (соотвественно от 0% до 20%).
    * @returns {this}

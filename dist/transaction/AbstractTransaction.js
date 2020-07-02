@@ -23,8 +23,6 @@
 
 'use strict'
 
-const validator = require('../util/validator.js')
-
 /**
  * @class
  * @lends Transaction
@@ -32,32 +30,33 @@ const validator = require('../util/validator.js')
  */
 class AbstractTransaction {
   /**
-   * @param {Uint8Array} [bytes] Транзакция в бинарном виде, 150 байт.
+   * @param {number[]|Uint8Array} [bytes] Транзакция в бинарном виде, 150 байт.
    * @throws {Error}
    * @private
    */
   constructor (bytes) {
     /**
      * Транзакция в бинарном виде.
-     * @type {Uint8Array}
+     * @type {number[]}
      * @private
      */
-    this._bytes = new Uint8Array(AbstractTransaction.LENGTH)
-    /**
-     * Транзакция в бинарном виде.
-     * @type {DataView}
-     * @private
-     */
-    this._view = new DataView(this._bytes.buffer)
+    this._bytes = []
     /**
      * Заполоненные свойства.
      * @type {Object}
      * @private
      */
     this._fieldsMap = {}
+    for (let i = 0; i < 150; i++) {
+      this._bytes[i] = 0
+    }
     if (bytes !== undefined) {
-      validator.validateUint8Array(bytes, AbstractTransaction.LENGTH)
-      this._bytes.set(bytes)
+      if (bytes.length !== 150) {
+        throw new Error('incorrect length')
+      }
+      for (let i = 0; i < 150; i++) {
+        this._bytes[i] = bytes[i]
+      }
       this._setFields([
         'version', 'sender', 'recipient', 'value', 'prefix',
         'name', 'profitPercent', 'feePercent', 'nonce', 'signature'
@@ -65,12 +64,6 @@ class AbstractTransaction {
     }
   }
 
-  /**
-   * Длина транзакции в байтах.
-   * @type {number}
-   * @constant
-   */
-  static get LENGTH () { return 150 }
   /**
    * Genesis-транзакция.
    * Может быть добавлена только в Genesis-блок.

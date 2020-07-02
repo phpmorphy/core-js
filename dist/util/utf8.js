@@ -27,7 +27,7 @@
  * Конвертер строки в типизированный массив UTF-8 байтов.
  * @function
  * @param {string} text
- * @returns {Uint8Array}
+ * @returns {number[]}
  * @private
  */
 function Utf8Encode (text) {
@@ -47,18 +47,18 @@ function Utf8Encode (text) {
       bytes.push((0x80 | ((code >> 6) & 0x3f)), (0x80 | (code & 0x3f)))
     }
   }
-  return new Uint8Array(bytes)
+  return bytes
 }
 /**
  * Конвертер из типизированного массива UTF-8 байтов в строку.
  * @function
- * @param {Uint8Array} bytes
+ * @param {number[]|Uint8Array|Buffer} bytes
  * @returns {string}
  * @private
  */
 function Utf8Decode (bytes) {
   let str = ''
-  for (let i = 0; i < bytes.byteLength; i++) {
+  for (let i = 0; i < bytes.length; i++) {
     if (bytes[i] < 0x80) {
       str += String.fromCharCode(bytes[i])
     } else if (bytes[i] > 0xBF && bytes[i] < 0xE0) {

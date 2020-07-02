@@ -19,7 +19,6 @@
 // SOFTWARE.
 
 import { verify } from '../../util/ed25519/verify'
-import { validateUint8Array } from '../../util/validator'
 
 /**
  * Базовый класс для работы с публичными ключами.
@@ -45,40 +44,42 @@ export class PublicKey {
    * @type {number}
    * @constant
    */
-  get signatureLength (): number { return PublicKey.SIGNATURE_LENGTH }
+  get signatureLength (): number { return 64 }
 
   /**
    * Публичный ключ в бинарном виде. В формате libsodium.
-   * @type {Uint8Array}
+   * @type {number[]}
    * @private
    * @internal
    */
-  private readonly _bytes: Uint8Array = new Uint8Array(PublicKey.LENGTH)
+  private readonly _bytes: number[] = []
 
   /**
-   * @param {Uint8Array} bytes Публичный ключ в формате libsodium, 32 байта (256 бит).
+   * @param {number[]} bytes Публичный ключ в формате libsodium, 32 байта (256 бит).
    * @throws {Error}
    */
-  constructor (bytes: Uint8Array) {
-    validateUint8Array(bytes, PublicKey.LENGTH)
-    this._bytes.set(bytes)
+  constructor (bytes: number[] | Uint8Array | Buffer) {
+    if (bytes.length !== 32) {
+      throw new Error('invalid length')
+    }
+    for (let i = 0; i < 32; i++) {
+      this._bytes[i] = bytes[i]
+    }
   }
 
   /**
    * Публичный ключ в формате libsodium, 32 байта (256 бит).
-   * @type {Uint8Array}
+   * @type {number[]}
    * @readonly
    */
-  get bytes (): Uint8Array {
-    const b = new Uint8Array(this._bytes.byteLength)
-    b.set(this._bytes)
-    return b
+  get bytes (): number[] {
+    return this._bytes.slice(0, 32)
   }
 
   /**
    * Проверяет цифровую подпись.
-   * @param {Uint8Array} signature Подпись, 64 байта.
-   * @param {Uint8Array} message Сообщение
+   * @param {number[]|Uint8Array|Buffer} signature Подпись, 64 байта.
+   * @param {number[]|Uint8Array|Buffer} message Сообщение
    * @returns {boolean}
    * @throws {Error}
    * @example
@@ -87,10 +88,13 @@ export class PublicKey {
    * let msg = new Uint8Array(1)
    * let ver = new PublicKey(key).verifySignature(sig, msg)
    */
-  verifySignature (signature: Uint8Array, message: Uint8Array): boolean {
-    validateUint8Array(signature, PublicKey.SIGNATURE_LENGTH)
-    validateUint8Array(message)
-
+  verifySignature (
+    signature: number[] | Uint8Array | Buffer,
+    message: number[] | Uint8Array | Buffer
+  ): boolean {
+    if (signature.length !== 64) {
+      throw new Error('invalid length')
+    }
     return verify(signature, message, this._bytes)
   }
 }

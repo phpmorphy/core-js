@@ -23,37 +23,39 @@
 
 'use strict'
 
-const gf0 = new Float64Array(16)
-const gf1 = new Float64Array([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-const D2 = new Float64Array([
+const gf0 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+const gf1 = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+const D2 = [
   0xf159, 0x26b2, 0x9b94, 0xebd6, 0xb156, 0x8283, 0x149a, 0x00e0,
   0xd130, 0xeef3, 0x80f2, 0x198e, 0xfce7, 0x56df, 0xd9dc, 0x2406
-])
-const X = new Float64Array([
+]
+const X = [
   0xd51a, 0x8f25, 0x2d60, 0xc956, 0xa7b2, 0x9525, 0xc760, 0x692c,
   0xdc5c, 0xfdd6, 0xe231, 0xc0a4, 0x53fe, 0xcd6e, 0x36d3, 0x2169
-])
-const Y = new Float64Array([
+]
+const Y = [
   0x6658, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666,
   0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666, 0x6666
-])
-const L = new Float64Array([
+]
+const L = [
   0xed, 0xd3, 0xf5, 0x5c, 0x1a, 0x63, 0x12, 0x58, 0xd6, 0x9c, 0xf7, 0xa2,
   0xde, 0xf9, 0xde, 0x14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x10
-])
+]
 /**
- * @param {Uint8Array} r
+ * @param {number[]} r
  * @private
  */
 function reduce (r) {
-  const x = new Float64Array(64)
-  x.set(r)
-  r.set(new Float64Array(64))
+  const x = []
+  for (let i = 0; i < 64; i++) {
+    x[i] = r[i]
+    r[i] = 0
+  }
   modL(r, x)
 }
 /**
- * @param {Uint8Array} r
- * @param {Float64Array} x
+ * @param {number[]} r
+ * @param {number[]} x
  * @private
  */
 function modL (r, x) {
@@ -88,19 +90,18 @@ function modLSub (r, x) {
   }
 }
 /**
- * @param {Float64Array[]} p
- * @param {Float64Array[]} q
- * @param {Uint8Array} s
+ * @param {number[][]} p
+ * @param {number[][]} q
+ * @param {number[]} s
  * @private
  */
 function scalarmult (p, q, s) {
-  let b
   set25519(p[0], gf0)
   set25519(p[1], gf1)
   set25519(p[2], gf1)
   set25519(p[3], gf0)
   for (let i = 255; i >= 0; --i) {
-    b = (s[(i / 8) | 0] >> (i & 7)) & 1
+    const b = (s[(i / 8) | 0] >> (i & 7)) & 1
     cswap(p, q, b)
     add(q, p)
     add(p, p)
@@ -108,8 +109,8 @@ function scalarmult (p, q, s) {
   }
 }
 /**
- * @param {Float64Array[]} p
- * @param {Float64Array[]} q
+ * @param {number[][]} p
+ * @param {number[][]} q
  * @param {number} b
  * @private
  */
@@ -119,20 +120,20 @@ function cswap (p, q, b) {
   }
 }
 /**
- * @param {Float64Array[]} p
- * @param {Float64Array[]} q
+ * @param {number[][]} p
+ * @param {number[][]} q
  * @private
  */
 function add (p, q) {
-  const a = new Float64Array(16)
-  const b = new Float64Array(16)
-  const c = new Float64Array(16)
-  const d = new Float64Array(16)
-  const e = new Float64Array(16)
-  const f = new Float64Array(16)
-  const g = new Float64Array(16)
-  const h = new Float64Array(16)
-  const t = new Float64Array(16)
+  const a = []
+  const b = []
+  const c = []
+  const d = []
+  const e = []
+  const f = []
+  const g = []
+  const h = []
+  const t = []
   fnZ(a, p[1], p[0])
   fnZ(t, q[1], q[0])
   fnM(a, a, t)
@@ -153,9 +154,9 @@ function add (p, q) {
   fnM(p[3], e, h)
 }
 /**
- * @param {Float64Array} o
- * @param {Float64Array} a
- * @param {Float64Array} b
+ * @param {number[]} o
+ * @param {number[]} a
+ * @param {number[]} b
  * @private
  */
 function fnA (o, a, b) {
@@ -164,13 +165,16 @@ function fnA (o, a, b) {
   }
 }
 /**
- * @param {Float64Array} o
- * @param {Float64Array} a
- * @param {Float64Array} b
+ * @param {number[]} o
+ * @param {number[]} a
+ * @param {number[]} b
  * @private
  */
 function fnM (o, a, b) {
-  const t = new Float64Array(31)
+  const t = []
+  for (let i = 0; i < 31; i++) {
+    t[i] = 0
+  }
   for (let i = 0; i < 16; i++) {
     for (let j = 0; j < 16; j++) {
       t[i + j] += a[i] * b[j]
@@ -179,14 +183,16 @@ function fnM (o, a, b) {
   for (let i = 0; i < 15; i++) {
     t[i] += 38 * t[i + 16]
   }
-  o.set(t.slice(0, 16))
+  for (let i = 0; i < 16; i++) {
+    o[i] = t[i]
+  }
   car25519(o)
   car25519(o)
 }
 /**
- * @param {Float64Array} o
- * @param {Float64Array} a
- * @param {Float64Array} b
+ * @param {number[]} o
+ * @param {number[]} a
+ * @param {number[]} b
  * @private
  */
 function fnZ (o, a, b) {
@@ -195,23 +201,22 @@ function fnZ (o, a, b) {
   }
 }
 /**
- * @param {Float64Array} r
- * @param {Float64Array} a
+ * @param {number[]} r
+ * @param {number[]} a
  * @private
  */
 function set25519 (r, a) {
-  r.set(a)
+  for (let i = 0; i < 16; i++) {
+    r[i] = a[i]
+  }
 }
 /**
- * @param {Float64Array[]} p
- * @param {Uint8Array} s
+ * @param {number[][]} p
+ * @param {number[]} s
  * @private
  */
 function scalarbase (p, s) {
-  const q = [
-    new Float64Array(16), new Float64Array(16),
-    new Float64Array(16), new Float64Array(16)
-  ]
+  const q = [[], [], [], []]
   set25519(q[0], X)
   set25519(q[1], Y)
   set25519(q[2], gf1)
@@ -219,7 +224,7 @@ function scalarbase (p, s) {
   scalarmult(p, q, s)
 }
 /**
- * @param {Float64Array} o
+ * @param {number[]} o
  * @private
  */
 function car25519 (o) {
@@ -233,14 +238,14 @@ function car25519 (o) {
   o[0] += c - 1 + 37 * (c - 1)
 }
 /**
- * @param {Uint8Array} r
- * @param {Float64Array[]} p
+ * @param {number[]} r
+ * @param {number[][]} p
  * @private
  */
 function pack (r, p) {
-  const tx = new Float64Array(16)
-  const ty = new Float64Array(16)
-  const zi = new Float64Array(16)
+  const tx = []
+  const ty = []
+  const zi = []
   inv25519(zi, p[2])
   fnM(tx, p[0], zi)
   fnM(ty, p[1], zi)
@@ -248,63 +253,68 @@ function pack (r, p) {
   r[31] ^= par25519(tx) << 7
 }
 /**
- * @param {Float64Array} a
+ * @param {number[]} a
+ * @returns {number}
  * @private
  */
 function par25519 (a) {
-  const d = new Uint8Array(32)
+  const d = []
   pack25519(d, a)
   return d[0] & 1
 }
 /**
- * @param {Float64Array} o
- * @param {Float64Array} a
+ * @param {number[]} o
+ * @param {number[]} a
  * @private
  */
 function fnS (o, a) {
   fnM(o, a, a)
 }
 /**
- * @param {Float64Array} o
- * @param {Float64Array} i
+ * @param {number[]} o
+ * @param {number[]} i
  * @private
  */
 function inv25519 (o, i) {
-  const c = new Float64Array(16)
-  c.set(i)
+  const c = []
+  for (let a = 0; a < 16; a++) {
+    c[a] = i[a]
+  }
   for (let a = 253; a >= 0; a--) {
-    fnS(c, c)
+    fnM(c, c, c)
     if (a !== 2 && a !== 4) {
       fnM(c, c, i)
     }
   }
-  o.set(c)
+  for (let a = 0; a < 16; a++) {
+    o[a] = c[a]
+  }
 }
 /**
- * @param {Float64Array} p
- * @param {Float64Array} q
+ * @param {number[]} p
+ * @param {number[]} q
  * @param {number} b
  * @private
  */
 function sel25519 (p, q, b) {
-  let t
   const c = ~(b - 1)
   for (let i = 0; i < 16; i++) {
-    t = c & (p[i] ^ q[i])
+    const t = c & (p[i] ^ q[i])
     p[i] ^= t
     q[i] ^= t
   }
 }
 /**
- * @param {Uint8Array} o
- * @param {Float64Array} n
+ * @param {number[]} o
+ * @param {number[]} n
  * @private
  */
 function pack25519 (o, n) {
-  let b
-  const m = new Float64Array(16)
-  const t = new Float64Array(16)
-  t.set(n)
+  const m = []
+  const t = []
+  for (let i = 0; i < 16; i++) {
+    t[i] = n[i]
+  }
   car25519(t)
   car25519(t)
   car25519(t)
@@ -315,7 +325,7 @@ function pack25519 (o, n) {
       m[i - 1] &= 0xffff
     }
     m[15] = t[15] - 0x7fff - ((m[14] >> 16) & 1)
-    b = (m[15] >> 16) & 1
+    const b = (m[15] >> 16) & 1
     m[14] &= 0xffff
     sel25519(t, m, 1 - b)
   }

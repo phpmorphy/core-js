@@ -18,11 +18,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+// tslint:disable:no-bitwise
+
 import { Address } from '../address/Address'
 import { SecretKey } from '../key/ed25519/SecretKey'
 import { AbstractTransaction } from './AbstractTransaction'
 import { sha256 } from '../util/sha256'
-import { validateInt, validateUint8Array } from '../util/validator'
+import { validateInt } from '../util/validator'
 
 /**
  * Базовый класс для работы с транзакциями.
@@ -33,21 +35,19 @@ import { validateInt, validateUint8Array } from '../util/validator'
 abstract class AbstractTransactionBase extends AbstractTransaction {
   /**
    * Транзакция в бинарном виде, 150 байт.
-   * @type {Uint8Array}
+   * @type {number[]}
    * @readonly
    */
-  get bytes (): Uint8Array {
-    const b = new Uint8Array(this._bytes.byteLength)
-    b.set(this._bytes)
-    return b
+  get bytes (): number[] {
+    return this._bytes.slice(0)
   }
 
   /**
    * Хэш транзакции, sha256 от всех 150 байт.
-   * @type {Uint8Array}
+   * @type {number[]}
    * @readonly
    */
-  get hash (): Uint8Array {
+  get hash (): number[] {
     return sha256(this._bytes)
   }
 
@@ -76,7 +76,7 @@ abstract class AbstractTransactionBase extends AbstractTransaction {
       throw new Error('could not update version')
     }
 
-    validateInt(version, AbstractTransactionBase.Genesis, AbstractTransactionBase.DeleteTransitAddress)
+    validateInt(version, 0, 7)
 
     this._bytes[0] = version
     this._setFields(['version'])
@@ -112,7 +112,7 @@ abstract class AbstractTransactionBase extends AbstractTransaction {
     // sender length = 34
     // sender begin = 1
     // sender end = 35
-    return new Address(this._bytes.subarray(1, 35))
+    return new Address(this._bytes.slice(1, 35))
   }
 
   set sender (address: Address) {
@@ -134,7 +134,10 @@ abstract class AbstractTransactionBase extends AbstractTransaction {
 
     // sender length = 34
     // sender begin = 1
-    this._bytes.set(address.bytes, 1)
+    const b = address.bytes
+    for (let i = 0; i < 34; i++) {
+      this._bytes[1 + i] = b[i]
+    }
     this._setFields(['sender'])
   }
 
@@ -163,7 +166,7 @@ abstract class AbstractTransactionBase extends AbstractTransaction {
     // recipient length = 34
     // recipient begin = 35
     // recipient enf = 69
-    return new Address(this._bytes.subarray(35, 69))
+    return new Address(this._bytes.slice(35, 69))
   }
 
   set recipient (address: Address) {
@@ -191,7 +194,10 @@ abstract class AbstractTransactionBase extends AbstractTransaction {
 
     // recipient length = 34
     // recipient begin = 35
-    this._bytes.set(address.bytes, 35)
+    const b = address.bytes
+    for (let i = 0; i < 34; i++) {
+      this._bytes[35 + i] = b[i]
+    }
     this._setFields(['recipient'])
   }
 
@@ -220,12 +226,7 @@ abstract class AbstractTransactionBase extends AbstractTransaction {
     this._checkFields(['value'])
 
     // value offset = 69
-    if (this._view.getUint16(69) > 0x001f) {
-      throw new Error('value is not safe integer')
-    }
-
-    return this._view.getUint32(69) * 0x1_0000_0000 +
-      this._view.getUint32(69 + 4)
+    return this._bytesToNumber(this._bytes.slice(69, 76))
   }
 
   set value (value: number) {
@@ -233,12 +234,39 @@ abstract class AbstractTransactionBase extends AbstractTransaction {
     this._checkVersionIsBasic()
     validateInt(value, 1, 9007199254740991)
 
-    // value offset = 69
-    // tslint:disable-next-line:no-bitwise
-    this._view.setInt32(69 + 4, value | 0)
-    this._view.setInt32(69,
-      (value - this._view.getUint32(69 + 4)) / 0x1_0000_0000)
+    const b = this._numberToBytes(value)
+    for (let i = 0; i < 8; i++) {
+      this._bytes[69 + i] = b[i]
+    }
     this._setFields(['value'])
+  }
+
+  private _numberToBytes (value: number): number[] {
+    const l = 1
+    const h = (value - l) / 0x1_0000_0000 // value >>> 32
+
+    // value offset = 69
+    this._bytes[69] = (h >>> 24) & 0xff
+    this._bytes[70] = (h >>> 16) & 0xff
+    this._bytes[71] = (h >>> 8) & 0xff
+    this._bytes[72] = h & 0xff
+    this._bytes[73] = (l >>> 24) & 0xff
+    this._bytes[74] = (l >>> 16) & 0xff
+    this._bytes[75] = (l >>> 8) & 0xff
+    this._bytes[76] = l & 0xff
+
+    return []
+  }
+
+  private _bytesToNumber (bytes: number[]): number {
+    if (((this._bytes[69] << 8) + this._bytes[70]) > 0x001f) {
+      throw new Error('value is not safe integer')
+    }
+
+    const h = (this._bytes[69] << 24) + (this._bytes[70] << 16) + (this._bytes[71] << 8) + this._bytes[72]
+    const l = (this._bytes[73] << 24) + (this._bytes[74] << 16) + (this._bytes[75] << 8) + this._bytes[76]
+
+    return (h * 0x1_0000_0000) + l // h << 32 | l
   }
 
   /**
@@ -265,22 +293,16 @@ abstract class AbstractTransactionBase extends AbstractTransaction {
     this._checkFields(['nonce'])
 
     // nonce offset = 77
-    if (this._view.getUint16(77) > 0x001f) {
-      throw new Error('nonce is not safe integer')
-    }
-
-    return this._view.getUint32(77) * 0x1_0000_0000 +
-      this._view.getUint32(77 + 4)
+    return this._bytesToNumber(this._bytes.slice(77, 85))
   }
 
   set nonce (nonce: number) {
     validateInt(nonce, 0, 9007199254740991)
 
-    // nonce offset = 77
-    // tslint:disable-next-line:no-bitwise
-    this._view.setInt32(77 + 4, nonce | 0)
-    this._view.setInt32(77,
-      (nonce - this._view.getUint32(77 + 4)) / 0x1_0000_0000)
+    const b = this._numberToBytes(nonce)
+    for (let i = 0; i < 8; i++) {
+      this._bytes[77 + i] = b[i] // nonce offset = 77
+    }
     this._setFields(['nonce'])
   }
 
@@ -296,39 +318,41 @@ abstract class AbstractTransactionBase extends AbstractTransaction {
   }
 
   /**
-   * Цифровая подпись транзкции, длина 64 байта.
+   * Цифровая подпись транзакции, длина 64 байта.
    * Генерируется автоматически при вызове sign().
-   * @type {Uint8Array}
+   * @type {number[]}
    * @throws {Error}
    */
-  get signature (): Uint8Array {
+  get signature (): number[] | Uint8Array | Buffer {
     this._checkFields(['signature'])
 
     // signature length = 64
     const len = this.sender.publicKey.signatureLength
-    const sig = new Uint8Array(len)
 
     // signature offset = 85
-    sig.set(this._bytes.subarray(85, 85 + len))
-    return sig
+    return this._bytes.slice(85, 85 + len)
   }
 
-  set signature (signature: Uint8Array) {
+  set signature (signature: number[] | Uint8Array | Buffer) {
     this._checkFields(['version', 'sender'])
-    validateUint8Array(signature, this.sender.publicKey.signatureLength)
+    if (signature.length !== this.sender.publicKey.signatureLength) {
+      throw new Error('invalid length')
+    }
 
     // signature offset = 85
-    this._bytes.set(signature, 85)
+    for (let i = 0, l = signature.length; i < l; i++) {
+      this._bytes[85 + i] = signature[i]
+    }
     this._setFields(['signature'])
   }
 
   /**
    * Устанавливает цифровую подпись и возвращяет this.
-   * @param {Uint8Array} signature Подпись, длина 64 байта.
+   * @param {number[]|Uint8Array|Buffer} signature Подпись, длина 64 байта.
    * @returns {this}
    * @throws {Error}
    */
-  setSignature (signature: Uint8Array): this {
+  setSignature (signature: number[] | Uint8Array | Buffer): this {
     this.signature = signature
     return this
   }
@@ -348,7 +372,7 @@ abstract class AbstractTransactionBase extends AbstractTransaction {
 
     // unsigned begin = 0
     // unsigned end = 85
-    const msg = this._bytes.subarray(0, 85)
+    const msg = this._bytes.slice(0, 85)
     this.signature = secretKey.sign(msg)
     return this
   }
@@ -363,7 +387,7 @@ abstract class AbstractTransactionBase extends AbstractTransaction {
 
     // unsigned begin = 0
     // unsigned end = 85
-    const msg = this._bytes.subarray(0, 85)
+    const msg = this._bytes.slice(0, 85)
     return this.sender.publicKey.verifySignature(this.signature, msg)
   }
 

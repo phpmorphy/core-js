@@ -18,21 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { validateUint8Array } from '../util/validator'
-
 /**
  * @class
  * @lends Transaction
  * @private
  */
 abstract class AbstractTransaction {
-  /**
-   * Длина транзакции в байтах.
-   * @type {number}
-   * @constant
-   */
-  static get LENGTH (): number { return 150 }
-
   /**
    * Genesis-транзакция.
    * Может быть добавлена только в Genesis-блок.
@@ -171,19 +162,11 @@ abstract class AbstractTransaction {
 
   /**
    * Транзакция в бинарном виде.
-   * @type {Uint8Array}
+   * @type {number[]}
    * @private
    * @internal
    */
-  protected readonly _bytes: Uint8Array = new Uint8Array(AbstractTransaction.LENGTH)
-
-  /**
-   * Транзакция в бинарном виде.
-   * @type {DataView}
-   * @private
-   * @internal
-   */
-  protected readonly _view: DataView = new DataView(this._bytes.buffer)
+  protected readonly _bytes: number[] = []
 
   /**
    * Заполоненные свойства.
@@ -194,15 +177,24 @@ abstract class AbstractTransaction {
   protected readonly _fieldsMap: { [key: string]: boolean } = {}
 
   /**
-   * @param {Uint8Array} [bytes] Транзакция в бинарном виде, 150 байт.
+   * @param {number[]|Uint8Array} [bytes] Транзакция в бинарном виде, 150 байт.
    * @throws {Error}
    * @private
    */
-  protected constructor (bytes?: Uint8Array) {
-    if (bytes !== undefined) {
-      validateUint8Array(bytes, AbstractTransaction.LENGTH)
+  protected constructor (bytes?: number[] | Uint8Array) {
+    for (let i = 0; i < 150; i++) {
+      this._bytes[i] = 0
+    }
 
-      this._bytes.set(bytes)
+    if (bytes !== undefined) {
+      if (bytes.length !== 150) {
+        throw new Error('incorrect length')
+      }
+
+      for (let i = 0; i < 150; i++) {
+        this._bytes[i] = bytes[i]
+      }
+
       this._setFields([
         'version', 'sender', 'recipient', 'value', 'prefix',
         'name', 'profitPercent', 'feePercent', 'nonce', 'signature'])

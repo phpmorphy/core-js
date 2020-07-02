@@ -26,49 +26,50 @@
 const sha512 = require('../sha512.js')
 const common = require('./common.js')
 
-function sign (message, secretKey) {
-  const signedMsg = new Uint8Array(64 + message.length)
-  cryptoSign(signedMsg, message, message.length, secretKey)
-  return new Uint8Array(signedMsg.buffer, 0, 64)
-}
 /**
  * Note: difference from C - smlen returned, not passed as argument.
- * @param {Uint8Array} sm
- * @param {Uint8Array} m
- * @param {number} n
- * @param {Uint8Array} sk
+ * @param {number[]|Uint8Array} message
+ * @param {number[]|Uint8Array} secretKey
+ * @returns {number[]}
  * @private
  */
-function cryptoSign (sm, m, n, sk) {
-  let i
-  let j
-  const x = new Float64Array(64)
-  const p = [
-    new Float64Array(16),
-    new Float64Array(16),
-    new Float64Array(16),
-    new Float64Array(16)
-  ]
-  const d = new Uint8Array(sha512.sha512(sk.slice(0, 32)))
+function sign (message, secretKey) {
+  const sm = []
+  const x = []
+  const p = [[], [], [], []]
+  const d = sha512.sha512(secretKey.slice(0, 32))
   d[0] &= 248
   d[31] &= 127
   d[31] |= 64
-  sm.set(m, 64)
-  sm.set(d.subarray(32), 32)
-  const r = new Uint8Array(sha512.sha512(sm.slice(32, 64)))
+  for (let i = 0, n = message.length; i < n; i++) {
+    sm[64 + i] = message[i]
+  }
+  for (let i = 32; i < 64; i++) {
+    sm[i] = d[i]
+  }
+  const r = sha512.sha512(sm.slice(32))
   common.reduce(r)
   common.scalarbase(p, r)
   common.pack(sm, p)
-  sm.set(sk.subarray(32), 32)
-  const h = new Uint8Array(sha512.sha512(sm))
+  for (let i = 32; i < 64; i++) {
+    sm[i] = secretKey[i]
+  }
+  const h = sha512.sha512(sm)
   common.reduce(h)
-  x.set(r)
-  for (i = 0; i < 32; i++) {
-    for (j = 0; j < 32; j++) {
+  for (let i = 0; i < 64; i++) {
+    x[i] = 0
+  }
+  for (let i = 0; i < 32; i++) {
+    x[i] = r[i]
+  }
+  for (let i = 0; i < 32; i++) {
+    for (let j = 0; j < 32; j++) {
       x[i + j] += h[i] * d[j]
     }
   }
-  common.modL(sm.subarray(32), x)
+  const sm2 = sm.slice(32)
+  common.modL(sm2, x)
+  return sm.slice(0, 32).concat(sm2.slice(0, 32))
 }
 
 exports.sign = sign

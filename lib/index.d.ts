@@ -1,14 +1,9 @@
+/// <reference types="node" />
 /**
  * Базовый класс для работы с адресами.
  * @class
  */
 export declare class Address {
-    /**
-     * Длина адреса в байтах.
-     * @type {number}
-     * @constant
-     */
-    static get LENGTH(): number;
     /**
      * Версия Genesis-адрса.
      * @type {number}
@@ -22,16 +17,16 @@ export declare class Address {
      */
     static get Umi(): number;
     /**
-     * @param {Uint8Array} [bytes] Адрес в бинарном виде, длина 34 байта.
+     * @param {number[]|Uint8Array} [bytes] Адрес в бинарном виде, длина 34 байта.
      * @throws {Error}
      */
-    constructor(bytes?: Uint8Array);
+    constructor(bytes?: number[] | Uint8Array | Buffer);
     /**
      * Адрес в бинарном виде, длина 34 байта.
-     * @type {Uint8Array}
+     * @type {number[]}
      * @readonly
      */
-    get bytes(): Uint8Array;
+    get bytes(): number[];
     /**
      * Версия адреса, префикс в числовом виде.
      * @type {number}
@@ -139,20 +134,20 @@ export declare class PublicKey {
      */
     get signatureLength(): number;
     /**
-     * @param {Uint8Array} bytes Публичный ключ в формате libsodium, 32 байта (256 бит).
+     * @param {number[]} bytes Публичный ключ в формате libsodium, 32 байта (256 бит).
      * @throws {Error}
      */
-    constructor(bytes: Uint8Array);
+    constructor(bytes: number[] | Uint8Array | Buffer);
     /**
      * Публичный ключ в формате libsodium, 32 байта (256 бит).
-     * @type {Uint8Array}
+     * @type {number[]}
      * @readonly
      */
-    get bytes(): Uint8Array;
+    get bytes(): number[];
     /**
      * Проверяет цифровую подпись.
-     * @param {Uint8Array} signature Подпись, 64 байта.
-     * @param {Uint8Array} message Сообщение
+     * @param {number[]|Uint8Array|Buffer} signature Подпись, 64 байта.
+     * @param {number[]|Uint8Array|Buffer} message Сообщение
      * @returns {boolean}
      * @throws {Error}
      * @example
@@ -161,7 +156,7 @@ export declare class PublicKey {
      * let msg = new Uint8Array(1)
      * let ver = new PublicKey(key).verifySignature(sig, msg)
      */
-    verifySignature(signature: Uint8Array, message: Uint8Array): boolean;
+    verifySignature(signature: number[] | Uint8Array | Buffer, message: number[] | Uint8Array | Buffer): boolean;
 }
 /**
  * Базовый класс для работы с приватными ключами.
@@ -169,46 +164,46 @@ export declare class PublicKey {
  */
 export declare class SecretKey {
     /**
-     * @param {Uint8Array} bytes Приватный ключ в бинарном виде.
+     * @param {number[]|Uint8Array|Buffer} bytes Приватный ключ в бинарном виде.
      * В формате libsodium, 64 байта (512 бит).
      * @throws {Error}
      */
-    constructor(bytes: Uint8Array);
+    constructor(bytes: number[] | Uint8Array | Buffer);
     /**
      * Приватный ключ в бинарном виде. В формате libsodium, 64 байта (512 бит).
-     * @type {Uint8Array}
+     * @type {number[]}
      * @readonly
      */
-    get bytes(): Uint8Array;
+    get bytes(): number[];
     /**
-     * Публичный ключ, соотвествующий приватному ключу.
+     * Публичный ключ, соответствующий приватному ключу.
      * @type {PublicKey}
      * @readonly
      */
     get publicKey(): PublicKey;
     /**
      * Создает цифровую подпись сообщения.
-     * @param {Uint8Array} message Сообщение, которое необходимо подписать.
-     * @returns {Uint8Array} Цифровая подпись длиной 64 байта (512 бит).
+     * @param {number[]|Uint8Array|Buffer} message Сообщение, которое необходимо подписать.
+     * @returns {number[]} Цифровая подпись длиной 64 байта (512 бит).
      * @throws {Error}
      * @example
      * let seed = new Uint8Array(32)
      * let msg = new Uint8Array(1)
      * let sig = SecretKey.fromSeed(seed).sign(msg)
      */
-    sign(message: Uint8Array): Uint8Array;
+    sign(message: number[] | Uint8Array | Buffer): number[];
     /**
      * Статический фабричный метод, создающий приватный ключ из seed.
      * Libsodium принимает seed длиной 32 байта (256 бит), если длина
      * отличается, то берется sha256 хэш.
-     * @param {Uint8Array} seed Seed длиной от 0 до 128 байт.
+     * @param {number[]|Uint8Array|Buffer} seed Seed длиной от 0 до 128 байт.
      * @returns {SecretKey}
      * @throws {Error}
      * @example
      * let seed = new Uint8Array(32)
      * let key = SecretKey.fromSeed(seed)
      */
-    static fromSeed(seed: Uint8Array): SecretKey;
+    static fromSeed(seed: number[] | Uint8Array | Buffer): SecretKey;
 }
 /**
  * @class
@@ -216,12 +211,6 @@ export declare class SecretKey {
  * @private
  */
 declare abstract class AbstractTransaction {
-    /**
-     * Длина транзакции в байтах.
-     * @type {number}
-     * @constant
-     */
-    static get LENGTH(): number;
     /**
      * Genesis-транзакция.
      * Может быть добавлена только в Genesis-блок.
@@ -351,11 +340,11 @@ declare abstract class AbstractTransaction {
      */
     static get DeleteTransitAddress(): number;
     /**
-     * @param {Uint8Array} [bytes] Транзакция в бинарном виде, 150 байт.
+     * @param {number[]|Uint8Array} [bytes] Транзакция в бинарном виде, 150 байт.
      * @throws {Error}
      * @private
      */
-    protected constructor(bytes?: Uint8Array);
+    protected constructor(bytes?: number[] | Uint8Array);
 }
 /**
  * Базовый класс для работы с транзакциями.
@@ -366,16 +355,16 @@ declare abstract class AbstractTransaction {
 declare abstract class AbstractTransactionBase extends AbstractTransaction {
     /**
      * Транзакция в бинарном виде, 150 байт.
-     * @type {Uint8Array}
+     * @type {number[]}
      * @readonly
      */
-    get bytes(): Uint8Array;
+    get bytes(): number[];
     /**
      * Хэш транзакции, sha256 от всех 150 байт.
-     * @type {Uint8Array}
+     * @type {number[]}
      * @readonly
      */
-    get hash(): Uint8Array;
+    get hash(): number[];
     /**
      * Версия (тип) транзакции.
      * Обязательное поле, необходимо задать сразу после создания новой транзакции.
@@ -447,6 +436,8 @@ declare abstract class AbstractTransactionBase extends AbstractTransaction {
      */
     get value(): number;
     set value(value: number);
+    private _numberToBytes;
+    private _bytesToNumber;
     /**
      * Устанавливает сумму и возвращяет this.
      * Принимает значения в промежутке от 1 до 9007199254740991.
@@ -473,20 +464,20 @@ declare abstract class AbstractTransactionBase extends AbstractTransaction {
      */
     setNonce(nonce: number): this;
     /**
-     * Цифровая подпись транзкции, длина 64 байта.
+     * Цифровая подпись транзакции, длина 64 байта.
      * Генерируется автоматически при вызове sign().
-     * @type {Uint8Array}
+     * @type {number[]}
      * @throws {Error}
      */
-    get signature(): Uint8Array;
-    set signature(signature: Uint8Array);
+    get signature(): number[] | Uint8Array | Buffer;
+    set signature(signature: number[] | Uint8Array | Buffer);
     /**
      * Устанавливает цифровую подпись и возвращяет this.
-     * @param {Uint8Array} signature Подпись, длина 64 байта.
+     * @param {number[]|Uint8Array|Buffer} signature Подпись, длина 64 байта.
      * @returns {this}
      * @throws {Error}
      */
-    setSignature(signature: Uint8Array): this;
+    setSignature(signature: number[] | Uint8Array | Buffer): this;
     /**
      * Подписать транзакцию приватным ключем.
      * @param {SecretKey} secretKey
@@ -504,7 +495,7 @@ declare abstract class AbstractTransactionBase extends AbstractTransaction {
 /**
  * Класс для работы с транзакциями.
  * @class
- * @param {Uint8Array} [bytes] Транзакция в бинарном виде, 150 байт.
+ * @param {number[]} [bytes] Транзакция в бинарном виде, 150 байт.
  * @throws {Error}
  */
 export declare class Transaction extends AbstractTransactionBase {
@@ -567,7 +558,7 @@ export declare class Transaction extends AbstractTransactionBase {
     get feePercent(): number;
     set feePercent(percent: number);
     /**
-     * Устанавливает размер комисии и возвращяет this.
+     * Устанавливает размер комиссии и возвращает this.
      * Доступно только для CreateStructure и UpdateStructure.
      * @param {number} percent Комиссия в сотых долях процента с шагом в 0.01%. Валидные значения от 0 до 2000 (соотвественно от 0% до 20%).
      * @returns {this}

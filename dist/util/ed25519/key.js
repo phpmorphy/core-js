@@ -26,37 +26,24 @@
 const sha512 = require('../sha512.js')
 const common = require('./common.js')
 
-function secretKeyFromSeed (seed) {
-  const pk = new Uint8Array(32)
-  const sk = new Uint8Array(64)
-  sk.set(seed)
-  cryptoSignKeypair(pk, sk)
-  return sk
-}
-function publicKeyFromSecretKey (secretKey) {
-  const b = new Uint8Array(32)
-  b.set(new Uint8Array(secretKey.buffer, 32, 32))
-  return b
-}
 /**
- * @param {Uint8Array} pk
- * @param {Uint8Array} sk
- * @private
+ * @param {number[]|Uint8Array|Buffer} seed
+ * @returns {number[]}
  */
-function cryptoSignKeypair (pk, sk) {
-  const p = [
-    new Float64Array(16), new Float64Array(16),
-    new Float64Array(16), new Float64Array(16)
-  ]
-  const d = new Uint8Array(sha512.sha512(sk.slice(0, 32)))
+function secretKeyFromSeed (seed) {
+  const sk = []
+  const pk = []
+  const p = [[], [], [], []]
+  for (let i = 0; i < 32; i++) {
+    sk[i] = seed[i]
+  }
+  const d = sha512.sha512(sk)
   d[0] &= 248
   d[31] &= 127
   d[31] |= 64
   common.scalarbase(p, d)
   common.pack(pk, p)
-  sk.set(pk, 32)
-  return 0
+  return sk.concat(pk)
 }
 
-exports.publicKeyFromSecretKey = publicKeyFromSecretKey
 exports.secretKeyFromSeed = secretKeyFromSeed

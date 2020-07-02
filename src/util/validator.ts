@@ -47,7 +47,7 @@ function validateUint8Array (arg: Uint8Array, len?: number): void {
     throw new Error('incorrect type')
   }
 
-  if (len !== undefined && arg.byteLength !== len) {
+  if (len !== undefined && arg.length !== len) {
     throw new Error('incorrect length')
   }
 }

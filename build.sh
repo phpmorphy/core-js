@@ -64,11 +64,5 @@ sed -i -e '/^  -/d' "$(pwd)/lib/index.js.flow"
 # cleanup
 rm -r "$(pwd)/tmp"
 
-# jsdoc (cjs)
-# jsdoc --pedantic -d ./doc ./lib/index.js
-
-# typedoc (src)
-# typedoc
-
 # lint (lib)
 eslint "$(pwd)/dist" "$(pwd)/lib/index.js" "$(pwd)/lib/index.mjs"

@@ -26,69 +26,66 @@
 const sha512 = require('../sha512.js')
 const common = require('./common.js')
 
-const D = new Float64Array([
+const D = [
   0x78a3, 0x1359, 0x4dca, 0x75eb, 0xd8ab, 0x4141, 0x0a4d, 0x0070,
   0xe898, 0x7779, 0x4079, 0x8cc7, 0xfe73, 0x2b6f, 0x6cee, 0x5203
-])
-const I = new Float64Array([
+]
+const I = [
   0xa0b0, 0x4a0e, 0x1b27, 0xc4ee, 0xe478, 0xad2f, 0x1806, 0x2f43,
   0xd7a7, 0x3dfb, 0x0099, 0x2b4d, 0xdf0b, 0x4fc1, 0x2480, 0x2b83
-])
-function verify (signature, message, publicKey) {
-  const sm = new Uint8Array(64 + message.byteLength)
-  const m = new Uint8Array(64 + message.byteLength)
-  sm.set(signature)
-  sm.set(message, 64)
-  m.set(sm)
-  return (cryptoSignOpen(m, sm, sm.byteLength, publicKey) >= 0)
-}
+]
 /**
- * @param {Uint8Array} m
- * @param {Uint8Array} sm
- * @param {number} n
- * @param {Uint8Array} pk
+ * @param {number[]} signature
+ * @param {number[]} message
+ * @param {number[]} pubKey
+ * @returns {boolean}
  * @private
  */
-function cryptoSignOpen (m, sm, n, pk) {
-  const t = new Uint8Array(32)
-  const p = [
-    new Float64Array(16), new Float64Array(16),
-    new Float64Array(16), new Float64Array(16)
-  ]
-  const q = [
-    new Float64Array(16), new Float64Array(16),
-    new Float64Array(16), new Float64Array(16)
-  ]
+function verify (signature, message, pubKey) {
+  const sm = []
+  const m = []
+  const t = []
+  const p = [[], [], [], []]
+  const q = [[], [], [], []]
   /* istanbul ignore if */
-  if (unpackneg(q, pk)) {
-    return -1
+  if (unpackneg(q, pubKey)) {
+    return false
   }
-  m.set(sm)
-  m.set(pk, 32)
-  const h = new Uint8Array(sha512.sha512(m))
+  for (let i = 0; i < 64; i++) {
+    sm[i] = signature[i]
+    m[i] = signature[i]
+  }
+  for (let i = 0, l = message.length; i < l; i++) {
+    sm[64 + i] = message[i]
+    m[64 + i] = message[i]
+  }
+  for (let i = 0; i < 32; i++) {
+    m[i + 32] = pubKey[i]
+  }
+  const h = sha512.sha512(m)
   common.reduce(h)
   common.scalarmult(p, q, h)
-  common.scalarbase(q, sm.subarray(32))
+  common.scalarbase(q, sm.slice(32))
   common.add(p, q)
   common.pack(t, p)
   if (cryptoVerify32(sm, t)) {
-    return -1
+    return false
   }
-  return n
+  return true
 }
 /**
- * @param {Float64Array[]} r
- * @param {Uint8Array} p
+ * @param {number[][]} r
+ * @param {number[]|Uint8Array} p
  * @private
  */
 function unpackneg (r, p) {
-  const t = new Float64Array(16)
-  const chk = new Float64Array(16)
-  const num = new Float64Array(16)
-  const den = new Float64Array(16)
-  const den2 = new Float64Array(16)
-  const den4 = new Float64Array(16)
-  const den6 = new Float64Array(16)
+  const t = []
+  const chk = []
+  const num = []
+  const den = []
+  const den2 = []
+  const den4 = []
+  const den6 = []
   common.set25519(r[2], common.gf1)
   unpack25519(r[1], p)
   common.fnS(num, r[1])
@@ -123,10 +120,8 @@ function unpackneg (r, p) {
   return 0
 }
 /**
- * @param {Uint8Array} x
- * @param {number} xi
- * @param {Uint8Array} y
- * @param {number} yi
+ * @param {number[]} x
+ * @param {number[]} y
  * @private
  */
 function cryptoVerify32 (x, y) {
@@ -137,8 +132,8 @@ function cryptoVerify32 (x, y) {
   return (1 & ((d - 1) >>> 8)) - 1
 }
 /**
- * @param {Float64Array} o
- * @param {Uint8Array} n
+ * @param {number[]} o
+ * @param {number[]} n
  * @private
  */
 function unpack25519 (o, n) {
@@ -148,29 +143,33 @@ function unpack25519 (o, n) {
   o[15] &= 0x7fff
 }
 /**
- * @param {Float64Array} o
- * @param {Float64Array} i
+ * @param {number[]} o
+ * @param {number[]} i
  * @private
  */
 function pow2523 (o, i) {
-  const c = new Float64Array(16)
-  c.set(i)
+  const c = []
+  for (let a = 0; a < 16; a++) {
+    c[a] = i[a]
+  }
   for (let a = 250; a >= 0; a--) {
     common.fnS(c, c)
     if (a !== 1) {
       common.fnM(c, c, i)
     }
   }
-  o.set(c)
+  for (let a = 0; a < 16; a++) {
+    o[a] = c[a]
+  }
 }
 /**
- * @param {Float64Array} a
- * @param {Float64Array} b
+ * @param {number[]} a
+ * @param {number[]} b
  * @private
  */
 function neq25519 (a, b) {
-  const c = new Uint8Array(32)
-  const d = new Uint8Array(32)
+  const c = []
+  const d = []
   common.pack25519(c, a)
   common.pack25519(d, b)
   return cryptoVerify32(c, d)

@@ -19,9 +19,8 @@
 // SOFTWARE.
 
 import { PublicKey } from './PublicKey'
+import { secretKeyFromSeed } from '../../util/ed25519/key'
 import { sign } from '../../util/ed25519/sign'
-import { secretKeyFromSeed, publicKeyFromSecretKey } from '../../util/ed25519/key'
-import { validateUint8Array } from '../../util/validator'
 import { sha256 } from '../../util/sha256'
 
 /**
@@ -38,54 +37,56 @@ export class SecretKey {
 
   /**
    * Приватный ключ в бинарном виде. В формате libsodium.
-   * @type {Uint8Array}
+   * @type {number[]}
    * @private
    * @internal
    */
-  private readonly _bytes: Uint8Array = new Uint8Array(SecretKey.LENGTH)
+  private readonly _bytes: number[] = []
 
   /**
-   * @param {Uint8Array} bytes Приватный ключ в бинарном виде.
+   * @param {number[]|Uint8Array|Buffer} bytes Приватный ключ в бинарном виде.
    * В формате libsodium, 64 байта (512 бит).
    * @throws {Error}
    */
-  constructor (bytes: Uint8Array) {
-    validateUint8Array(bytes, SecretKey.LENGTH)
-    this._bytes.set(bytes)
+  constructor (bytes: number[] | Uint8Array | Buffer) {
+    if (bytes.length !== 64) {
+      throw new Error('invalid length')
+    }
+
+    for (let i = 0; i < 64; i++) {
+      this._bytes[i] = bytes[i]
+    }
   }
 
   /**
    * Приватный ключ в бинарном виде. В формате libsodium, 64 байта (512 бит).
-   * @type {Uint8Array}
+   * @type {number[]}
    * @readonly
    */
-  get bytes (): Uint8Array {
-    const b = new Uint8Array(this._bytes.byteLength)
-    b.set(this._bytes)
-    return b
+  get bytes (): number[] {
+    return this._bytes.slice(0, 64)
   }
 
   /**
-   * Публичный ключ, соотвествующий приватному ключу.
+   * Публичный ключ, соответствующий приватному ключу.
    * @type {PublicKey}
    * @readonly
    */
   get publicKey (): PublicKey {
-    return new PublicKey(publicKeyFromSecretKey(this._bytes))
+    return new PublicKey(this._bytes.slice(32, 64))
   }
 
   /**
    * Создает цифровую подпись сообщения.
-   * @param {Uint8Array} message Сообщение, которое необходимо подписать.
-   * @returns {Uint8Array} Цифровая подпись длиной 64 байта (512 бит).
+   * @param {number[]|Uint8Array|Buffer} message Сообщение, которое необходимо подписать.
+   * @returns {number[]} Цифровая подпись длиной 64 байта (512 бит).
    * @throws {Error}
    * @example
    * let seed = new Uint8Array(32)
    * let msg = new Uint8Array(1)
    * let sig = SecretKey.fromSeed(seed).sign(msg)
    */
-  sign (message: Uint8Array): Uint8Array {
-    validateUint8Array(message)
+  sign (message: number[] | Uint8Array | Buffer): number[] {
     return sign(message, this._bytes)
   }
 
@@ -93,20 +94,19 @@ export class SecretKey {
    * Статический фабричный метод, создающий приватный ключ из seed.
    * Libsodium принимает seed длиной 32 байта (256 бит), если длина
    * отличается, то берется sha256 хэш.
-   * @param {Uint8Array} seed Seed длиной от 0 до 128 байт.
+   * @param {number[]|Uint8Array|Buffer} seed Seed длиной от 0 до 128 байт.
    * @returns {SecretKey}
    * @throws {Error}
    * @example
    * let seed = new Uint8Array(32)
    * let key = SecretKey.fromSeed(seed)
    */
-  static fromSeed (seed: Uint8Array): SecretKey {
-    validateUint8Array(seed)
-
-    if (seed.byteLength === 32) {
-      return new SecretKey(secretKeyFromSeed(seed))
+  static fromSeed (seed: number[] | Uint8Array | Buffer): SecretKey {
+    let entropy = seed
+    if (seed.length !== 32) {
+      entropy = sha256(entropy)
     }
 
-    return new SecretKey(secretKeyFromSeed(sha256(seed)))
+    return new SecretKey(secretKeyFromSeed(entropy))
   }
 }

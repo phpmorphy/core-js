@@ -6,11 +6,10 @@
  */
 
 declare export class Address {
-  LENGTH: number;
   Genesis: number;
   Umi: number;
-  constructor(bytes?: Uint8Array): this;
-  bytes: Uint8Array;
+  constructor(bytes?: number[] | Uint8Array | Buffer): this;
+  bytes: number[];
   version: number;
   setVersion(version: number): Address;
   publicKey: PublicKey;
@@ -28,19 +27,21 @@ declare export class PublicKey {
   LENGTH: number;
   SIGNATURE_LENGTH: number;
   signatureLength: number;
-  constructor(bytes: Uint8Array): this;
-  bytes: Uint8Array;
-  verifySignature(signature: Uint8Array, message: Uint8Array): boolean;
+  constructor(bytes: number[] | Uint8Array | Buffer): this;
+  bytes: number[];
+  verifySignature(
+    signature: number[] | Uint8Array | Buffer,
+    message: number[] | Uint8Array | Buffer
+  ): boolean;
 }
 declare export class SecretKey {
-  constructor(bytes: Uint8Array): this;
-  bytes: Uint8Array;
+  constructor(bytes: number[] | Uint8Array | Buffer): this;
+  bytes: number[];
   publicKey: PublicKey;
-  sign(message: Uint8Array): Uint8Array;
-  static fromSeed(seed: Uint8Array): SecretKey;
+  sign(message: number[] | Uint8Array | Buffer): number[];
+  static fromSeed(seed: number[] | Uint8Array | Buffer): SecretKey;
 }
 declare class AbstractTransaction {
-  LENGTH: number;
   Genesis: number;
   Basic: number;
   CreateStructure: number;
@@ -49,11 +50,11 @@ declare class AbstractTransaction {
   UpdateFeeAddress: number;
   CreateTransitAddress: number;
   DeleteTransitAddress: number;
-  constructor(bytes?: Uint8Array): this;
+  constructor(bytes?: number[] | Uint8Array): this;
 }
 declare class AbstractTransactionBase mixins AbstractTransaction {
-  bytes: Uint8Array;
-  hash: Uint8Array;
+  bytes: number[];
+  hash: number[];
   version: number;
   setVersion(version: number): this;
   sender: Address;
@@ -64,8 +65,8 @@ declare class AbstractTransactionBase mixins AbstractTransaction {
   setValue(value: number): this;
   nonce: number;
   setNonce(nonce: number): this;
-  signature: Uint8Array;
-  setSignature(signature: Uint8Array): this;
+  signature: number[] | Uint8Array | Buffer;
+  setSignature(signature: number[] | Uint8Array | Buffer): this;
   sign(secretKey: SecretKey): this;
   verify(): boolean;
 }

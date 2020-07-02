@@ -23,7 +23,6 @@
 
 'use strict'
 
-const validator = require('../util/validator.js')
 const PublicKey = require('../key/ed25519/PublicKey.js')
 const SecretKey = require('../key/ed25519/SecretKey.js')
 const converter = require('../util/converter.js')
@@ -35,35 +34,28 @@ const bech32 = require('../util/bech32.js')
  */
 class Address {
   /**
-   * @param {Uint8Array} [bytes] Адрес в бинарном виде, длина 34 байта.
+   * @param {number[]|Uint8Array} [bytes] Адрес в бинарном виде, длина 34 байта.
    * @throws {Error}
    */
   constructor (bytes) {
     /**
      * Адрес в бинарном виде, длина 34 байта.
-     * @type {Uint8Array}
+     * @type {number[]}
      * @private
      */
-    this._bytes = new Uint8Array(Address.LENGTH)
+    this._bytes = []
     if (bytes === undefined) {
       this.version = Address.Umi
     } else {
-      if (!(bytes instanceof Uint8Array)) {
-        throw new Error('bytes type must be Uint8Array')
-      }
-      if (bytes.byteLength !== Address.LENGTH) {
+      if (bytes.length !== 34) {
         throw new Error('bytes length must be 34 bytes')
       }
-      this._bytes.set(bytes)
+      for (let i = 0; i < 34; i++) {
+        this._bytes[i] = bytes[i]
+      }
     }
   }
 
-  /**
-   * Длина адреса в байтах.
-   * @type {number}
-   * @constant
-   */
-  static get LENGTH () { return 34 }
   /**
    * Версия Genesis-адрса.
    * @type {number}
@@ -78,13 +70,11 @@ class Address {
   static get Umi () { return 21929 }
   /**
    * Адрес в бинарном виде, длина 34 байта.
-   * @type {Uint8Array}
+   * @type {number[]}
    * @readonly
    */
   get bytes () {
-    const b = new Uint8Array(this._bytes.byteLength)
-    b.set(this._bytes)
-    return b
+    return this._bytes.slice(0)
   }
 
   /**
@@ -93,12 +83,13 @@ class Address {
    * @throws {Error}
    */
   get version () {
-    return new DataView(this._bytes.buffer).getUint16(0)
+    return (this._bytes[0] << 8) + this._bytes[1]
   }
 
   set version (version) {
     converter.versionToPrefix(version)
-    new DataView(this._bytes.buffer).setUint16(0, (version & 0x7FFF))
+    this._bytes[0] = (version >> 8) & 0xff
+    this._bytes[1] = version & 0xff
   }
 
   /**
@@ -118,14 +109,17 @@ class Address {
    * @throws {Error}
    */
   get publicKey () {
-    return new PublicKey.PublicKey(this._bytes.subarray(2))
+    return new PublicKey.PublicKey(this._bytes.slice(2))
   }
 
   set publicKey (publicKey) {
     if (!(publicKey instanceof PublicKey.PublicKey)) {
       throw new Error('publicKey type must be PublicKey')
     }
-    this._bytes.set(publicKey.bytes, 2)
+    const b = publicKey.bytes
+    for (let i = 0; i < 32; i++) {
+      this._bytes[2 + i] = b[i]
+    }
   }
 
   /**
@@ -173,8 +167,10 @@ class Address {
   }
 
   set bech32 (bech32$1) {
-    validator.validateStr(bech32$1)
-    this._bytes.set(bech32.decode(bech32$1))
+    const b = bech32.decode(bech32$1)
+    for (let i = 0; i < 32; i++) {
+      this._bytes[i] = b[i]
+    }
   }
 
   /**

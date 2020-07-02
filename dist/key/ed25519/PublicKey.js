@@ -24,7 +24,6 @@
 'use strict'
 
 const verify = require('../../util/ed25519/verify.js')
-const validator = require('../../util/validator.js')
 
 /**
  * Базовый класс для работы с публичными ключами.
@@ -32,18 +31,22 @@ const validator = require('../../util/validator.js')
  */
 class PublicKey {
   /**
-   * @param {Uint8Array} bytes Публичный ключ в формате libsodium, 32 байта (256 бит).
+   * @param {number[]} bytes Публичный ключ в формате libsodium, 32 байта (256 бит).
    * @throws {Error}
    */
   constructor (bytes) {
     /**
      * Публичный ключ в бинарном виде. В формате libsodium.
-     * @type {Uint8Array}
+     * @type {number[]}
      * @private
      */
-    this._bytes = new Uint8Array(PublicKey.LENGTH)
-    validator.validateUint8Array(bytes, PublicKey.LENGTH)
-    this._bytes.set(bytes)
+    this._bytes = []
+    if (bytes.length !== 32) {
+      throw new Error('invalid length')
+    }
+    for (let i = 0; i < 32; i++) {
+      this._bytes[i] = bytes[i]
+    }
   }
 
   /**
@@ -63,22 +66,20 @@ class PublicKey {
    * @type {number}
    * @constant
    */
-  get signatureLength () { return PublicKey.SIGNATURE_LENGTH }
+  get signatureLength () { return 64 }
   /**
    * Публичный ключ в формате libsodium, 32 байта (256 бит).
-   * @type {Uint8Array}
+   * @type {number[]}
    * @readonly
    */
   get bytes () {
-    const b = new Uint8Array(this._bytes.byteLength)
-    b.set(this._bytes)
-    return b
+    return this._bytes.slice(0, 32)
   }
 
   /**
    * Проверяет цифровую подпись.
-   * @param {Uint8Array} signature Подпись, 64 байта.
-   * @param {Uint8Array} message Сообщение
+   * @param {number[]|Uint8Array|Buffer} signature Подпись, 64 байта.
+   * @param {number[]|Uint8Array|Buffer} message Сообщение
    * @returns {boolean}
    * @throws {Error}
    * @example
@@ -88,8 +89,9 @@ class PublicKey {
    * let ver = new PublicKey(key).verifySignature(sig, msg)
    */
   verifySignature (signature, message) {
-    validator.validateUint8Array(signature, PublicKey.SIGNATURE_LENGTH)
-    validator.validateUint8Array(message)
+    if (signature.length !== 64) {
+      throw new Error('invalid length')
+    }
     return verify.verify(signature, message, this._bytes)
   }
 }

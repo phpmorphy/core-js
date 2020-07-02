@@ -23,12 +23,12 @@
 /**
  * Безопасный алгоритм хеширования, SHA2-256.
  * @see https://en.wikipedia.org/wiki/SHA-2
- * @param {number[]} message message
+ * @param {number[]|Uint8Array|Buffer} message message
  * @returns {number[]} hash
  * @private
  * @internal
  */
-function sha256 (message: number[]): number[] {
+function sha256 (message: number[] | Uint8Array | Buffer): number[] {
   // SHA-256 initial hash values.
   const h = [0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A, 0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19]
 
@@ -57,22 +57,21 @@ function sha256 (message: number[]): number[] {
 }
 
 /**
- * @param {number[]} message
+ * @param {number[]|Uint8Array|Buffer} message
  * @returns {number[][]}
  */
-function sha256PreProcess (message: number[]): number[][] {
-  const mLen = message.length
-  const bLen = mLen + 8 + (64 - ((mLen + 8) % 64))
+function sha256PreProcess (message: number[] | Uint8Array | Buffer): number[][] {
   const bytes: number[] = []
-  bytes.length = bLen // Padding
 
-  for (let i = 0; i < bLen; i++) {
+  // Length a multiple of 512 bits
+  for (let i = 0, l = message.length + 8 + (64 - ((message.length + 8) % 64)); i < l; i++) {
     bytes[i] = message[i] || 0
   }
-  bytes[mLen] = 0x80 // Append a single '1' bit
+
+  bytes[message.length] = 0x80 // Append a single '1' bit
   // Append message length in bits as a 64-bit big-endian integer
-  bytes[bLen - 2] = ((mLen * 8) >>> 8) & 0xff
-  bytes[bLen - 1] = (mLen * 8) & 0xff
+  bytes[bytes.length - 2] = ((message.length * 8) >>> 8) & 0xff
+  bytes[bytes.length - 1] = (message.length * 8) & 0xff
 
   const chunks: number[][] = []
 

@@ -20,7 +20,6 @@
 
 import { PublicKey } from '../key/ed25519/PublicKey'
 import { SecretKey } from '../key/ed25519/SecretKey'
-import { validateStr } from '../util/validator'
 import { prefixToVersion, versionToPrefix } from '../util/converter'
 import { decode, encode } from '../util/bech32'
 
@@ -29,13 +28,6 @@ import { decode, encode } from '../util/bech32'
  * @class
  */
 export class Address {
-  /**
-   * Длина адреса в байтах.
-   * @type {number}
-   * @constant
-   */
-  static get LENGTH (): number { return 34 }
-
   /**
    * Версия Genesis-адрса.
    * @type {number}
@@ -52,41 +44,37 @@ export class Address {
 
   /**
    * Адрес в бинарном виде, длина 34 байта.
-   * @type {Uint8Array}
+   * @type {number[]}
    * @private
    * @internal
    */
-  private readonly _bytes: Uint8Array = new Uint8Array(Address.LENGTH)
+  private readonly _bytes: number[] = []
 
   /**
-   * @param {Uint8Array} [bytes] Адрес в бинарном виде, длина 34 байта.
+   * @param {number[]|Uint8Array} [bytes] Адрес в бинарном виде, длина 34 байта.
    * @throws {Error}
    */
-  constructor (bytes?: Uint8Array) {
+  constructor (bytes?: number[] | Uint8Array | Buffer) {
     if (bytes === undefined) {
       this.version = Address.Umi
     } else {
-      if (!(bytes instanceof Uint8Array)) {
-        throw new Error('bytes type must be Uint8Array')
-      }
-
-      if (bytes.byteLength !== Address.LENGTH) {
+      if (bytes.length !== 34) {
         throw new Error('bytes length must be 34 bytes')
       }
 
-      this._bytes.set(bytes)
+      for (let i = 0; i < 34; i++) {
+        this._bytes[i] = bytes[i]
+      }
     }
   }
 
   /**
    * Адрес в бинарном виде, длина 34 байта.
-   * @type {Uint8Array}
+   * @type {number[]}
    * @readonly
    */
-  get bytes (): Uint8Array {
-    const b = new Uint8Array(this._bytes.byteLength)
-    b.set(this._bytes)
-    return b
+  get bytes (): number[] {
+    return this._bytes.slice(0)
   }
 
   /**
@@ -97,14 +85,15 @@ export class Address {
   get version (): number {
     // version length = 2
     // version offset = 0
-    return new DataView(this._bytes.buffer).getUint16(0)
+    return (this._bytes[0] << 8) + this._bytes[1]
   }
 
   set version (version: number) {
     versionToPrefix(version) // validation
 
     // tslint:disable-next-line:no-bitwise
-    new DataView(this._bytes.buffer).setUint16(0, (version & 0x7FFF))
+    this._bytes[0] = (version >> 8) & 0xff
+    this._bytes[1] = version & 0xff
   }
 
   /**
@@ -125,7 +114,7 @@ export class Address {
    */
   get publicKey (): PublicKey {
     // public key begin = 2
-    return new PublicKey(this._bytes.subarray(2))
+    return new PublicKey(this._bytes.slice(2))
   }
 
   set publicKey (publicKey: PublicKey) {
@@ -134,7 +123,10 @@ export class Address {
     }
 
     // public key offset = 2
-    this._bytes.set(publicKey.bytes, 2)
+    const b = publicKey.bytes
+    for (let i = 0; i < 32; i++) {
+      this._bytes[2 + i] = b[i]
+    }
   }
 
   /**
@@ -182,8 +174,10 @@ export class Address {
   }
 
   set bech32 (bech32: string) {
-    validateStr(bech32)
-    this._bytes.set(decode(bech32))
+    const b = decode(bech32)
+    for (let i = 0; i < 32; i++) {
+      this._bytes[i] = b[i]
+    }
   }
 
   /**
