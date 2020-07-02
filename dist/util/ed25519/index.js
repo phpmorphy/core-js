@@ -39,17 +39,13 @@ function sign (message, secretKey) {
   d[31] &= 127
   d[31] |= 64
   const sm = d.slice(0)
-  for (let i = 0, l = message.length; i < l; i++) {
-    sm[64 + i] = message[i]
-  }
+  arraySet(sm, message, 64)
   const r = sha512.sha512(sm.slice(32))
   common.reduce(r)
   const p = [[], [], [], []]
   common.scalarbase(p, r)
   common.pack(sm, p)
-  for (let i = 32; i < 64; i++) {
-    sm[i] = secretKey[i]
-  }
+  arraySet(sm, secretKey.slice(32), 32)
   const h = sha512.sha512(sm)
   common.reduce(h)
   for (let i = 0; i < 32; i++) {

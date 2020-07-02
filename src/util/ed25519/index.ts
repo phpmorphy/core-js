@@ -16,9 +16,7 @@ function sign (message: number[] | Uint8Array | Buffer, secretKey: number[] | Ui
   d[31] |= 64
 
   const sm = d.slice(0)
-  for (let i = 0, l = message.length; i < l; i++) {
-    sm[64 + i] = message[i]
-  }
+  arraySet(sm, message, 64)
 
   const r = sha512(sm.slice(32))
   reduce(r)
@@ -27,9 +25,7 @@ function sign (message: number[] | Uint8Array | Buffer, secretKey: number[] | Ui
   scalarbase(p, r)
   pack(sm, p)
 
-  for (let i = 32; i < 64; i++) {
-    sm[i] = secretKey[i]
-  }
+  arraySet(sm, secretKey.slice(32), 32)
 
   const h = sha512(sm)
   reduce(h)
