@@ -26,6 +26,39 @@
 const sha512 = require('../sha512.js')
 const common = require('./common.js')
 
+/**
+ * Note: difference from C - smlen returned, not passed as argument.
+ * @param {number[]|Uint8Array|Buffer} message
+ * @param {number[]|Uint8Array|Buffer} secretKey
+ * @returns {number[]}
+ * @private
+ */
+function sign (message, secretKey) {
+  const d = sha512.sha512(secretKey.slice(0, 32))
+  d[0] &= 248
+  d[31] &= 127
+  d[31] |= 64
+  const sm = d.slice(0)
+  for (let i = 0, l = message.length; i < l; i++) {
+    sm[64 + i] = message[i]
+  }
+  const r = sha512.sha512(sm.slice(32))
+  common.reduce(r)
+  const p = [[], [], [], []]
+  common.scalarbase(p, r)
+  common.pack(sm, p)
+  for (let i = 32; i < 64; i++) {
+    sm[i] = secretKey[i]
+  }
+  const h = sha512.sha512(sm)
+  common.reduce(h)
+  for (let i = 0; i < 32; i++) {
+    for (let j = 0; j < 32; j++) {
+      r[i + j] += h[i] * d[j]
+    }
+  }
+  return sm.slice(0, 32).concat(common.modL(sm.slice(32), r).slice(0, 32))
+}
 const D = [
   0x78a3, 0x1359, 0x4dca, 0x75eb, 0xd8ab, 0x4141, 0x0a4d, 0x0070,
   0xe898, 0x7779, 0x4079, 0x8cc7, 0xfe73, 0x2b6f, 0x6cee, 0x5203
@@ -43,7 +76,6 @@ const I = [
  */
 function verify (signature, message, pubKey) {
   const sm = []
-  const m = []
   const t = []
   const p = [[], [], [], []]
   const q = [[], [], [], []]
@@ -51,17 +83,10 @@ function verify (signature, message, pubKey) {
   if (!unpackneg(q, pubKey)) {
     return false
   }
-  for (let i = 0; i < 64; i++) {
-    sm[i] = signature[i]
-    m[i] = signature[i]
-  }
-  for (let i = 0, l = message.length; i < l; i++) {
-    sm[64 + i] = message[i]
-    m[64 + i] = message[i]
-  }
-  for (let i = 0; i < 32; i++) {
-    m[i + 32] = pubKey[i]
-  }
+  arraySet(sm, signature, 0)
+  arraySet(sm, message, 64)
+  const m = sm.slice(0)
+  arraySet(m, pubKey, 32)
   const h = sha512.sha512(m)
   common.reduce(h)
   common.scalarmult(p, q, h)
@@ -69,6 +94,11 @@ function verify (signature, message, pubKey) {
   common.add(p, q)
   common.pack(t, p)
   return cryptoVerify32(sm, t)
+}
+function arraySet (a, b, offset) {
+  for (let i = 0, l = b.length; i < l; i++) {
+    a[offset + i] = b[i]
+  }
 }
 /**
  * @param {number[][]} r
@@ -174,5 +204,26 @@ function neq25519 (a, b) {
   common.pack25519(d, b)
   return cryptoVerify32(c, d)
 }
+/**
+ * @param {number[]|Uint8Array|Buffer} seed
+ * @returns {number[]}
+ */
+function secretKeyFromSeed (seed) {
+  const sk = []
+  const pk = []
+  const p = [[], [], [], []]
+  for (let i = 0; i < 32; i++) {
+    sk[i] = seed[i]
+  }
+  const d = sha512.sha512(sk)
+  d[0] &= 248
+  d[31] &= 127
+  d[31] |= 64
+  common.scalarbase(p, d)
+  common.pack(pk, p)
+  return sk.concat(pk)
+}
 
+exports.secretKeyFromSeed = secretKeyFromSeed
+exports.sign = sign
 exports.verify = verify

@@ -23,7 +23,7 @@
 
 'use strict'
 
-const verify = require('../../util/ed25519/verify.js')
+const index = require('../../util/ed25519/index.js')
 
 /**
  * Базовый класс для работы с публичными ключами.
@@ -92,7 +92,7 @@ class PublicKey {
     if (signature.length !== 64) {
       throw new Error('invalid length')
     }
-    return verify.verify(signature, message, this._bytes)
+    return index.verify(signature, message, this._bytes)
   }
 }
 

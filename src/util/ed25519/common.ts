@@ -182,6 +182,10 @@ function fnM (o: number[], a: number[], b: number[]): void {
     }
   }
 
+  fnMSub(o, t)
+}
+
+function fnMSub (o: number[], t: number[]): void {
   for (let i = 0; i < 15; i++) {
     t[i] += 38 * t[i + 16]
   }

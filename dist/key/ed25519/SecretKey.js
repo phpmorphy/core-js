@@ -23,9 +23,8 @@
 
 'use strict'
 
+const index = require('../../util/ed25519/index.js')
 const PublicKey = require('./PublicKey.js')
-const key = require('../../util/ed25519/key.js')
-const sign = require('../../util/ed25519/sign.js')
 const sha256 = require('../../util/sha256.js')
 
 /**
@@ -87,7 +86,7 @@ class SecretKey {
    * let sig = SecretKey.fromSeed(seed).sign(msg)
    */
   sign (message) {
-    return sign.sign(message, this._bytes)
+    return index.sign(message, this._bytes)
   }
 
   /**
@@ -106,7 +105,7 @@ class SecretKey {
     if (seed.length !== 32) {
       entropy = sha256.sha256(entropy)
     }
-    return new SecretKey(key.secretKeyFromSeed(entropy))
+    return new SecretKey(index.secretKeyFromSeed(entropy))
   }
 }
 

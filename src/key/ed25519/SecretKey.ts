@@ -19,8 +19,7 @@
 // SOFTWARE.
 
 import { PublicKey } from './PublicKey'
-import { secretKeyFromSeed } from '../../util/ed25519/key'
-import { sign } from '../../util/ed25519/sign'
+import { sign, secretKeyFromSeed } from '../../util/ed25519/index'
 import { sha256 } from '../../util/sha256'
 
 /**

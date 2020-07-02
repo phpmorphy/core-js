@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { verify } from '../../util/ed25519/verify'
+import { verify } from '../../util/ed25519/index'
 
 /**
  * Базовый класс для работы с публичными ключами.

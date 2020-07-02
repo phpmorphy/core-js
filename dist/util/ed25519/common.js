@@ -181,6 +181,9 @@ function fnM (o, a, b) {
       t[i + j] += a[i] * b[j]
     }
   }
+  fnMSub(o, t)
+}
+function fnMSub (o, t) {
   for (let i = 0; i < 15; i++) {
     t[i] += 38 * t[i + 16]
   }
