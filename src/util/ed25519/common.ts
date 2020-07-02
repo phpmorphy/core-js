@@ -18,19 +18,29 @@ const L: number[] = [
   0xed, 0xd3, 0xf5, 0x5c, 0x1a, 0x63, 0x12, 0x58, 0xd6, 0x9c, 0xf7, 0xa2,
   0xde, 0xf9, 0xde, 0x14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x10]
 
+function arrayFill (array: number[], length: number, value?: any) {
+  const v = value || 0
+  for (let i = 0; i < length; i++) {
+    array[i] = v
+  }
+}
+
+function arraySet (a: number[], b: number[] | Uint8Array | Buffer, offset?: number, length?: number) {
+  const o = offset || 0
+  const l = length || b.length
+  for (let i = 0; i < l; i++) {
+    a[o + i] = b[i]
+  }
+}
+
 /**
  * @param {number[]} r
  * @private
  * @internal
  */
 function reduce (r: number[]): void {
-  const x: number[] = []
-
-  for (let i = 0; i < 64; i++) {
-    x[i] = r[i]
-    r[i] = 0
-  }
-
+  const x = r.slice(0)
+  arrayFill(r, 64)
   modL(r, x)
 }
 
@@ -84,10 +94,10 @@ function modLSub (r: number[], x: number[]): number[] {
  * @internal
  */
 function scalarmult (p: number[][], q: number[][], s: number[]): void {
-  set25519(p[0], gf0)
-  set25519(p[1], gf1)
-  set25519(p[2], gf1)
-  set25519(p[3], gf0)
+  arraySet(p[0], gf0)
+  arraySet(p[1], gf1)
+  arraySet(p[2], gf1)
+  arraySet(p[3], gf0)
 
   for (let i = 255; i >= 0; --i) {
     const b = (s[(i / 8) | 0] >> (i & 7)) & 1
@@ -170,11 +180,8 @@ function fnA (o: number[], a: number[], b: number[]): void {
  * @internal
  */
 function fnM (o: number[], a: number[], b: number[]): void {
-  const t = []
-
-  for (let i = 0; i < 31; i++) {
-    t[i] = 0
-  }
+  const t: number[] = []
+  arrayFill(t, 31)
 
   for (let i = 0; i < 16; i++) {
     for (let j = 0; j < 16; j++) {
@@ -182,18 +189,11 @@ function fnM (o: number[], a: number[], b: number[]): void {
     }
   }
 
-  fnMSub(o, t)
-}
-
-function fnMSub (o: number[], t: number[]): void {
   for (let i = 0; i < 15; i++) {
     t[i] += 38 * t[i + 16]
   }
 
-  for (let i = 0; i < 16; i++) {
-    o[i] = t[i]
-  }
-
+  arraySet(o, t, 0, 16)
   car25519(o)
   car25519(o)
 }
@@ -212,18 +212,6 @@ function fnZ (o: number[], a: number[], b: number[]): void {
 }
 
 /**
- * @param {number[]} r
- * @param {number[]} a
- * @private
- * @internal
- */
-function set25519 (r: number[], a: number[]): void {
-  for (let i = 0; i < 16; i++) {
-    r[i] = a[i]
-  }
-}
-
-/**
  * @param {number[][]} p
  * @param {number[]} s
  * @private
@@ -231,9 +219,9 @@ function set25519 (r: number[], a: number[]): void {
  */
 function scalarbase (p: number[][], s: number[]): void {
   const q = [[], [], [], []]
-  set25519(q[0], X)
-  set25519(q[1], Y)
-  set25519(q[2], gf1)
+  arraySet(q[0], X)
+  arraySet(q[1], Y)
+  arraySet(q[2], gf1)
   fnM(q[3], X, Y)
   scalarmult(p, q, s)
 }
@@ -301,9 +289,7 @@ function fnS (o: number[], a: number[]): void {
  */
 function inv25519 (o: number[], i: number[]): void {
   const c: number[] = []
-  for (let a = 0; a < 16; a++) {
-    c[a] = i[a]
-  }
+  arraySet(c, i)
 
   for (let a = 253; a >= 0; a--) {
     fnM(c, c, c)
@@ -312,9 +298,7 @@ function inv25519 (o: number[], i: number[]): void {
     }
   }
 
-  for (let a = 0; a < 16; a++) {
-    o[a] = c[a]
-  }
+  arraySet(o, c)
 }
 
 /**
@@ -365,4 +349,4 @@ function pack25519 (o: number[], n: number[]): void {
   }
 }
 
-export { gf0, gf1, fnA, fnS, fnM, fnZ, modL, reduce, par25519, scalarmult, scalarbase, car25519, add, set25519, pack, pack25519 }
+export { gf0, gf1, arraySet, fnA, fnS, fnM, fnZ, modL, reduce, par25519, scalarmult, scalarbase, car25519, add, pack, pack25519 }

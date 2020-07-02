@@ -26,6 +26,14 @@
 const sha512 = require('../sha512.js')
 const common = require('./common.js')
 
+const D = [
+  0x78a3, 0x1359, 0x4dca, 0x75eb, 0xd8ab, 0x4141, 0x0a4d, 0x0070,
+  0xe898, 0x7779, 0x4079, 0x8cc7, 0xfe73, 0x2b6f, 0x6cee, 0x5203
+]
+const I = [
+  0xa0b0, 0x4a0e, 0x1b27, 0xc4ee, 0xe478, 0xad2f, 0x1806, 0x2f43,
+  0xd7a7, 0x3dfb, 0x0099, 0x2b4d, 0xdf0b, 0x4fc1, 0x2480, 0x2b83
+]
 /**
  * Note: difference from C - smlen returned, not passed as argument.
  * @param {number[]|Uint8Array|Buffer} message
@@ -39,13 +47,13 @@ function sign (message, secretKey) {
   d[31] &= 127
   d[31] |= 64
   const sm = d.slice(0)
-  arraySet(sm, message, 64)
+  common.arraySet(sm, message, 64)
   const r = sha512.sha512(sm.slice(32))
   common.reduce(r)
   const p = [[], [], [], []]
   common.scalarbase(p, r)
   common.pack(sm, p)
-  arraySet(sm, secretKey.slice(32), 32)
+  common.arraySet(sm, secretKey.slice(32), 32)
   const h = sha512.sha512(sm)
   common.reduce(h)
   for (let i = 0; i < 32; i++) {
@@ -55,14 +63,6 @@ function sign (message, secretKey) {
   }
   return sm.slice(0, 32).concat(common.modL(sm.slice(32), r).slice(0, 32))
 }
-const D = [
-  0x78a3, 0x1359, 0x4dca, 0x75eb, 0xd8ab, 0x4141, 0x0a4d, 0x0070,
-  0xe898, 0x7779, 0x4079, 0x8cc7, 0xfe73, 0x2b6f, 0x6cee, 0x5203
-]
-const I = [
-  0xa0b0, 0x4a0e, 0x1b27, 0xc4ee, 0xe478, 0xad2f, 0x1806, 0x2f43,
-  0xd7a7, 0x3dfb, 0x0099, 0x2b4d, 0xdf0b, 0x4fc1, 0x2480, 0x2b83
-]
 /**
  * @param {number[]|Uint8Array|Buffer} signature
  * @param {number[]|Uint8Array|Buffer} message
@@ -79,10 +79,10 @@ function verify (signature, message, pubKey) {
   if (!unpackneg(q, pubKey)) {
     return false
   }
-  arraySet(sm, signature, 0)
-  arraySet(sm, message, 64)
+  common.arraySet(sm, signature, 0)
+  common.arraySet(sm, message, 64)
   const m = sm.slice(0)
-  arraySet(m, pubKey, 32)
+  common.arraySet(m, pubKey, 32)
   const h = sha512.sha512(m)
   common.reduce(h)
   common.scalarmult(p, q, h)
@@ -90,11 +90,6 @@ function verify (signature, message, pubKey) {
   common.add(p, q)
   common.pack(t, p)
   return cryptoVerify32(sm, t)
-}
-function arraySet (a, b, offset) {
-  for (let i = 0, l = b.length; i < l; i++) {
-    a[offset + i] = b[i]
-  }
 }
 /**
  * @param {number[][]} r
@@ -110,7 +105,7 @@ function unpackneg (r, p) {
   const den2 = []
   const den4 = []
   const den6 = []
-  common.set25519(r[2], common.gf1)
+  common.arraySet(r[2], common.gf1)
   unpack25519(r[1], p)
   common.fnS(num, r[1])
   common.fnM(den, num, D)

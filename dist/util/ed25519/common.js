@@ -41,16 +41,26 @@ const L = [
   0xed, 0xd3, 0xf5, 0x5c, 0x1a, 0x63, 0x12, 0x58, 0xd6, 0x9c, 0xf7, 0xa2,
   0xde, 0xf9, 0xde, 0x14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x10
 ]
+function arrayFill (array, length, value) {
+  const v = value || 0
+  for (let i = 0; i < length; i++) {
+    array[i] = v
+  }
+}
+function arraySet (a, b, offset, length) {
+  const o = offset || 0
+  const l = length || b.length
+  for (let i = 0; i < l; i++) {
+    a[o + i] = b[i]
+  }
+}
 /**
  * @param {number[]} r
  * @private
  */
 function reduce (r) {
-  const x = []
-  for (let i = 0; i < 64; i++) {
-    x[i] = r[i]
-    r[i] = 0
-  }
+  const x = r.slice(0)
+  arrayFill(r, 64)
   modL(r, x)
 }
 /**
@@ -97,10 +107,10 @@ function modLSub (r, x) {
  * @private
  */
 function scalarmult (p, q, s) {
-  set25519(p[0], gf0)
-  set25519(p[1], gf1)
-  set25519(p[2], gf1)
-  set25519(p[3], gf0)
+  arraySet(p[0], gf0)
+  arraySet(p[1], gf1)
+  arraySet(p[2], gf1)
+  arraySet(p[3], gf0)
   for (let i = 255; i >= 0; --i) {
     const b = (s[(i / 8) | 0] >> (i & 7)) & 1
     cswap(p, q, b)
@@ -173,23 +183,16 @@ function fnA (o, a, b) {
  */
 function fnM (o, a, b) {
   const t = []
-  for (let i = 0; i < 31; i++) {
-    t[i] = 0
-  }
+  arrayFill(t, 31)
   for (let i = 0; i < 16; i++) {
     for (let j = 0; j < 16; j++) {
       t[i + j] += a[i] * b[j]
     }
   }
-  fnMSub(o, t)
-}
-function fnMSub (o, t) {
   for (let i = 0; i < 15; i++) {
     t[i] += 38 * t[i + 16]
   }
-  for (let i = 0; i < 16; i++) {
-    o[i] = t[i]
-  }
+  arraySet(o, t, 0, 16)
   car25519(o)
   car25519(o)
 }
@@ -205,25 +208,15 @@ function fnZ (o, a, b) {
   }
 }
 /**
- * @param {number[]} r
- * @param {number[]} a
- * @private
- */
-function set25519 (r, a) {
-  for (let i = 0; i < 16; i++) {
-    r[i] = a[i]
-  }
-}
-/**
  * @param {number[][]} p
  * @param {number[]} s
  * @private
  */
 function scalarbase (p, s) {
   const q = [[], [], [], []]
-  set25519(q[0], X)
-  set25519(q[1], Y)
-  set25519(q[2], gf1)
+  arraySet(q[0], X)
+  arraySet(q[1], Y)
+  arraySet(q[2], gf1)
   fnM(q[3], X, Y)
   scalarmult(p, q, s)
 }
@@ -281,18 +274,14 @@ function fnS (o, a) {
  */
 function inv25519 (o, i) {
   const c = []
-  for (let a = 0; a < 16; a++) {
-    c[a] = i[a]
-  }
+  arraySet(c, i)
   for (let a = 253; a >= 0; a--) {
     fnM(c, c, c)
     if (a !== 2 && a !== 4) {
       fnM(c, c, i)
     }
   }
-  for (let a = 0; a < 16; a++) {
-    o[a] = c[a]
-  }
+  arraySet(o, c)
 }
 /**
  * @param {number[]} p
@@ -337,6 +326,7 @@ function pack25519 (o, n) {
 }
 
 exports.add = add
+exports.arraySet = arraySet
 exports.car25519 = car25519
 exports.fnA = fnA
 exports.fnM = fnM
@@ -351,4 +341,3 @@ exports.par25519 = par25519
 exports.reduce = reduce
 exports.scalarbase = scalarbase
 exports.scalarmult = scalarmult
-exports.set25519 = set25519

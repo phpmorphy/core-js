@@ -1,5 +1,13 @@
 import { sha512 } from '../sha512'
-import { gf0, gf1, reduce, modL, scalarbase, pack, scalarmult, add, set25519, fnA, fnM, fnS, fnZ, pack25519, par25519 } from './common'
+import { gf0, gf1, arraySet, reduce, modL, scalarbase, pack, scalarmult, add, fnA, fnM, fnS, fnZ, pack25519, par25519 } from './common'
+
+const D: number[] = [
+  0x78a3, 0x1359, 0x4dca, 0x75eb, 0xd8ab, 0x4141, 0x0a4d, 0x0070,
+  0xe898, 0x7779, 0x4079, 0x8cc7, 0xfe73, 0x2b6f, 0x6cee, 0x5203]
+
+const I: number[] = [
+  0xa0b0, 0x4a0e, 0x1b27, 0xc4ee, 0xe478, 0xad2f, 0x1806, 0x2f43,
+  0xd7a7, 0x3dfb, 0x0099, 0x2b4d, 0xdf0b, 0x4fc1, 0x2480, 0x2b83]
 
 /**
  * Note: difference from C - smlen returned, not passed as argument.
@@ -39,14 +47,6 @@ function sign (message: number[] | Uint8Array | Buffer, secretKey: number[] | Ui
   return sm.slice(0, 32).concat(modL(sm.slice(32), r).slice(0, 32))
 }
 
-const D: number[] = [
-  0x78a3, 0x1359, 0x4dca, 0x75eb, 0xd8ab, 0x4141, 0x0a4d, 0x0070,
-  0xe898, 0x7779, 0x4079, 0x8cc7, 0xfe73, 0x2b6f, 0x6cee, 0x5203]
-
-const I: number[] = [
-  0xa0b0, 0x4a0e, 0x1b27, 0xc4ee, 0xe478, 0xad2f, 0x1806, 0x2f43,
-  0xd7a7, 0x3dfb, 0x0099, 0x2b4d, 0xdf0b, 0x4fc1, 0x2480, 0x2b83]
-
 /**
  * @param {number[]|Uint8Array|Buffer} signature
  * @param {number[]|Uint8Array|Buffer} message
@@ -83,12 +83,6 @@ function verify (signature: number[] | Uint8Array | Buffer, message: number[] | 
   return cryptoVerify32(sm, t)
 }
 
-function arraySet (a: number[], b: number[] | Uint8Array | Buffer, offset: number) {
-  for (let i = 0, l = b.length; i < l; i++) {
-    a[offset + i] = b[i]
-  }
-}
-
 /**
  * @param {number[][]} r
  * @param {number[]|Uint8Array} p
@@ -105,7 +99,7 @@ function unpackneg (r: number[][], p: number[] | Uint8Array): boolean {
   const den4: number[] = []
   const den6: number[] = []
 
-  set25519(r[2], gf1)
+  arraySet(r[2], gf1)
   unpack25519(r[1], p)
   fnS(num, r[1])
   fnM(den, num, D)
