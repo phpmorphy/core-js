@@ -18,6 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+import { arraySet, arrayFill } from '../util/array'
+
 /**
  * @class
  * @lends Transaction
@@ -177,23 +179,19 @@ abstract class AbstractTransaction {
   protected readonly _fieldsMap: { [key: string]: boolean } = {}
 
   /**
-   * @param {number[]|Uint8Array} [bytes] Транзакция в бинарном виде, 150 байт.
+   * @param {number[]|Uint8Array|Buffer} [bytes] Транзакция в бинарном виде, 150 байт.
    * @throws {Error}
    * @private
    */
-  protected constructor (bytes?: number[] | Uint8Array) {
-    for (let i = 0; i < 150; i++) {
-      this._bytes[i] = 0
-    }
+  protected constructor (bytes?: number[] | Uint8Array | Buffer) {
+    arrayFill(this._bytes, 150)
 
     if (bytes !== undefined) {
       if (bytes.length !== 150) {
         throw new Error('incorrect length')
       }
 
-      for (let i = 0; i < 150; i++) {
-        this._bytes[i] = bytes[i]
-      }
+      arraySet(this._bytes, bytes)
 
       this._setFields([
         'version', 'sender', 'recipient', 'value', 'prefix',

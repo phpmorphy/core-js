@@ -23,11 +23,13 @@
 
 'use strict'
 
+const array = require('../util/array.js')
 const sha256 = require('../util/sha256.js')
 const SecretKey = require('../key/ed25519/SecretKey.js')
 const validator = require('../util/validator.js')
 const Address = require('../address/Address.js')
 const AbstractTransaction = require('./AbstractTransaction.js')
+const int = require('../util/int.js')
 
 /**
  * Базовый класс для работы с транзакциями.
@@ -125,10 +127,7 @@ class AbstractTransactionBase extends AbstractTransaction.AbstractTransaction {
       address.version === Address.Address.Genesis) {
       throw new Error('address version must not be genesis')
     }
-    const b = address.bytes
-    for (let i = 0; i < 34; i++) {
-      this._bytes[1 + i] = b[i]
-    }
+    array.arraySet(this._bytes, address.bytes, 1)
     this._setFields(['sender'])
   }
 
@@ -174,10 +173,7 @@ class AbstractTransactionBase extends AbstractTransaction.AbstractTransaction {
       address.version === Address.Address.Umi) {
       throw new Error('recipient version must not be umi')
     }
-    const b = address.bytes
-    for (let i = 0; i < 34; i++) {
-      this._bytes[35 + i] = b[i]
-    }
+    array.arraySet(this._bytes, address.bytes, 35)
     this._setFields(['recipient'])
   }
 
@@ -204,41 +200,15 @@ class AbstractTransactionBase extends AbstractTransaction.AbstractTransaction {
     this._checkFields(['version'])
     this._checkVersionIsBasic()
     this._checkFields(['value'])
-    return this._bytesToNumber(this._bytes.slice(69, 76))
+    return int.bytesToUint64(this._bytes.slice(69, 76))
   }
 
   set value (value) {
     this._checkFields(['version'])
     this._checkVersionIsBasic()
     validator.validateInt(value, 1, 9007199254740991)
-    const b = this._numberToBytes(value)
-    for (let i = 0; i < 8; i++) {
-      this._bytes[69 + i] = b[i]
-    }
+    array.arraySet(this._bytes, int.uint64ToBytes(value), 69)
     this._setFields(['value'])
-  }
-
-  _numberToBytes (value) {
-    const l = 1
-    const h = (value - l) / 4294967296
-    this._bytes[69] = (h >>> 24) & 0xff
-    this._bytes[70] = (h >>> 16) & 0xff
-    this._bytes[71] = (h >>> 8) & 0xff
-    this._bytes[72] = h & 0xff
-    this._bytes[73] = (l >>> 24) & 0xff
-    this._bytes[74] = (l >>> 16) & 0xff
-    this._bytes[75] = (l >>> 8) & 0xff
-    this._bytes[76] = l & 0xff
-    return []
-  }
-
-  _bytesToNumber (bytes) {
-    if (((this._bytes[69] << 8) + this._bytes[70]) > 0x001f) {
-      throw new Error('value is not safe integer')
-    }
-    const h = (this._bytes[69] << 24) + (this._bytes[70] << 16) + (this._bytes[71] << 8) + this._bytes[72]
-    const l = (this._bytes[73] << 24) + (this._bytes[74] << 16) + (this._bytes[75] << 8) + this._bytes[76]
-    return (h * 4294967296) + l
   }
 
   /**
@@ -263,15 +233,12 @@ class AbstractTransactionBase extends AbstractTransaction.AbstractTransaction {
    */
   get nonce () {
     this._checkFields(['nonce'])
-    return this._bytesToNumber(this._bytes.slice(77, 85))
+    return int.bytesToUint64(this._bytes.slice(77, 85))
   }
 
   set nonce (nonce) {
     validator.validateInt(nonce, 0, 9007199254740991)
-    const b = this._numberToBytes(nonce)
-    for (let i = 0; i < 8; i++) {
-      this._bytes[77 + i] = b[i]
-    }
+    array.arraySet(this._bytes, int.uint64ToBytes(nonce), 77)
     this._setFields(['nonce'])
   }
 
@@ -303,9 +270,7 @@ class AbstractTransactionBase extends AbstractTransaction.AbstractTransaction {
     if (signature.length !== this.sender.publicKey.signatureLength) {
       throw new Error('invalid length')
     }
-    for (let i = 0, l = signature.length; i < l; i++) {
-      this._bytes[85 + i] = signature[i]
-    }
+    array.arraySet(this._bytes, signature, 85)
     this._setFields(['signature'])
   }
 
@@ -331,8 +296,7 @@ class AbstractTransactionBase extends AbstractTransaction.AbstractTransaction {
     if (!(secretKey instanceof SecretKey.SecretKey)) {
       throw new Error('secretKey type must be SecretKey')
     }
-    const msg = this._bytes.slice(0, 85)
-    this.signature = secretKey.sign(msg)
+    this.signature = secretKey.sign(this._bytes.slice(0, 85))
     return this
   }
 
@@ -343,8 +307,7 @@ class AbstractTransactionBase extends AbstractTransaction.AbstractTransaction {
    */
   verify () {
     this._checkFields(['version', 'sender', 'signature'])
-    const msg = this._bytes.slice(0, 85)
-    return this.sender.publicKey.verifySignature(this.signature, msg)
+    return this.sender.publicKey.verifySignature(this.signature, this._bytes.slice(0, 85))
   }
 
   /**

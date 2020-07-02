@@ -23,6 +23,8 @@
 
 'use strict'
 
+const array = require('../util/array.js')
+
 /**
  * @class
  * @lends Transaction
@@ -30,7 +32,7 @@
  */
 class AbstractTransaction {
   /**
-   * @param {number[]|Uint8Array} [bytes] Транзакция в бинарном виде, 150 байт.
+   * @param {number[]|Uint8Array|Buffer} [bytes] Транзакция в бинарном виде, 150 байт.
    * @throws {Error}
    * @private
    */
@@ -47,16 +49,12 @@ class AbstractTransaction {
      * @private
      */
     this._fieldsMap = {}
-    for (let i = 0; i < 150; i++) {
-      this._bytes[i] = 0
-    }
+    array.arrayFill(this._bytes, 150)
     if (bytes !== undefined) {
       if (bytes.length !== 150) {
         throw new Error('incorrect length')
       }
-      for (let i = 0; i < 150; i++) {
-        this._bytes[i] = bytes[i]
-      }
+      array.arraySet(this._bytes, bytes)
       this._setFields([
         'version', 'sender', 'recipient', 'value', 'prefix',
         'name', 'profitPercent', 'feePercent', 'nonce', 'signature'

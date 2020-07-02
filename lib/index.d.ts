@@ -340,11 +340,11 @@ declare abstract class AbstractTransaction {
      */
     static get DeleteTransitAddress(): number;
     /**
-     * @param {number[]|Uint8Array} [bytes] Транзакция в бинарном виде, 150 байт.
+     * @param {number[]|Uint8Array|Buffer} [bytes] Транзакция в бинарном виде, 150 байт.
      * @throws {Error}
      * @private
      */
-    protected constructor(bytes?: number[] | Uint8Array);
+    protected constructor(bytes?: number[] | Uint8Array | Buffer);
 }
 /**
  * Базовый класс для работы с транзакциями.
@@ -436,8 +436,6 @@ declare abstract class AbstractTransactionBase extends AbstractTransaction {
      */
     get value(): number;
     set value(value: number);
-    private _numberToBytes;
-    private _bytesToNumber;
     /**
      * Устанавливает сумму и возвращяет this.
      * Принимает значения в промежутке от 1 до 9007199254740991.

@@ -25,6 +25,8 @@ import { SecretKey } from '../key/ed25519/SecretKey'
 import { AbstractTransaction } from './AbstractTransaction'
 import { sha256 } from '../util/sha256'
 import { validateInt } from '../util/validator'
+import { arraySet } from '../util/array'
+import { uint64ToBytes, bytesToUint64 } from '../util/int'
 
 /**
  * Базовый класс для работы с транзакциями.
@@ -132,12 +134,8 @@ abstract class AbstractTransactionBase extends AbstractTransaction {
       throw new Error('address version must not be genesis')
     }
 
-    // sender length = 34
-    // sender begin = 1
-    const b = address.bytes
-    for (let i = 0; i < 34; i++) {
-      this._bytes[1 + i] = b[i]
-    }
+    // sender offset = 1
+    arraySet(this._bytes, address.bytes, 1)
     this._setFields(['sender'])
   }
 
@@ -163,9 +161,8 @@ abstract class AbstractTransactionBase extends AbstractTransaction {
     this._checkVersionIsNotStruct()
     this._checkFields(['recipient'])
 
-    // recipient length = 34
     // recipient begin = 35
-    // recipient enf = 69
+    // recipient end = 69
     return new Address(this._bytes.slice(35, 69))
   }
 
@@ -192,12 +189,8 @@ abstract class AbstractTransactionBase extends AbstractTransaction {
       throw new Error('recipient version must not be umi')
     }
 
-    // recipient length = 34
-    // recipient begin = 35
-    const b = address.bytes
-    for (let i = 0; i < 34; i++) {
-      this._bytes[35 + i] = b[i]
-    }
+    // recipient offset = 35
+    arraySet(this._bytes, address.bytes, 35)
     this._setFields(['recipient'])
   }
 
@@ -226,7 +219,7 @@ abstract class AbstractTransactionBase extends AbstractTransaction {
     this._checkFields(['value'])
 
     // value offset = 69
-    return this._bytesToNumber(this._bytes.slice(69, 76))
+    return bytesToUint64(this._bytes.slice(69, 76))
   }
 
   set value (value: number) {
@@ -234,39 +227,9 @@ abstract class AbstractTransactionBase extends AbstractTransaction {
     this._checkVersionIsBasic()
     validateInt(value, 1, 9007199254740991)
 
-    const b = this._numberToBytes(value)
-    for (let i = 0; i < 8; i++) {
-      this._bytes[69 + i] = b[i]
-    }
-    this._setFields(['value'])
-  }
-
-  private _numberToBytes (value: number): number[] {
-    const l = 1
-    const h = (value - l) / 0x1_0000_0000 // value >>> 32
-
     // value offset = 69
-    this._bytes[69] = (h >>> 24) & 0xff
-    this._bytes[70] = (h >>> 16) & 0xff
-    this._bytes[71] = (h >>> 8) & 0xff
-    this._bytes[72] = h & 0xff
-    this._bytes[73] = (l >>> 24) & 0xff
-    this._bytes[74] = (l >>> 16) & 0xff
-    this._bytes[75] = (l >>> 8) & 0xff
-    this._bytes[76] = l & 0xff
-
-    return []
-  }
-
-  private _bytesToNumber (bytes: number[]): number {
-    if (((this._bytes[69] << 8) + this._bytes[70]) > 0x001f) {
-      throw new Error('value is not safe integer')
-    }
-
-    const h = (this._bytes[69] << 24) + (this._bytes[70] << 16) + (this._bytes[71] << 8) + this._bytes[72]
-    const l = (this._bytes[73] << 24) + (this._bytes[74] << 16) + (this._bytes[75] << 8) + this._bytes[76]
-
-    return (h * 0x1_0000_0000) + l // h << 32 | l
+    arraySet(this._bytes, uint64ToBytes(value), 69)
+    this._setFields(['value'])
   }
 
   /**
@@ -293,16 +256,14 @@ abstract class AbstractTransactionBase extends AbstractTransaction {
     this._checkFields(['nonce'])
 
     // nonce offset = 77
-    return this._bytesToNumber(this._bytes.slice(77, 85))
+    return bytesToUint64(this._bytes.slice(77, 85))
   }
 
   set nonce (nonce: number) {
     validateInt(nonce, 0, 9007199254740991)
 
-    const b = this._numberToBytes(nonce)
-    for (let i = 0; i < 8; i++) {
-      this._bytes[77 + i] = b[i] // nonce offset = 77
-    }
+    // nonce offset = 77
+    arraySet(this._bytes, uint64ToBytes(nonce), 77)
     this._setFields(['nonce'])
   }
 
@@ -340,9 +301,7 @@ abstract class AbstractTransactionBase extends AbstractTransaction {
     }
 
     // signature offset = 85
-    for (let i = 0, l = signature.length; i < l; i++) {
-      this._bytes[85 + i] = signature[i]
-    }
+    arraySet(this._bytes, signature, 85)
     this._setFields(['signature'])
   }
 
@@ -372,8 +331,7 @@ abstract class AbstractTransactionBase extends AbstractTransaction {
 
     // unsigned begin = 0
     // unsigned end = 85
-    const msg = this._bytes.slice(0, 85)
-    this.signature = secretKey.sign(msg)
+    this.signature = secretKey.sign(this._bytes.slice(0, 85))
     return this
   }
 
@@ -387,8 +345,7 @@ abstract class AbstractTransactionBase extends AbstractTransaction {
 
     // unsigned begin = 0
     // unsigned end = 85
-    const msg = this._bytes.slice(0, 85)
-    return this.sender.publicKey.verifySignature(this.signature, msg)
+    return this.sender.publicKey.verifySignature(this.signature, this._bytes.slice(0, 85))
   }
 
   /**

@@ -1,3 +1,5 @@
+import { arrayFill, arraySet } from '../array'
+
 const gf0: number[] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
 const gf1: number[] = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -17,21 +19,6 @@ const Y: number[] = [
 const L: number[] = [
   0xed, 0xd3, 0xf5, 0x5c, 0x1a, 0x63, 0x12, 0x58, 0xd6, 0x9c, 0xf7, 0xa2,
   0xde, 0xf9, 0xde, 0x14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x10]
-
-function arrayFill (array: number[], length: number, value?: any) {
-  const v = value || 0
-  for (let i = 0; i < length; i++) {
-    array[i] = v
-  }
-}
-
-function arraySet (a: number[], b: number[] | Uint8Array | Buffer, offset?: number, length?: number) {
-  const o = offset || 0
-  const l = length || b.length
-  for (let i = 0; i < l; i++) {
-    a[o + i] = b[i]
-  }
-}
 
 /**
  * @param {number[]} r
@@ -273,16 +260,6 @@ function par25519 (a: number[]): number {
 
 /**
  * @param {number[]} o
- * @param {number[]} a
- * @private
- * @internal
- */
-function fnS (o: number[], a: number[]): void {
-  fnM(o, a, a)
-}
-
-/**
- * @param {number[]} o
  * @param {number[]} i
  * @private
  * @internal
@@ -349,4 +326,4 @@ function pack25519 (o: number[], n: number[]): void {
   }
 }
 
-export { gf0, gf1, arraySet, fnA, fnS, fnM, fnZ, modL, reduce, par25519, scalarmult, scalarbase, car25519, add, pack, pack25519 }
+export { gf0, gf1, arraySet, fnA, fnM, fnZ, modL, reduce, par25519, scalarmult, scalarbase, car25519, add, pack, pack25519 }

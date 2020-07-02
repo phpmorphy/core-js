@@ -24,6 +24,7 @@
 'use strict'
 
 const sha512 = require('../sha512.js')
+const array = require('../array.js')
 const common = require('./common.js')
 
 const D = [
@@ -47,13 +48,13 @@ function sign (message, secretKey) {
   d[31] &= 127
   d[31] |= 64
   const sm = d.slice(0)
-  common.arraySet(sm, message, 64)
+  array.arraySet(sm, message, 64)
   const r = sha512.sha512(sm.slice(32))
   common.reduce(r)
   const p = [[], [], [], []]
   common.scalarbase(p, r)
   common.pack(sm, p)
-  common.arraySet(sm, secretKey.slice(32), 32)
+  array.arraySet(sm, secretKey.slice(32), 32)
   const h = sha512.sha512(sm)
   common.reduce(h)
   for (let i = 0; i < 32; i++) {
@@ -79,10 +80,10 @@ function verify (signature, message, pubKey) {
   if (!unpackneg(q, pubKey)) {
     return false
   }
-  common.arraySet(sm, signature, 0)
-  common.arraySet(sm, message, 64)
+  array.arraySet(sm, signature, 0)
+  array.arraySet(sm, message, 64)
   const m = sm.slice(0)
-  common.arraySet(m, pubKey, 32)
+  array.arraySet(m, pubKey, 32)
   const h = sha512.sha512(m)
   common.reduce(h)
   common.scalarmult(p, q, h)
@@ -105,14 +106,14 @@ function unpackneg (r, p) {
   const den2 = []
   const den4 = []
   const den6 = []
-  common.arraySet(r[2], common.gf1)
+  array.arraySet(r[2], common.gf1)
   unpack25519(r[1], p)
-  common.fnS(num, r[1])
+  common.fnM(num, r[1], r[1])
   common.fnM(den, num, D)
   common.fnZ(num, num, r[2])
   common.fnA(den, r[2], den)
-  common.fnS(den2, den)
-  common.fnS(den4, den2)
+  common.fnM(den2, den, den)
+  common.fnM(den4, den2, den2)
   common.fnM(den6, den4, den2)
   common.fnM(t, den6, num)
   common.fnM(t, t, den)
@@ -121,12 +122,12 @@ function unpackneg (r, p) {
   common.fnM(t, t, den)
   common.fnM(t, t, den)
   common.fnM(r[0], t, den)
-  common.fnS(chk, r[0])
+  common.fnM(chk, r[0], r[0])
   common.fnM(chk, chk, den)
   if (!neq25519(chk, num)) {
     common.fnM(r[0], r[0], I)
   }
-  common.fnS(chk, r[0])
+  common.fnM(chk, r[0], r[0])
   common.fnM(chk, chk, den)
   /* istanbul ignore if */
   if (!neq25519(chk, num)) {
@@ -173,7 +174,7 @@ function pow2523 (o, i) {
     c[a] = i[a]
   }
   for (let a = 250; a >= 0; a--) {
-    common.fnS(c, c)
+    common.fnM(c, c, c)
     if (a !== 1) {
       common.fnM(c, c, i)
     }
@@ -203,9 +204,7 @@ function secretKeyFromSeed (seed) {
   const sk = []
   const pk = []
   const p = [[], [], [], []]
-  for (let i = 0; i < 32; i++) {
-    sk[i] = seed[i]
-  }
+  array.arraySet(sk, seed)
   const d = sha512.sha512(sk)
   d[0] &= 248
   d[31] &= 127

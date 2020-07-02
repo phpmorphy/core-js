@@ -23,6 +23,8 @@
 
 'use strict'
 
+const array = require('../array.js')
+
 const gf0 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 const gf1 = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 const D2 = [
@@ -41,26 +43,13 @@ const L = [
   0xed, 0xd3, 0xf5, 0x5c, 0x1a, 0x63, 0x12, 0x58, 0xd6, 0x9c, 0xf7, 0xa2,
   0xde, 0xf9, 0xde, 0x14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x10
 ]
-function arrayFill (array, length, value) {
-  const v = value || 0
-  for (let i = 0; i < length; i++) {
-    array[i] = v
-  }
-}
-function arraySet (a, b, offset, length) {
-  const o = offset || 0
-  const l = length || b.length
-  for (let i = 0; i < l; i++) {
-    a[o + i] = b[i]
-  }
-}
 /**
  * @param {number[]} r
  * @private
  */
 function reduce (r) {
   const x = r.slice(0)
-  arrayFill(r, 64)
+  array.arrayFill(r, 64)
   modL(r, x)
 }
 /**
@@ -107,10 +96,10 @@ function modLSub (r, x) {
  * @private
  */
 function scalarmult (p, q, s) {
-  arraySet(p[0], gf0)
-  arraySet(p[1], gf1)
-  arraySet(p[2], gf1)
-  arraySet(p[3], gf0)
+  array.arraySet(p[0], gf0)
+  array.arraySet(p[1], gf1)
+  array.arraySet(p[2], gf1)
+  array.arraySet(p[3], gf0)
   for (let i = 255; i >= 0; --i) {
     const b = (s[(i / 8) | 0] >> (i & 7)) & 1
     cswap(p, q, b)
@@ -183,7 +172,7 @@ function fnA (o, a, b) {
  */
 function fnM (o, a, b) {
   const t = []
-  arrayFill(t, 31)
+  array.arrayFill(t, 31)
   for (let i = 0; i < 16; i++) {
     for (let j = 0; j < 16; j++) {
       t[i + j] += a[i] * b[j]
@@ -192,7 +181,7 @@ function fnM (o, a, b) {
   for (let i = 0; i < 15; i++) {
     t[i] += 38 * t[i + 16]
   }
-  arraySet(o, t, 0, 16)
+  array.arraySet(o, t, 0, 16)
   car25519(o)
   car25519(o)
 }
@@ -214,9 +203,9 @@ function fnZ (o, a, b) {
  */
 function scalarbase (p, s) {
   const q = [[], [], [], []]
-  arraySet(q[0], X)
-  arraySet(q[1], Y)
-  arraySet(q[2], gf1)
+  array.arraySet(q[0], X)
+  array.arraySet(q[1], Y)
+  array.arraySet(q[2], gf1)
   fnM(q[3], X, Y)
   scalarmult(p, q, s)
 }
@@ -261,27 +250,19 @@ function par25519 (a) {
 }
 /**
  * @param {number[]} o
- * @param {number[]} a
- * @private
- */
-function fnS (o, a) {
-  fnM(o, a, a)
-}
-/**
- * @param {number[]} o
  * @param {number[]} i
  * @private
  */
 function inv25519 (o, i) {
   const c = []
-  arraySet(c, i)
+  array.arraySet(c, i)
   for (let a = 253; a >= 0; a--) {
     fnM(c, c, c)
     if (a !== 2 && a !== 4) {
       fnM(c, c, i)
     }
   }
-  arraySet(o, c)
+  array.arraySet(o, c)
 }
 /**
  * @param {number[]} p
@@ -325,12 +306,11 @@ function pack25519 (o, n) {
   }
 }
 
+exports.arraySet = array.arraySet
 exports.add = add
-exports.arraySet = arraySet
 exports.car25519 = car25519
 exports.fnA = fnA
 exports.fnM = fnM
-exports.fnS = fnS
 exports.fnZ = fnZ
 exports.gf0 = gf0
 exports.gf1 = gf1

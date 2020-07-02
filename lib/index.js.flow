@@ -50,7 +50,7 @@ declare class AbstractTransaction {
   UpdateFeeAddress: number;
   CreateTransitAddress: number;
   DeleteTransitAddress: number;
-  constructor(bytes?: number[] | Uint8Array): this;
+  constructor(bytes?: number[] | Uint8Array | Buffer): this;
 }
 declare class AbstractTransactionBase mixins AbstractTransaction {
   bytes: number[];

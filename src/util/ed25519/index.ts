@@ -1,5 +1,6 @@
 import { sha512 } from '../sha512'
-import { gf0, gf1, arraySet, reduce, modL, scalarbase, pack, scalarmult, add, fnA, fnM, fnS, fnZ, pack25519, par25519 } from './common'
+import { arraySet } from '../array'
+import { gf0, gf1, reduce, modL, scalarbase, pack, scalarmult, add, fnA, fnM, fnZ, pack25519, par25519 } from './common'
 
 const D: number[] = [
   0x78a3, 0x1359, 0x4dca, 0x75eb, 0xd8ab, 0x4141, 0x0a4d, 0x0070,
@@ -101,13 +102,13 @@ function unpackneg (r: number[][], p: number[] | Uint8Array): boolean {
 
   arraySet(r[2], gf1)
   unpack25519(r[1], p)
-  fnS(num, r[1])
+  fnM(num, r[1], r[1])
   fnM(den, num, D)
   fnZ(num, num, r[2])
   fnA(den, r[2], den)
 
-  fnS(den2, den)
-  fnS(den4, den2)
+  fnM(den2, den, den)
+  fnM(den4, den2, den2)
   fnM(den6, den4, den2)
   fnM(t, den6, num)
   fnM(t, t, den)
@@ -117,14 +118,14 @@ function unpackneg (r: number[][], p: number[] | Uint8Array): boolean {
   fnM(t, t, den)
   fnM(t, t, den)
   fnM(r[0], t, den)
-  fnS(chk, r[0])
+  fnM(chk, r[0], r[0])
   fnM(chk, chk, den)
 
   if (!neq25519(chk, num)) {
     fnM(r[0], r[0], I)
   }
 
-  fnS(chk, r[0])
+  fnM(chk, r[0], r[0])
   fnM(chk, chk, den)
 
   /** @istanbul ignore if */
@@ -184,7 +185,7 @@ function pow2523 (o: number[], i: number[]): void {
   }
 
   for (let a = 250; a >= 0; a--) {
-    fnS(c, c)
+    fnM(c, c, c)
     if (a !== 1) {
       fnM(c, c, i)
     }
@@ -220,9 +221,7 @@ function secretKeyFromSeed (seed: number[] | Uint8Array | Buffer): number[] {
   const pk: number[] = []
   const p: number[][] = [[], [], [], []]
 
-  for (let i = 0; i < 32; i++) {
-    sk[i] = seed[i]
-  }
+  arraySet(sk, seed)
 
   const d = sha512(sk)
   d[0] &= 248
