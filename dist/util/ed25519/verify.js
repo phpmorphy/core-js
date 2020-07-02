@@ -35,9 +35,9 @@ const I = [
   0xd7a7, 0x3dfb, 0x0099, 0x2b4d, 0xdf0b, 0x4fc1, 0x2480, 0x2b83
 ]
 /**
- * @param {number[]} signature
- * @param {number[]} message
- * @param {number[]} pubKey
+ * @param {number[]|Uint8Array|Buffer} signature
+ * @param {number[]|Uint8Array|Buffer} message
+ * @param {number[]|Uint8Array|Buffer} pubKey
  * @returns {boolean}
  * @private
  */
@@ -48,7 +48,7 @@ function verify (signature, message, pubKey) {
   const p = [[], [], [], []]
   const q = [[], [], [], []]
   /* istanbul ignore if */
-  if (unpackneg(q, pubKey)) {
+  if (!unpackneg(q, pubKey)) {
     return false
   }
   for (let i = 0; i < 64; i++) {
@@ -68,14 +68,12 @@ function verify (signature, message, pubKey) {
   common.scalarbase(q, sm.slice(32))
   common.add(p, q)
   common.pack(t, p)
-  if (cryptoVerify32(sm, t)) {
-    return false
-  }
-  return true
+  return cryptoVerify32(sm, t)
 }
 /**
  * @param {number[][]} r
  * @param {number[]|Uint8Array} p
+ * @returns {boolean}
  * @private
  */
 function unpackneg (r, p) {
@@ -104,24 +102,25 @@ function unpackneg (r, p) {
   common.fnM(r[0], t, den)
   common.fnS(chk, r[0])
   common.fnM(chk, chk, den)
-  if (neq25519(chk, num)) {
+  if (!neq25519(chk, num)) {
     common.fnM(r[0], r[0], I)
   }
   common.fnS(chk, r[0])
   common.fnM(chk, chk, den)
   /* istanbul ignore if */
-  if (neq25519(chk, num)) {
-    return -1
+  if (!neq25519(chk, num)) {
+    return false
   }
   if (common.par25519(r[0]) === (p[31] >> 7)) {
     common.fnZ(r[0], common.gf0, r[0])
   }
   common.fnM(r[3], r[0], r[1])
-  return 0
+  return true
 }
 /**
  * @param {number[]} x
  * @param {number[]} y
+ * @returns {boolean}
  * @private
  */
 function cryptoVerify32 (x, y) {
@@ -129,7 +128,7 @@ function cryptoVerify32 (x, y) {
   for (let i = 0; i < 32; i++) {
     d |= x[i] ^ y[i]
   }
-  return (1 & ((d - 1) >>> 8)) - 1
+  return (1 & ((d - 1) >>> 8)) === 1
 }
 /**
  * @param {number[]} o
@@ -165,6 +164,7 @@ function pow2523 (o, i) {
 /**
  * @param {number[]} a
  * @param {number[]} b
+ * @throws {boolean}
  * @private
  */
 function neq25519 (a, b) {

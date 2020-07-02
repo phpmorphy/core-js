@@ -3,33 +3,31 @@ import { reduce, modL, scalarbase, pack } from './common'
 
 /**
  * Note: difference from C - smlen returned, not passed as argument.
- * @param {number[]|Uint8Array} message
- * @param {number[]|Uint8Array} secretKey
+ * @param {number[]|Uint8Array|Buffer} message
+ * @param {number[]|Uint8Array|Buffer} secretKey
  * @returns {number[]}
  * @private
  * @internal
  */
-function sign (message: number[]|Uint8Array, secretKey: number[]|Uint8Array): number[] {
-  const sm: number[] = []
-  const x: number[] = []
-  const p: number[][] = [[], [], [], []]
+function sign (message: number[] | Uint8Array | Buffer, secretKey: number[] | Uint8Array | Buffer): number[] {
+  if (secretKey.length !== 64) {
+    throw new Error('secretKey - invalid length')
+  }
 
   const d = sha512(secretKey.slice(0, 32))
   d[0] &= 248
   d[31] &= 127
   d[31] |= 64
 
-  for (let i = 0, n = message.length; i < n; i++) {
+  const sm = d.slice(0)
+  for (let i = 0, l = message.length; i < l; i++) {
     sm[64 + i] = message[i]
-  }
-
-  for (let i = 32; i < 64; i++) {
-    sm[i] = d[i]
   }
 
   const r = sha512(sm.slice(32))
   reduce(r)
 
+  const p: number[][] = [[], [], [], []]
   scalarbase(p, r)
   pack(sm, p)
 
@@ -40,24 +38,13 @@ function sign (message: number[]|Uint8Array, secretKey: number[]|Uint8Array): nu
   const h = sha512(sm)
   reduce(h)
 
-  for (let i = 0; i < 64; i++) {
-    x[i] = 0
-  }
-
-  for (let i = 0; i < 32; i++) {
-    x[i] = r[i]
-  }
-
   for (let i = 0; i < 32; i++) {
     for (let j = 0; j < 32; j++) {
-      x[i + j] += h[i] * d[j]
+      r[i + j] += h[i] * d[j]
     }
   }
 
-  const sm2 = sm.slice(32)
-  modL(sm2, x)
-
-  return sm.slice(0, 32).concat(sm2.slice(0, 32))
+  return sm.slice(0, 32).concat(modL(sm.slice(32), r).slice(0, 32))
 }
 
 export { sign }

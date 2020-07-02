@@ -10,14 +10,14 @@ const I: number[] = [
   0xd7a7, 0x3dfb, 0x0099, 0x2b4d, 0xdf0b, 0x4fc1, 0x2480, 0x2b83]
 
 /**
- * @param {number[]} signature
- * @param {number[]} message
- * @param {number[]} pubKey
+ * @param {number[]|Uint8Array|Buffer} signature
+ * @param {number[]|Uint8Array|Buffer} message
+ * @param {number[]|Uint8Array|Buffer} pubKey
  * @returns {boolean}
  * @private
  * @internal
  */
-function verify (signature: number[] | Uint8Array, message: number[] | Uint8Array, pubKey: number[] | Uint8Array): boolean {
+function verify (signature: number[] | Uint8Array | Buffer, message: number[] | Uint8Array | Buffer, pubKey: number[] | Uint8Array | Buffer): boolean {
   const sm: number[] = []
   const m: number[] = []
   const t: number[] = []
@@ -25,7 +25,7 @@ function verify (signature: number[] | Uint8Array, message: number[] | Uint8Arra
   const q: number[][] = [[], [], [], []]
 
   /** @istanbul ignore if */
-  if (unpackneg(q, pubKey)) {
+  if (!unpackneg(q, pubKey)) {
     return false
   }
 
@@ -51,20 +51,17 @@ function verify (signature: number[] | Uint8Array, message: number[] | Uint8Arra
   add(p, q)
   pack(t, p)
 
-  if (cryptoVerify32(sm, t)) {
-    return false
-  }
-
-  return true
+  return cryptoVerify32(sm, t)
 }
 
 /**
  * @param {number[][]} r
  * @param {number[]|Uint8Array} p
+ * @returns {boolean}
  * @private
  * @internal
  */
-function unpackneg (r: number[][], p: number[] | Uint8Array): number {
+function unpackneg (r: number[][], p: number[] | Uint8Array): boolean {
   const t: number[] = []
   const chk: number[] = []
   const num: number[] = []
@@ -94,7 +91,7 @@ function unpackneg (r: number[][], p: number[] | Uint8Array): number {
   fnS(chk, r[0])
   fnM(chk, chk, den)
 
-  if (neq25519(chk, num)) {
+  if (!neq25519(chk, num)) {
     fnM(r[0], r[0], I)
   }
 
@@ -102,8 +99,8 @@ function unpackneg (r: number[][], p: number[] | Uint8Array): number {
   fnM(chk, chk, den)
 
   /** @istanbul ignore if */
-  if (neq25519(chk, num)) {
-    return -1
+  if (!neq25519(chk, num)) {
+    return false
   }
 
   if (par25519(r[0]) === (p[31] >> 7)) {
@@ -112,22 +109,23 @@ function unpackneg (r: number[][], p: number[] | Uint8Array): number {
 
   fnM(r[3], r[0], r[1])
 
-  return 0
+  return true
 }
 
 /**
  * @param {number[]} x
  * @param {number[]} y
+ * @returns {boolean}
  * @private
  * @internal
  */
-function cryptoVerify32 (x: number[], y: number[]): number {
+function cryptoVerify32 (x: number[], y: number[]): boolean {
   let d = 0
   for (let i = 0; i < 32; i++) {
     d |= x[i] ^ y[i]
   }
 
-  return (1 & ((d - 1) >>> 8)) - 1
+  return (1 & ((d - 1) >>> 8)) === 1
 }
 
 /**
@@ -171,10 +169,11 @@ function pow2523 (o: number[], i: number[]): void {
 /**
  * @param {number[]} a
  * @param {number[]} b
+ * @throws {boolean}
  * @private
  * @internal
  */
-function neq25519 (a: number[], b: number[]): number {
+function neq25519 (a: number[], b: number[]): boolean {
   const c: number[] = []
   const d: number[] = []
   pack25519(c, a)

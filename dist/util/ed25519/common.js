@@ -72,7 +72,7 @@ function modL (r, x) {
     x[j] += carry
     x[i] = 0
   }
-  modLSub(r, x)
+  return modLSub(r, x)
 }
 function modLSub (r, x) {
   let carry = 0
@@ -88,6 +88,7 @@ function modLSub (r, x) {
     x[i + 1] += x[i] >> 8
     r[i] = x[i] & 255
   }
+  return r
 }
 /**
  * @param {number[][]} p
@@ -311,10 +312,7 @@ function sel25519 (p, q, b) {
  */
 function pack25519 (o, n) {
   const m = []
-  const t = []
-  for (let i = 0; i < 16; i++) {
-    t[i] = n[i]
-  }
+  const t = n.slice(0)
   car25519(t)
   car25519(t)
   car25519(t)

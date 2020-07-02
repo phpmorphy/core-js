@@ -40,7 +40,7 @@ function reduce (r: number[]): void {
  * @private
  * @internal
  */
-function modL (r: number[], x: number[]): void {
+function modL (r: number[], x: number[]): number[] {
   let carry: number
   let j: number
   let k: number
@@ -54,10 +54,11 @@ function modL (r: number[], x: number[]): void {
     x[j] += carry
     x[i] = 0
   }
-  modLSub(r, x)
+
+  return modLSub(r, x)
 }
 
-function modLSub (r: number[], x: number[]) {
+function modLSub (r: number[], x: number[]): number[] {
   let carry = 0
   for (let j = 0; j < 32; j++) {
     x[j] += carry - (x[31] >> 4) * L[j]
@@ -71,6 +72,8 @@ function modLSub (r: number[], x: number[]) {
     x[i + 1] += x[i] >> 8
     r[i] = x[i] & 255
   }
+
+  return r
 }
 
 /**
@@ -334,11 +337,7 @@ function sel25519 (p: number[], q: number[], b: number): void {
  */
 function pack25519 (o: number[], n: number[]): void {
   const m: number[] = []
-  const t: number[] = []
-
-  for (let i = 0; i < 16; i++) {
-    t[i] = n[i]
-  }
+  const t = n.slice(0)
 
   car25519(t)
   car25519(t)
