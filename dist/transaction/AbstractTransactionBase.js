@@ -27,9 +27,9 @@ const array = require('../util/array.js')
 const sha256 = require('../util/sha256.js')
 const SecretKey = require('../key/ed25519/SecretKey.js')
 const validator = require('../util/validator.js')
+const integer = require('../util/integer.js')
 const Address = require('../address/Address.js')
 const AbstractTransaction = require('./AbstractTransaction.js')
-const int = require('../util/int.js')
 
 /**
  * Базовый класс для работы с транзакциями.
@@ -200,14 +200,14 @@ class AbstractTransactionBase extends AbstractTransaction.AbstractTransaction {
     this._checkFields(['version'])
     this._checkVersionIsBasic()
     this._checkFields(['value'])
-    return int.bytesToUint64(this._bytes.slice(69, 76))
+    return integer.bytesToUint64(this._bytes.slice(69, 76))
   }
 
   set value (value) {
     this._checkFields(['version'])
     this._checkVersionIsBasic()
     validator.validateInt(value, 1, 9007199254740991)
-    array.arraySet(this._bytes, int.uint64ToBytes(value), 69)
+    array.arraySet(this._bytes, integer.uint64ToBytes(value), 69)
     this._setFields(['value'])
   }
 
@@ -233,12 +233,12 @@ class AbstractTransactionBase extends AbstractTransaction.AbstractTransaction {
    */
   get nonce () {
     this._checkFields(['nonce'])
-    return int.bytesToUint64(this._bytes.slice(77, 85))
+    return integer.bytesToUint64(this._bytes.slice(77, 85))
   }
 
   set nonce (nonce) {
     validator.validateInt(nonce, 0, 9007199254740991)
-    array.arraySet(this._bytes, int.uint64ToBytes(nonce), 77)
+    array.arraySet(this._bytes, integer.uint64ToBytes(nonce), 77)
     this._setFields(['nonce'])
   }
 

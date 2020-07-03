@@ -26,7 +26,7 @@ import { AbstractTransaction } from './AbstractTransaction'
 import { sha256 } from '../util/sha256'
 import { validateInt } from '../util/validator'
 import { arraySet } from '../util/array'
-import { uint64ToBytes, bytesToUint64 } from '../util/int'
+import { uint64ToBytes, bytesToUint64 } from '../util/integer'
 
 /**
  * Базовый класс для работы с транзакциями.

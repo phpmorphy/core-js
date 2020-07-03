@@ -22,6 +22,8 @@ import { PublicKey } from '../key/ed25519/PublicKey'
 import { SecretKey } from '../key/ed25519/SecretKey'
 import { prefixToVersion, versionToPrefix } from '../util/converter'
 import { decode, encode } from '../util/bech32'
+import { arrayFill, arraySet } from '../util/array'
+import { uint16ToBytes, bytesToUint16 } from '../util/integer'
 
 /**
  * Базовый класс для работы с адресами.
@@ -56,15 +58,13 @@ export class Address {
    */
   constructor (bytes?: number[] | Uint8Array | Buffer) {
     if (bytes === undefined) {
+      arrayFill(this._bytes, 34)
       this.version = Address.Umi
     } else {
       if (bytes.length !== 34) {
         throw new Error('bytes length must be 34 bytes')
       }
-
-      for (let i = 0; i < 34; i++) {
-        this._bytes[i] = bytes[i]
-      }
+      arraySet(this._bytes, bytes)
     }
   }
 
@@ -85,15 +85,12 @@ export class Address {
   get version (): number {
     // version length = 2
     // version offset = 0
-    return (this._bytes[0] << 8) + this._bytes[1]
+    return bytesToUint16(this._bytes.slice(0, 2))
   }
 
   set version (version: number) {
     versionToPrefix(version) // validation
-
-    // tslint:disable-next-line:no-bitwise
-    this._bytes[0] = (version >> 8) & 0xff
-    this._bytes[1] = version & 0xff
+    arraySet(this._bytes, uint16ToBytes(version))
   }
 
   /**
@@ -123,10 +120,7 @@ export class Address {
     }
 
     // public key offset = 2
-    const b = publicKey.bytes
-    for (let i = 0; i < 32; i++) {
-      this._bytes[2 + i] = b[i]
-    }
+    arraySet(this._bytes, publicKey.bytes, 2)
   }
 
   /**
@@ -174,10 +168,7 @@ export class Address {
   }
 
   set bech32 (bech32: string) {
-    const b = decode(bech32)
-    for (let i = 0; i < 32; i++) {
-      this._bytes[i] = b[i]
-    }
+    arraySet(this._bytes, decode(bech32))
   }
 
   /**

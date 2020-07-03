@@ -31,6 +31,18 @@ function arrayFill (array: number[], length: number, value?: any) {
 }
 
 /**
+ * @param {number} length
+ * @returns {number[]}
+ */
+function arrayNew (length: number): number[] {
+  const a: number[] = []
+  for (let i = 0; i < length; i++) {
+    a[i] = 0
+  }
+  return a
+}
+
+/**
  * @param {number[]} a
  * @param {number[]} b
  * @param {number} offset
@@ -44,4 +56,4 @@ function arraySet (a: number[], b: number[] | Uint8Array | Buffer, offset?: numb
   }
 }
 
-export { arrayFill, arraySet }
+export { arrayFill, arraySet, arrayNew }

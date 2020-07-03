@@ -32,8 +32,9 @@
  */
 function Utf8Encode (text) {
   const bytes = []
-  for (let i = 0; i < text.length; i++) {
-    let code = text.charCodeAt(i)
+  let i = 0
+  while (i < text.length) {
+    let code = text.charCodeAt(i++)
     if (code < 0x80) {
       bytes.push(code)
     } else if (code < 0x800) {
@@ -42,7 +43,7 @@ function Utf8Encode (text) {
       bytes.push((0xe0 | (code >> 12)), (0x80 | ((code >> 6) & 0x3f)))
       bytes.push(0x80 | (code & 0x3f))
     } else {
-      code = 0x10000 + ((code & 0x3ff) << 10) + (text.charCodeAt(++i) & 0x3ff)
+      code = 0x10000 + ((code & 0x3ff) << 10) + (text.charCodeAt(i++) & 0x3ff)
       bytes.push((0xf0 | (code >> 18)), (0x80 | ((code >> 12) & 0x3f)))
       bytes.push((0x80 | ((code >> 6) & 0x3f)), (0x80 | (code & 0x3f)))
     }
@@ -58,17 +59,16 @@ function Utf8Encode (text) {
  */
 function Utf8Decode (bytes) {
   let str = ''
-  for (let i = 0; i < bytes.length; i++) {
+  let i = 0
+  while (i < bytes.length) {
     if (bytes[i] < 0x80) {
-      str += String.fromCharCode(bytes[i])
-    } else if (bytes[i] > 0xBF && bytes[i] < 0xE0) {
-      str += String.fromCharCode((bytes[i] & 0x1F) << 6 | bytes[++i] & 0x3F)
+      str += String.fromCharCode(bytes[i++])
+    } else if ((bytes[i] > 0xBF) && (bytes[i] < 0xE0)) {
+      str += String.fromCharCode((bytes[i++] & 0x1F) << 6 | bytes[i++] & 0x3F)
     } else if (bytes[i] > 0xDF && bytes[i] < 0xF0) {
-      str += String.fromCharCode((bytes[i] & 0x0F) << 12 |
-        (bytes[++i] & 0x3F) << 6 | bytes[++i] & 0x3F)
+      str += String.fromCharCode(((bytes[i++] & 0x0F) << 12) | ((bytes[i++] & 0x3F) << 6) | (bytes[i++] & 0x3F))
     } else {
-      const code = ((bytes[i] & 0x07) << 18 | (bytes[++i] & 0x3F) << 12 |
-        (bytes[++i] & 0x3F) << 6 | bytes[++i] & 0x3F) - 0x010000
+      const code = (((bytes[i++] & 0x07) << 18) | ((bytes[i++] & 0x3F) << 12) | ((bytes[i++] & 0x3F) << 6) | (bytes[i++] & 0x3F)) - 0x010000
       str += String.fromCharCode(code >> 10 | 0xD800, code & 0x03FF | 0xDC00)
     }
   }

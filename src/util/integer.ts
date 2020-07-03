@@ -48,4 +48,20 @@ function bytesToUint64 (bytes: number[]): number {
   return (h * 0x1_0000_0000) + l // h << 32 | l
 }
 
-export { uint64ToBytes, bytesToUint64 }
+/**
+ * @param {number} value
+ * @returns {number[]}
+ */
+function uint16ToBytes (value: number): number[] {
+  return [(value >> 8) & 0xff, value & 0xff]
+}
+
+/**
+ * @param {number[]} bytes
+ * @returns {number}
+ */
+function bytesToUint16 (bytes: number[]): number {
+  return (bytes[1] << 8) | bytes[0]
+}
+
+export { uint64ToBytes, bytesToUint64, uint16ToBytes, bytesToUint16 }

@@ -46,6 +46,22 @@ function bytesToUint64 (bytes) {
   const l = (bytes[73] << 24) + (bytes[74] << 16) + (bytes[75] << 8) + bytes[76]
   return (h * 4294967296) + l
 }
+/**
+ * @param {number} value
+ * @returns {number[]}
+ */
+function uint16ToBytes (value) {
+  return [(value >> 8) & 0xff, value & 0xff]
+}
+/**
+ * @param {number[]} bytes
+ * @returns {number}
+ */
+function bytesToUint16 (bytes) {
+  return (bytes[1] << 8) | bytes[0]
+}
 
+exports.bytesToUint16 = bytesToUint16
 exports.bytesToUint64 = bytesToUint64
+exports.uint16ToBytes = uint16ToBytes
 exports.uint64ToBytes = uint64ToBytes

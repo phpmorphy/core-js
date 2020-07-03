@@ -23,10 +23,12 @@
 
 'use strict'
 
+const array = require('../util/array.js')
 const PublicKey = require('../key/ed25519/PublicKey.js')
 const SecretKey = require('../key/ed25519/SecretKey.js')
 const converter = require('../util/converter.js')
 const bech32 = require('../util/bech32.js')
+const integer = require('../util/integer.js')
 
 /**
  * Базовый класс для работы с адресами.
@@ -45,14 +47,13 @@ class Address {
      */
     this._bytes = []
     if (bytes === undefined) {
+      array.arrayFill(this._bytes, 34)
       this.version = Address.Umi
     } else {
       if (bytes.length !== 34) {
         throw new Error('bytes length must be 34 bytes')
       }
-      for (let i = 0; i < 34; i++) {
-        this._bytes[i] = bytes[i]
-      }
+      array.arraySet(this._bytes, bytes)
     }
   }
 
@@ -83,13 +84,12 @@ class Address {
    * @throws {Error}
    */
   get version () {
-    return (this._bytes[0] << 8) + this._bytes[1]
+    return integer.bytesToUint16(this._bytes.slice(0, 2))
   }
 
   set version (version) {
     converter.versionToPrefix(version)
-    this._bytes[0] = (version >> 8) & 0xff
-    this._bytes[1] = version & 0xff
+    array.arraySet(this._bytes, integer.uint16ToBytes(version))
   }
 
   /**
@@ -116,10 +116,7 @@ class Address {
     if (!(publicKey instanceof PublicKey.PublicKey)) {
       throw new Error('publicKey type must be PublicKey')
     }
-    const b = publicKey.bytes
-    for (let i = 0; i < 32; i++) {
-      this._bytes[2 + i] = b[i]
-    }
+    array.arraySet(this._bytes, publicKey.bytes, 2)
   }
 
   /**
@@ -167,10 +164,7 @@ class Address {
   }
 
   set bech32 (bech32$1) {
-    const b = bech32.decode(bech32$1)
-    for (let i = 0; i < 32; i++) {
-      this._bytes[i] = b[i]
-    }
+    array.arraySet(this._bytes, bech32.decode(bech32$1))
   }
 
   /**
