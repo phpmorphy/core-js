@@ -21,19 +21,13 @@
 import { PublicKey } from './PublicKey'
 import { sign, secretKeyFromSeed } from '../../util/ed25519/index'
 import { sha256 } from '../../util/sha256'
+import { arraySet } from '../../util/array'
 
 /**
  * Базовый класс для работы с приватными ключами.
  * @class
  */
 export class SecretKey {
-  /**
-   * Длина приватного ключа в формате libsodium в байтах.
-   * @type {number}
-   * @internal
-   */
-  static get LENGTH (): number { return 64 }
-
   /**
    * Приватный ключ в бинарном виде. В формате libsodium.
    * @type {number[]}
@@ -51,10 +45,7 @@ export class SecretKey {
     if (bytes.length !== 64) {
       throw new Error('invalid length')
     }
-
-    for (let i = 0; i < 64; i++) {
-      this._bytes[i] = bytes[i]
-    }
+    arraySet(this._bytes, bytes)
   }
 
   /**
@@ -63,7 +54,7 @@ export class SecretKey {
    * @readonly
    */
   get bytes (): number[] {
-    return this._bytes.slice(0, 64)
+    return this._bytes.slice(0)
   }
 
   /**
@@ -79,7 +70,6 @@ export class SecretKey {
    * Создает цифровую подпись сообщения.
    * @param {number[]|Uint8Array|Buffer} message Сообщение, которое необходимо подписать.
    * @returns {number[]} Цифровая подпись длиной 64 байта (512 бит).
-   * @throws {Error}
    * @example
    * let seed = new Uint8Array(32)
    * let msg = new Uint8Array(1)
@@ -95,7 +85,6 @@ export class SecretKey {
    * отличается, то берется sha256 хэш.
    * @param {number[]|Uint8Array|Buffer} seed Seed длиной от 0 до 128 байт.
    * @returns {SecretKey}
-   * @throws {Error}
    * @example
    * let seed = new Uint8Array(32)
    * let key = SecretKey.fromSeed(seed)

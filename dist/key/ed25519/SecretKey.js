@@ -23,6 +23,7 @@
 
 'use strict'
 
+const array = require('../../util/array.js')
 const index = require('../../util/ed25519/index.js')
 const PublicKey = require('./PublicKey.js')
 const sha256 = require('../../util/sha256.js')
@@ -47,23 +48,16 @@ class SecretKey {
     if (bytes.length !== 64) {
       throw new Error('invalid length')
     }
-    for (let i = 0; i < 64; i++) {
-      this._bytes[i] = bytes[i]
-    }
+    array.arraySet(this._bytes, bytes)
   }
 
-  /**
-   * Длина приватного ключа в формате libsodium в байтах.
-   * @type {number}
-   */
-  static get LENGTH () { return 64 }
   /**
    * Приватный ключ в бинарном виде. В формате libsodium, 64 байта (512 бит).
    * @type {number[]}
    * @readonly
    */
   get bytes () {
-    return this._bytes.slice(0, 64)
+    return this._bytes.slice(0)
   }
 
   /**
@@ -79,7 +73,6 @@ class SecretKey {
    * Создает цифровую подпись сообщения.
    * @param {number[]|Uint8Array|Buffer} message Сообщение, которое необходимо подписать.
    * @returns {number[]} Цифровая подпись длиной 64 байта (512 бит).
-   * @throws {Error}
    * @example
    * let seed = new Uint8Array(32)
    * let msg = new Uint8Array(1)
@@ -95,7 +88,6 @@ class SecretKey {
    * отличается, то берется sha256 хэш.
    * @param {number[]|Uint8Array|Buffer} seed Seed длиной от 0 до 128 байт.
    * @returns {SecretKey}
-   * @throws {Error}
    * @example
    * let seed = new Uint8Array(32)
    * let key = SecretKey.fromSeed(seed)

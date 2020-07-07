@@ -23,6 +23,7 @@
 
 'use strict'
 
+const array = require('../../util/array.js')
 const index = require('../../util/ed25519/index.js')
 
 /**
@@ -31,7 +32,7 @@ const index = require('../../util/ed25519/index.js')
  */
 class PublicKey {
   /**
-   * @param {number[]} bytes Публичный ключ в формате libsodium, 32 байта (256 бит).
+   * @param {number[]|Uint8Array|Buffer} bytes Публичный ключ в формате libsodium, 32 байта (256 бит).
    * @throws {Error}
    */
   constructor (bytes) {
@@ -44,23 +45,9 @@ class PublicKey {
     if (bytes.length !== 32) {
       throw new Error('invalid length')
     }
-    for (let i = 0; i < 32; i++) {
-      this._bytes[i] = bytes[i]
-    }
+    array.arraySet(this._bytes, bytes)
   }
 
-  /**
-   * Длина публичного ключа в формате libsodium в байтах.
-   * @type {number}
-   * @constant
-   */
-  static get LENGTH () { return 32 }
-  /**
-   * Длина цифровой подписи в байтах.
-   * @type {number}
-   * @constant
-   */
-  static get SIGNATURE_LENGTH () { return 64 }
   /**
    * Длина цифровой подписи в байтах.
    * @type {number}
@@ -73,7 +60,16 @@ class PublicKey {
    * @readonly
    */
   get bytes () {
-    return this._bytes.slice(0, 32)
+    return this._bytes.slice(0)
+  }
+
+  /**
+   * Публичный ключ
+   * @type {PublicKey}
+   * @readonly
+   */
+  get publicKey () {
+    return this
   }
 
   /**

@@ -1,4 +1,4 @@
-import { arrayFill, arraySet } from '../array'
+import { arrayFill, arraySet, arrayNew } from '../array'
 
 const gf0: number[] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
@@ -167,9 +167,7 @@ function fnA (o: number[], a: number[], b: number[]): void {
  * @internal
  */
 function fnM (o: number[], a: number[], b: number[]): void {
-  const t: number[] = []
-  arrayFill(t, 31)
-
+  const t = arrayNew(31)
   for (let i = 0; i < 16; i++) {
     for (let j = 0; j < 16; j++) {
       t[i + j] += a[i] * b[j]

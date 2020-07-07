@@ -6,7 +6,6 @@ if (typeof window === 'undefined') {
 describe('Transaction', function () {
   describe('константы', function () {
     const tests = [
-      { args: 'LENGTH', expected: 150 },
       { args: 'Genesis', expected: 0 },
       { args: 'Basic', expected: 1 },
       { args: 'CreateStructure', expected: 2 },
@@ -26,25 +25,10 @@ describe('Transaction', function () {
   })
 
   describe('new Transaction()', function () {
-    describe('возвращяет ошибку если передать', function () {
-      const len = umi.Transaction.LENGTH
-      const tests = [
-        { desc: 'число', args: len },
-        { desc: 'массив', args: new Array(len) },
-        { desc: 'объект', args: { a: 'b' } },
-        { desc: 'ArrayBuffer', args: new ArrayBuffer(len) },
-        { desc: 'DataView', args: new DataView(new ArrayBuffer(len)) },
-        { desc: 'слишком короткий Uint8Array', args: new Uint8Array(len - 1) },
-        { desc: 'слишком длинный Uint8Array', args: new Uint8Array(len + 2) }
-      ]
-
-      tests.forEach(function (test) {
-        it(test.desc, function () {
-          assert.throws(function () {
-            return new umi.Transaction(test.args)
-          }, Error)
-        })
-      })
+    it('ошибка если некорректная длина', function () {
+      assert.throws(function () {
+        return new umi.Transaction([0, 1, 2])
+      }, Error)
     })
 
     describe('создает транзакцию', function () {
@@ -61,10 +45,10 @@ describe('Transaction', function () {
   })
 
   describe('bytes', function () {
-    it('возвращяет Uint8Array длиной 150 байта', function () {
+    it('возвращает массив длиной 150 байта', function () {
       const expected = new Uint8Array(150)
       expected[1] = 255
-      const actual = new umi.Transaction(expected).bytes
+      const actual = new Uint8Array(new umi.Transaction(expected).bytes)
 
       assert.deepEqual(actual, expected)
     })
@@ -865,7 +849,7 @@ describe('Transaction', function () {
   })
 
   describe('signature', function () {
-    describe('возвращяет ошибку если', function () {
+    describe('возвращает ошибку если', function () {
       describe('передать', function () {
         const len = 64
         const tests = [
@@ -931,7 +915,7 @@ describe('Transaction', function () {
   })
 
   describe('sign', function () {
-    describe('возвращяет ошибку если', function () {
+    describe('возвращает ошибку если', function () {
       describe('передать', function () {
         const len = 64
         const tests = [
@@ -974,7 +958,7 @@ describe('Transaction', function () {
   })
 
   describe('verify', function () {
-    describe('возвращяет ошибку если', function () {
+    describe('возвращает ошибку если', function () {
       it('не установлена версию', function () {
         const tx = new umi.Transaction()
         assert.throws(function () { tx.verify() }, Error)

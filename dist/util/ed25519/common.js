@@ -171,8 +171,7 @@ function fnA (o, a, b) {
  * @private
  */
 function fnM (o, a, b) {
-  const t = []
-  array.arrayFill(t, 31)
+  const t = array.arrayNew(31)
   for (let i = 0; i < 16; i++) {
     for (let j = 0; j < 16; j++) {
       t[i + j] += a[i] * b[j]

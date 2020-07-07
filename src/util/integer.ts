@@ -18,8 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-// tslint:disable:no-bitwise
-
 /**
  * @param {number} value
  * @returns {number[]}
@@ -53,7 +51,7 @@ function bytesToUint64 (bytes: number[]): number {
  * @returns {number[]}
  */
 function uint16ToBytes (value: number): number[] {
-  return [(value >> 8) & 0xff, value & 0xff]
+  return [((value >> 8) & 0xff), (value & 0xff)]
 }
 
 /**
@@ -61,7 +59,7 @@ function uint16ToBytes (value: number): number[] {
  * @returns {number}
  */
 function bytesToUint16 (bytes: number[]): number {
-  return (bytes[1] << 8) | bytes[0]
+  return (bytes[0] << 8) | bytes[1]
 }
 
 export { uint64ToBytes, bytesToUint64, uint16ToBytes, bytesToUint16 }

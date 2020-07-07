@@ -51,14 +51,14 @@ function bytesToUint64 (bytes) {
  * @returns {number[]}
  */
 function uint16ToBytes (value) {
-  return [(value >> 8) & 0xff, value & 0xff]
+  return [((value >> 8) & 0xff), (value & 0xff)]
 }
 /**
  * @param {number[]} bytes
  * @returns {number}
  */
 function bytesToUint16 (bytes) {
-  return (bytes[1] << 8) | bytes[0]
+  return (bytes[0] << 8) | bytes[1]
 }
 
 exports.bytesToUint16 = bytesToUint16

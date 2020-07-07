@@ -18,8 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-// tslint:disable:no-bitwise
-
 import { validateInt, validateStr } from '../util/validator'
 
 /**

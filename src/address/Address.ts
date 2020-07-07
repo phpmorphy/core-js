@@ -19,7 +19,7 @@
 // SOFTWARE.
 
 import { PublicKey } from '../key/ed25519/PublicKey'
-import { SecretKey } from '../key/ed25519/SecretKey'
+import { SecretKey } from '../key/ed25519/SecretKey' // eslint-disable-line
 import { prefixToVersion, versionToPrefix } from '../util/converter'
 import { decode, encode } from '../util/bech32'
 import { arrayFill, arraySet } from '../util/array'
@@ -199,14 +199,6 @@ export class Address {
    * @throws {Error}
    */
   static fromKey (key: PublicKey | SecretKey): Address {
-    if (key instanceof SecretKey) {
-      return new Address().setPublicKey(key.publicKey)
-    }
-
-    if (key instanceof PublicKey) {
-      return new Address().setPublicKey(key)
-    }
-
-    throw new Error('key type must be PublicKey or SecretKey')
+    return new Address().setPublicKey(key.publicKey)
   }
 }

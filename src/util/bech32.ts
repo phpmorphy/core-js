@@ -18,19 +18,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-// tslint:disable:no-bitwise
-
 import { prefixToVersion, versionToPrefix } from './converter'
+import { arrayNew } from './array'
+import { uint16ToBytes } from './integer'
 
-const alphabet = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l'
+const bech32Alphabet = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l'
 
 /**
  * @param {number[]|Uint8Array|Buffer} bytes
  * @returns {string}
  */
 function encode (bytes: number[] | Uint8Array | Buffer): string {
-  const version = (bytes[0] << 8) + bytes[1]
-  const prefix = versionToPrefix(version)
+  const prefix = versionToPrefix((bytes[0] << 8) + bytes[1])
   const data = convert8to5(bytes.slice(2))
   const checksum = createChecksum(prefix, data)
 
@@ -59,11 +58,7 @@ function decode (bech32: string): number[] {
   checkAlphabet(data)
   verifyChecksum(pfx, data)
 
-  const res = []
-  res[0] = (ver >>> 8) & 0xff
-  res[1] = ver & 0xff
-
-  return res.concat(convert5to8(data.slice(0, -6)))
+  return uint16ToBytes(ver).concat(convert5to8(data.slice(0, -6)))
 }
 
 function convert5to8 (data: string): number[] {
@@ -100,13 +95,13 @@ function convert8to5 (data: number[] | Uint8Array | Buffer): string {
 
     while (bits >= 5) {
       bits -= 5
-      result += alphabet[(value >> bits) & 0x1f]
+      result += bech32Alphabet[(value >> bits) & 0x1f]
     }
   }
 
   /** @istanbul ignore else */
   if (bits > 0) {
-    result += alphabet[(value << (5 - bits)) & 0x1f]
+    result += bech32Alphabet[(value << (5 - bits)) & 0x1f]
   }
 
   return result
@@ -123,7 +118,7 @@ function createChecksum (prefix: string, data: string): string {
 
   let checksum = ''
   for (let i = 0; i < 6; i++) {
-    checksum += alphabet[(poly >> 5 * (5 - i)) & 31]
+    checksum += bech32Alphabet[(poly >> 5 * (5 - i)) & 31]
   }
 
   return checksum
@@ -147,13 +142,12 @@ function polyMod (values: number[] | Uint8Array | Buffer): number {
 }
 
 function prefixExpand (prefix: string): number[] {
-  const res = []
-  res[prefix.length] = 0
+  const res = arrayNew((prefix.length * 2) + 1)
 
-  for (let i = 0; i < prefix.length; i++) {
+  for (let i = 0, l = prefix.length; i < l; i++) {
     const ord = prefix.charCodeAt(i)
     res[i] = ord >> 5
-    res[i + prefix.length + 1] = ord & 31
+    res[i + l + 1] = ord & 31
   }
 
   return res
@@ -162,7 +156,7 @@ function prefixExpand (prefix: string): number[] {
 function strToBytes (str: string): number[] {
   const bytes: number[] = []
   for (const chr of str) {
-    bytes.push(alphabet.indexOf(chr))
+    bytes.push(bech32Alphabet.indexOf(chr))
   }
 
   return bytes
@@ -185,7 +179,7 @@ function verifyChecksum (prefix: string, data: string): void {
 
 function checkAlphabet (chars: string): void {
   for (const chr of chars) {
-    if (alphabet.indexOf(chr) === -1) {
+    if (bech32Alphabet.indexOf(chr) === -1) {
       throw new Error('bech32: invalid character')
     }
   }

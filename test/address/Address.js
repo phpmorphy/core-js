@@ -5,19 +5,10 @@ if (typeof window === 'undefined') {
 
 describe('Address', function () {
   describe('new Address()', function () {
-    describe('ошибки', function () {
-      const tests = [
-        { desc: 'тип', args: new Array(umi.Address.LENGTH) },
-        { desc: 'длина', args: new Uint8Array(umi.Address.LENGTH - 1) }
-      ]
-
-      tests.forEach(function (test) {
-        it(test.desc, function () {
-          assert.throws(function () {
-            return new umi.Address(test.args)
-          }, Error)
-        })
-      })
+    it('ошибка если некорректная длина', function () {
+      assert.throws(function () {
+        return new umi.Address([0, 1, 2])
+      }, Error)
     })
   })
 
@@ -114,19 +105,19 @@ describe('Address', function () {
   })
 
   describe('fromKey()', function () {
-    it('ошибка - тип', function () {
+    it('ошибка если некорректный тип', function () {
       assert.throws(function () { umi.Address.fromKey({}) }, Error)
     })
 
     it('из публичного ключа', function () {
-      const pubKey = new umi.PublicKey(new Uint8Array(umi.PublicKey.LENGTH))
+      const pubKey = new umi.PublicKey(new Uint8Array(32))
       const expected = 'umi1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqr5zcpj'
       const actual = umi.Address.fromKey(pubKey).bech32
 
       assert.strictEqual(actual, expected)
     })
 
-    it('из секректного ключа', function () {
+    it('из секретного ключа', function () {
       const secKey = umi.SecretKey.fromSeed(new Uint8Array(32))
       const expected = 'umi18d4z00xwk6jz6c4r4rgz5mcdwdjny9thrh3y8f36cpy2rz6emg5s6rxnf6'
       const actual = umi.Address.fromKey(secKey).bech32
@@ -136,7 +127,7 @@ describe('Address', function () {
   })
 
   describe('publicKey', function () {
-    it('ошибка - тип', function () {
+    it('ошибка если некорректный тип', function () {
       const adr = new umi.Address()
       assert.throws(function () { adr.publicKey = {} }, Error)
     })
@@ -145,8 +136,8 @@ describe('Address', function () {
   describe('version', function () {
     describe('ошибка', function () {
       const tests = [
-        { desc: 'строка', args: 'ab' },
-        { desc: 'float', args: 0.123 },
+        { desc: 'строка', args: '1057' },
+        { desc: 'float', args: 1057.1 },
         {
           desc: 'некорректный первый символ (26)',
           args: (27 << 10) + (1 << 5) + 1

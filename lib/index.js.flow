@@ -24,11 +24,10 @@ declare export class Address {
 declare export class Block {}
 declare export class BlockHeader {}
 declare export class PublicKey {
-  LENGTH: number;
-  SIGNATURE_LENGTH: number;
   signatureLength: number;
   constructor(bytes: number[] | Uint8Array | Buffer): this;
   bytes: number[];
+  publicKey: PublicKey;
   verifySignature(
     signature: number[] | Uint8Array | Buffer,
     message: number[] | Uint8Array | Buffer
@@ -51,8 +50,6 @@ declare class AbstractTransaction {
   CreateTransitAddress: number;
   DeleteTransitAddress: number;
   constructor(bytes?: number[] | Uint8Array | Buffer): this;
-}
-declare class AbstractTransactionBase mixins AbstractTransaction {
   bytes: number[];
   hash: number[];
   version: number;
@@ -70,7 +67,7 @@ declare class AbstractTransactionBase mixins AbstractTransaction {
   sign(secretKey: SecretKey): this;
   verify(): boolean;
 }
-declare export class Transaction mixins AbstractTransactionBase {
+declare export class Transaction mixins AbstractTransaction {
   prefix: string;
   setPrefix(prefix: string): this;
   name: string;

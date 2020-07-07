@@ -35,6 +35,17 @@ function arrayFill (array, length, value) {
   }
 }
 /**
+ * @param {number} length
+ * @returns {number[]}
+ */
+function arrayNew (length) {
+  const a = []
+  for (let i = 0; i < length; i++) {
+    a[i] = 0
+  }
+  return a
+}
+/**
  * @param {number[]} a
  * @param {number[]} b
  * @param {number} offset
@@ -49,4 +60,5 @@ function arraySet (a, b, offset, length) {
 }
 
 exports.arrayFill = arrayFill
+exports.arrayNew = arrayNew
 exports.arraySet = arraySet

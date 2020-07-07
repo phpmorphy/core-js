@@ -25,10 +25,9 @@
 
 const array = require('../util/array.js')
 const PublicKey = require('../key/ed25519/PublicKey.js')
-const SecretKey = require('../key/ed25519/SecretKey.js')
 const converter = require('../util/converter.js')
-const bech32 = require('../util/bech32.js')
 const integer = require('../util/integer.js')
+const bech32 = require('../util/bech32.js')
 
 /**
  * Базовый класс для работы с адресами.
@@ -195,13 +194,7 @@ class Address {
    * @throws {Error}
    */
   static fromKey (key) {
-    if (key instanceof SecretKey.SecretKey) {
-      return new Address().setPublicKey(key.publicKey)
-    }
-    if (key instanceof PublicKey.PublicKey) {
-      return new Address().setPublicKey(key)
-    }
-    throw new Error('key type must be PublicKey or SecretKey')
+    return new Address().setPublicKey(key.publicKey)
   }
 }
 

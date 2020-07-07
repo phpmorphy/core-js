@@ -19,26 +19,13 @@
 // SOFTWARE.
 
 import { verify } from '../../util/ed25519/index'
+import { arraySet } from '../../util/array'
 
 /**
  * Базовый класс для работы с публичными ключами.
  * @class
  */
 export class PublicKey {
-  /**
-   * Длина публичного ключа в формате libsodium в байтах.
-   * @type {number}
-   * @constant
-   */
-  static get LENGTH (): number { return 32 }
-
-  /**
-   * Длина цифровой подписи в байтах.
-   * @type {number}
-   * @constant
-   */
-  static get SIGNATURE_LENGTH (): number { return 64 }
-
   /**
    * Длина цифровой подписи в байтах.
    * @type {number}
@@ -55,16 +42,14 @@ export class PublicKey {
   private readonly _bytes: number[] = []
 
   /**
-   * @param {number[]} bytes Публичный ключ в формате libsodium, 32 байта (256 бит).
+   * @param {number[]|Uint8Array|Buffer} bytes Публичный ключ в формате libsodium, 32 байта (256 бит).
    * @throws {Error}
    */
   constructor (bytes: number[] | Uint8Array | Buffer) {
     if (bytes.length !== 32) {
       throw new Error('invalid length')
     }
-    for (let i = 0; i < 32; i++) {
-      this._bytes[i] = bytes[i]
-    }
+    arraySet(this._bytes, bytes)
   }
 
   /**
@@ -73,7 +58,16 @@ export class PublicKey {
    * @readonly
    */
   get bytes (): number[] {
-    return this._bytes.slice(0, 32)
+    return this._bytes.slice(0)
+  }
+
+  /**
+   * Публичный ключ
+   * @type {PublicKey}
+   * @readonly
+   */
+  get publicKey (): PublicKey {
+    return this
   }
 
   /**

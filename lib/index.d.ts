@@ -116,25 +116,13 @@ export declare class BlockHeader {
  */
 export declare class PublicKey {
     /**
-     * Длина публичного ключа в формате libsodium в байтах.
-     * @type {number}
-     * @constant
-     */
-    static get LENGTH(): number;
-    /**
-     * Длина цифровой подписи в байтах.
-     * @type {number}
-     * @constant
-     */
-    static get SIGNATURE_LENGTH(): number;
-    /**
      * Длина цифровой подписи в байтах.
      * @type {number}
      * @constant
      */
     get signatureLength(): number;
     /**
-     * @param {number[]} bytes Публичный ключ в формате libsodium, 32 байта (256 бит).
+     * @param {number[]|Uint8Array|Buffer} bytes Публичный ключ в формате libsodium, 32 байта (256 бит).
      * @throws {Error}
      */
     constructor(bytes: number[] | Uint8Array | Buffer);
@@ -144,6 +132,12 @@ export declare class PublicKey {
      * @readonly
      */
     get bytes(): number[];
+    /**
+     * Публичный ключ
+     * @type {PublicKey}
+     * @readonly
+     */
+    get publicKey(): PublicKey;
     /**
      * Проверяет цифровую подпись.
      * @param {number[]|Uint8Array|Buffer} signature Подпись, 64 байта.
@@ -185,7 +179,6 @@ export declare class SecretKey {
      * Создает цифровую подпись сообщения.
      * @param {number[]|Uint8Array|Buffer} message Сообщение, которое необходимо подписать.
      * @returns {number[]} Цифровая подпись длиной 64 байта (512 бит).
-     * @throws {Error}
      * @example
      * let seed = new Uint8Array(32)
      * let msg = new Uint8Array(1)
@@ -198,7 +191,6 @@ export declare class SecretKey {
      * отличается, то берется sha256 хэш.
      * @param {number[]|Uint8Array|Buffer} seed Seed длиной от 0 до 128 байт.
      * @returns {SecretKey}
-     * @throws {Error}
      * @example
      * let seed = new Uint8Array(32)
      * let key = SecretKey.fromSeed(seed)
@@ -206,6 +198,7 @@ export declare class SecretKey {
     static fromSeed(seed: number[] | Uint8Array | Buffer): SecretKey;
 }
 /**
+ * Базовый класс для работы с транзакциями.
  * @class
  * @lends Transaction
  * @private
@@ -344,15 +337,7 @@ declare abstract class AbstractTransaction {
      * @throws {Error}
      * @private
      */
-    protected constructor(bytes?: number[] | Uint8Array | Buffer);
-}
-/**
- * Базовый класс для работы с транзакциями.
- * @class
- * @lends Transaction
- * @private
- */
-declare abstract class AbstractTransactionBase extends AbstractTransaction {
+    constructor(bytes?: number[] | Uint8Array | Buffer);
     /**
      * Транзакция в бинарном виде, 150 байт.
      * @type {number[]}
@@ -496,7 +481,7 @@ declare abstract class AbstractTransactionBase extends AbstractTransaction {
  * @param {number[]} [bytes] Транзакция в бинарном виде, 150 байт.
  * @throws {Error}
  */
-export declare class Transaction extends AbstractTransactionBase {
+export declare class Transaction extends AbstractTransaction {
     /**
      * Префикс адресов, принадлежащих структуре.
      * Доступно только для CreateStructure и UpdateStructure.

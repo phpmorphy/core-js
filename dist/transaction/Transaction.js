@@ -26,7 +26,7 @@
 const validator = require('../util/validator.js')
 const converter = require('../util/converter.js')
 const utf8 = require('../util/utf8.js')
-const AbstractTransactionBase = require('./AbstractTransactionBase.js')
+const AbstractTransaction = require('./AbstractTransaction.js')
 
 /**
  * Класс для работы с транзакциями.
@@ -34,18 +34,7 @@ const AbstractTransactionBase = require('./AbstractTransactionBase.js')
  * @param {number[]} [bytes] Транзакция в бинарном виде, 150 байт.
  * @throws {Error}
  */
-class Transaction extends AbstractTransactionBase.AbstractTransactionBase {
-  /**
-   * @throws {Error}
-   * @private
-   */
-  _checkVersionIsStruct () {
-    const versions = [Transaction.CreateStructure, Transaction.UpdateStructure]
-    if (versions.indexOf(this.version) === -1) {
-      throw new Error('unavailable for this transaction type')
-    }
-  }
-
+class Transaction extends AbstractTransaction.AbstractTransaction {
   /**
    * Префикс адресов, принадлежащих структуре.
    * Доступно только для CreateStructure и UpdateStructure.
@@ -53,20 +42,14 @@ class Transaction extends AbstractTransactionBase.AbstractTransactionBase {
    * @throws {Error}
    */
   get prefix () {
-    this._checkFields(['version'])
-    this._checkVersionIsStruct()
-    this._checkFields(['prefix'])
     const ver = (this._bytes[35] << 8) + this._bytes[36]
     return converter.versionToPrefix(ver)
   }
 
   set prefix (prefix) {
-    this._checkFields(['version'])
-    this._checkVersionIsStruct()
     const ver = converter.prefixToVersion(prefix)
     this._bytes[35] = (ver >>> 8) & 0xff
     this._bytes[36] = ver & 0xff
-    this._setFields(['prefix'])
   }
 
   /**
@@ -88,16 +71,11 @@ class Transaction extends AbstractTransactionBase.AbstractTransactionBase {
    * @throws {Error}
    */
   get name () {
-    this._checkFields(['version'])
-    this._checkVersionIsStruct()
-    this._checkFields(['name'])
     const txt = this._bytes.slice(42, 42 + this._bytes[41])
     return utf8.Utf8Decode(txt)
   }
 
   set name (name) {
-    this._checkFields(['version'])
-    this._checkVersionIsStruct()
     if (typeof name !== 'string') {
       throw new Error('name type must be a string')
     }
@@ -109,7 +87,6 @@ class Transaction extends AbstractTransactionBase.AbstractTransactionBase {
     for (let i = 0; i < 35; i++) {
       this._bytes[42 + i] = txt[i] || 0
     }
-    this._setFields(['name'])
   }
 
   /**
@@ -132,19 +109,13 @@ class Transaction extends AbstractTransactionBase.AbstractTransactionBase {
    * @throws {Error}
    */
   get profitPercent () {
-    this._checkFields(['version'])
-    this._checkVersionIsStruct()
-    this._checkFields(['profitPercent'])
     return (this._bytes[37] << 8) + this._bytes[38]
   }
 
   set profitPercent (percent) {
-    this._checkFields(['version'])
-    this._checkVersionIsStruct()
     validator.validateInt(percent, 100, 500)
     this._bytes[37] = (percent >>> 8) & 0xff
     this._bytes[38] = percent & 0xff
-    this._setFields(['profitPercent'])
   }
 
   /**
@@ -167,19 +138,13 @@ class Transaction extends AbstractTransactionBase.AbstractTransactionBase {
    * @throws {Error}
    */
   get feePercent () {
-    this._checkFields(['version'])
-    this._checkVersionIsStruct()
-    this._checkFields(['feePercent'])
     return (this._bytes[39] << 8) + this._bytes[40]
   }
 
   set feePercent (percent) {
-    this._checkFields(['version'])
-    this._checkVersionIsStruct()
     validator.validateInt(percent, 0, 2000)
     this._bytes[39] = (percent >>> 8) & 0xff
     this._bytes[40] = percent & 0xff
-    this._setFields(['feePercent'])
   }
 
   /**
