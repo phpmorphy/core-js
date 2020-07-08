@@ -18,15 +18,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+import { AbstractTransaction } from './AbstractTransaction'
 import { versionToPrefix, prefixToVersion } from '../util/converter'
 import { Utf8Decode, Utf8Encode } from '../util/utf8'
 import { validateInt } from '../util/validator'
-import { AbstractTransaction } from './AbstractTransaction'
+import { bytesToUint16, uint16ToBytes } from '../util/integer'
+import { arrayNew, arraySet } from '../util/array'
+import { base64Decode } from '../util/base64'
 
 /**
  * Класс для работы с транзакциями.
  * @class
- * @param {number[]} [bytes] Транзакция в бинарном виде, 150 байт.
+ * @param {number[]|Uint8Array|Buffer} [bytes] Транзакция в бинарном виде, 150 байт.
  * @throws {Error}
  */
 export class Transaction extends AbstractTransaction {
@@ -34,26 +37,20 @@ export class Transaction extends AbstractTransaction {
    * Префикс адресов, принадлежащих структуре.
    * Доступно только для CreateStructure и UpdateStructure.
    * @type {string}
-   * @throws {Error}
    */
   get prefix (): string {
-    // prefix offset = 35
-    const ver = (this._bytes[35] << 8) + this._bytes[36]
-    return versionToPrefix(ver)
+    return versionToPrefix(bytesToUint16(this._bytes.slice(35, 37)))
   }
 
   set prefix (prefix: string) {
-    const ver = prefixToVersion(prefix)
-    // prefix offset = 35
-    this._bytes[35] = (ver >>> 8) & 0xff
-    this._bytes[36] = ver & 0xff
+    arraySet(this._bytes, uint16ToBytes(prefixToVersion(prefix)), 35)
   }
 
   /**
-   * Устанавливает префикс и возвращяет this.
+   * Устанавливает префикс и возвращает this.
    * Доступно только для CreateStructure и UpdateStructure.
    * @param {string} prefix Префикс адресов, принадлежащих структуре.
-   * @returns {this}
+   * @returns {Transaction}
    * @throws {Error}
    */
   setPrefix (prefix: string): this {
@@ -65,38 +62,29 @@ export class Transaction extends AbstractTransaction {
    * Название структуры в кодировке UTF-8.
    * Доступно только для CreateStructure и UpdateStructure.
    * @type {string}
-   * @throws {Error}
    */
   get name (): string {
-    // name offset = 41
-    const txt = this._bytes.slice(42, 42 + this._bytes[41])
-    return Utf8Decode(txt)
+    if (this._bytes[41] > 35) {
+      throw new Error('invalid length')
+    }
+    return Utf8Decode(this._bytes.slice(42, 42 + this._bytes[41]))
   }
 
   set name (name: string) {
-    if (typeof name !== 'string') {
-      throw new Error('name type must be a string')
-    }
-
-    const txt = Utf8Encode(name)
-
-    if (txt.length >= 36) {
+    const bytes = Utf8Encode(name)
+    if (bytes.length > 35) {
       throw new Error('name is too long')
     }
-
-    // name length = 36
-    // name offset = 41
-    this._bytes[41] = txt.length
-    for (let i = 0; i < 35; i++) {
-      this._bytes[42 + i] = txt[i] || 0
-    }
+    arraySet(this._bytes, arrayNew(36), 41) // wipe
+    arraySet(this._bytes, bytes, 42)
+    this._bytes[41] = bytes.length
   }
 
   /**
    * Устанавливает название структуры.
    * Доступно только для CreateStructure и UpdateStructure.
    * @param {string} name Название структуры в кодировке UTF-8.
-   * @returns {this}
+   * @returns {Transaction}
    * @throws {Error}
    */
   setName (name: string): this {
@@ -106,29 +94,25 @@ export class Transaction extends AbstractTransaction {
 
   /**
    * Профита в сотых долях процента с шагом в 0.01%.
-   * Валидные значения от 100 до 500 (соотвественно от 1% до 5%).
+   * Принимает значения от 100 до 500 (соответственно от 1% до 5%).
    * Доступно только для CreateStructure и UpdateStructure.
    * @type {number}
-   * @throws {Error}
    */
   get profitPercent (): number {
-    // profit offset = 37
-    return (this._bytes[37] << 8) + this._bytes[38]
+    return bytesToUint16(this._bytes.slice(37, 39))
   }
 
   set profitPercent (percent: number) {
     validateInt(percent, 100, 500)
-
-    // profit offset = 37
-    this._bytes[37] = (percent >>> 8) & 0xff
-    this._bytes[38] = percent & 0xff
+    arraySet(this._bytes, uint16ToBytes(percent), 37)
   }
 
   /**
-   * Устанавливает процент профита и возвращяет this.
+   * Устанавливает процент профита и возвращает this.
    * Доступно только для CreateStructure и UpdateStructure.
-   * @param {number} percent Профит в сотых долях процента с шагом в 0.01%. Валидные значения от 100 до 500 (соотвественно от 1% до 5%).
-   * @returns {this}
+   * @param {number} percent Профит в сотых долях процента с шагом в 0.01%.
+   * Принимает значения от 100 до 500 (соответственно от 1% до 5%).
+   * @returns {Transaction}
    * @throws {Error}
    */
   setProfitPercent (percent: number): this {
@@ -138,33 +122,41 @@ export class Transaction extends AbstractTransaction {
 
   /**
    * Комиссия в сотых долях процента с шагом в 0.01%.
-   * Валидные значения от 0 до 2000 (соотвественно от 0% до 20%).
+   * Принимает значения от 0 до 2000 (соответственно от 0% до 20%).
    * Доступно только для CreateStructure и UpdateStructure.
    * @type {number}
-   * @throws {Error}
    */
   get feePercent (): number {
-    // fee offset = 39
-    return (this._bytes[39] << 8) + this._bytes[40]
+    return bytesToUint16(this._bytes.slice(39, 41))
   }
 
   set feePercent (percent: number) {
     validateInt(percent, 0, 2000)
-
-    // fee offset = 39
-    this._bytes[39] = (percent >>> 8) & 0xff
-    this._bytes[40] = percent & 0xff
+    arraySet(this._bytes, uint16ToBytes(percent), 39)
   }
 
   /**
    * Устанавливает размер комиссии и возвращает this.
    * Доступно только для CreateStructure и UpdateStructure.
-   * @param {number} percent Комиссия в сотых долях процента с шагом в 0.01%. Валидные значения от 0 до 2000 (соотвественно от 0% до 20%).
-   * @returns {this}
+   * @param {number} percent Комиссия в сотых долях процента с шагом в 0.01%. Принимает значения от 0 до 2000 (соответственно от 0% до 20%).
+   * @returns {Transaction}
    * @throws {Error}
    */
   setFeePercent (percent: number): this {
     this.feePercent = percent
     return this
+  }
+
+  /**
+   * Статический метод, создает объект из Base64 строки.
+   * @param {string} base64
+   * @returns {Transaction}
+   * @throws {Error}
+   */
+  static fromBase64 (base64: string): Transaction {
+    if (base64.length !== 200) {
+      throw new Error('invalid length')
+    }
+    return new Transaction(base64Decode(base64))
   }
 }

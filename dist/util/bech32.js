@@ -31,8 +31,9 @@ const bech32Alphabet = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l'
 /**
  * @param {number[]|Uint8Array|Buffer} bytes
  * @returns {string}
+ * @private
  */
-function encode (bytes) {
+function bech32Encode (bytes) {
   const prefix = converter.versionToPrefix((bytes[0] << 8) + bytes[1])
   const data = convert8to5(bytes.slice(2))
   const checksum = createChecksum(prefix, data)
@@ -41,8 +42,9 @@ function encode (bytes) {
 /**
  * @param {string} bech32
  * @returns {number[]}
+ * @private
  */
-function decode (bech32) {
+function bech32Decode (bech32) {
   if (bech32.length !== 62 && bech32.length !== 66) {
     throw new Error('bech32: invalid length')
   }
@@ -58,6 +60,11 @@ function decode (bech32) {
   verifyChecksum(pfx, data)
   return integer.uint16ToBytes(ver).concat(convert5to8(data.slice(0, -6)))
 }
+/**
+ * @param {string} data
+ * @returns {number[]}
+ * @private
+ */
 function convert5to8 (data) {
   let value = 0
   let bits = 0
@@ -76,6 +83,11 @@ function convert5to8 (data) {
   }
   return result
 }
+/**
+ * @param {number[]|Uint8Array|Buffer} data
+ * @returns {string}
+ * @private
+ */
 function convert8to5 (data) {
   let value = 0
   let bits = 0
@@ -94,12 +106,18 @@ function convert8to5 (data) {
   }
   return result
 }
+/**
+ * @param {string} prefix
+ * @param {string} data
+ * @returns {string}
+ * @private
+ */
 function createChecksum (prefix, data) {
   const bytes = strToBytes(data)
   const pfx = prefixExpand(prefix)
-  const values = new Uint8Array(pfx.length + bytes.length + 6)
-  values.set(pfx)
-  values.set(bytes, pfx.length)
+  const values = array.arrayNew(pfx.length + bytes.length + 6)
+  array.arraySet(values, pfx)
+  array.arraySet(values, bytes, pfx.length)
   const poly = polyMod(values) ^ 1
   let checksum = ''
   for (let i = 0; i < 6; i++) {
@@ -107,6 +125,11 @@ function createChecksum (prefix, data) {
   }
   return checksum
 }
+/**
+ * @param {number[]|Uint8Array|Buffer} values
+ * @returns {number}
+ * @private
+ */
 function polyMod (values) {
   const gen = [0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3]
   let chk = 1
@@ -121,6 +144,11 @@ function polyMod (values) {
   }
   return chk
 }
+/**
+ * @param {string} prefix
+ * @returns {number[]}
+ * @private
+ */
 function prefixExpand (prefix) {
   const res = array.arrayNew((prefix.length * 2) + 1)
   for (let i = 0, l = prefix.length; i < l; i++) {
@@ -130,6 +158,11 @@ function prefixExpand (prefix) {
   }
   return res
 }
+/**
+ * @param {string} str
+ * @returns {number[]}
+ * @private
+ */
 function strToBytes (str) {
   const bytes = []
   for (const chr of str) {
@@ -137,17 +170,26 @@ function strToBytes (str) {
   }
   return bytes
 }
+/**
+ * @param {string} prefix
+ * @param {string} data
+ * @private
+ */
 function verifyChecksum (prefix, data) {
   const pfx = prefixExpand(prefix)
   const bytes = strToBytes(data)
-  const values = new Uint8Array(pfx.length + bytes.length)
-  values.set(pfx)
-  values.set(bytes, pfx.length)
+  const values = array.arrayNew(pfx.length + bytes.length)
+  array.arraySet(values, pfx)
+  array.arraySet(values, bytes, pfx.length)
   const poly = polyMod(values)
   if (poly !== 1) {
     throw new Error('bech32: invalid checksum')
   }
 }
+/**
+ * @param {string} chars
+ * @private
+ */
 function checkAlphabet (chars) {
   for (const chr of chars) {
     if (bech32Alphabet.indexOf(chr) === -1) {
@@ -156,5 +198,5 @@ function checkAlphabet (chars) {
   }
 }
 
-exports.decode = decode
-exports.encode = encode
+exports.bech32Decode = bech32Decode
+exports.bech32Encode = bech32Encode

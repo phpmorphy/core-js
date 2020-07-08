@@ -68,6 +68,8 @@ function sha256 (message: number[] | Uint8Array | Buffer): number[] {
 /**
  * @param {number[]|Uint8Array|Buffer} message
  * @returns {number[][]}
+ * @private
+ * @internal
  */
 function sha256PreProcess (message: number[] | Uint8Array | Buffer): number[][] {
   const bytes: number[] = []
@@ -101,6 +103,8 @@ function sha256PreProcess (message: number[] | Uint8Array | Buffer): number[][] 
 /**
  * @param {number[]} h
  * @param {number[]} w
+ * @private
+ * @internal
  */
 function sha256Block (h: number[], w: number[]) {
   // Initialize working variables to current hash value.
@@ -136,6 +140,8 @@ function sha256Block (h: number[], w: number[]) {
  * @param {number} n
  * @param {number} i
  * @returns {number}
+ * @private
+ * @internal
  */
 function rotr (n: number, i: number): number {
   return (n >>> i) | (n << (32 - i))

@@ -11,23 +11,22 @@ declare export class Address {
   constructor(bytes?: number[] | Uint8Array | Buffer): this;
   bytes: number[];
   version: number;
-  setVersion(version: number): Address;
+  setVersion(version: number): this;
   publicKey: PublicKey;
-  setPublicKey(publicKey: PublicKey): Address;
+  setPublicKey(publicKey: PublicKey): this;
   prefix: string;
-  setPrefix(prefix: string): Address;
+  setPrefix(prefix: string): this;
   bech32: string;
-  setBech32(bech32: string): Address;
+  setBech32(bech32: string): this;
   static fromBech32(bech32: string): Address;
   static fromKey(key: PublicKey | SecretKey): Address;
 }
 declare export class Block {}
 declare export class BlockHeader {}
 declare export class PublicKey {
-  signatureLength: number;
   constructor(bytes: number[] | Uint8Array | Buffer): this;
   bytes: number[];
-  publicKey: PublicKey;
+  publicKey: this;
   verifySignature(
     signature: number[] | Uint8Array | Buffer,
     message: number[] | Uint8Array | Buffer
@@ -51,6 +50,7 @@ declare class AbstractTransaction {
   DeleteTransitAddress: number;
   constructor(bytes?: number[] | Uint8Array | Buffer): this;
   bytes: number[];
+  base64: string;
   hash: number[];
   version: number;
   setVersion(version: number): this;
@@ -76,5 +76,6 @@ declare export class Transaction mixins AbstractTransaction {
   setProfitPercent(percent: number): this;
   feePercent: number;
   setFeePercent(percent: number): this;
+  static fromBase64(base64: string): Transaction;
 }
 declare export {};

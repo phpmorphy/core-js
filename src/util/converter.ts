@@ -26,6 +26,7 @@ import { validateInt, validateStr } from '../util/validator'
  * @returns {string}
  * @throws {Error}
  * @private
+ * @internal
  */
 function versionToPrefix (version: number): string {
   validateInt(version, 0, 65535)
@@ -53,6 +54,7 @@ function versionToPrefix (version: number): string {
  * @returns {number}
  * @throws {Error}
  * @private
+ * @internal
  */
 function prefixToVersion (prefix: string): number {
   if (prefix === 'genesis') {
@@ -73,6 +75,8 @@ function prefixToVersion (prefix: string): number {
 /**
  * @param {number[]} chars
  * @throws {Error}
+ * @private
+ * @internal
  */
 function checkChars (chars: number[]): void {
   for (const chr of chars) {

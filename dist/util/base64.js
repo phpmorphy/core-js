@@ -23,45 +23,51 @@
 
 'use strict'
 
+const base64Alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
 /**
- * @param {number[]} array
- * @param {number} [length]
- * @param [value]
+ * @param {number[]} bytes
+ * @returns {string}
  * @private
  */
-function arrayFill (array, length, value) {
-  const v = value || 0
-  for (let i = 0; i < length; i++) {
-    array[i] = v
+function base64Encode (bytes) {
+  let res = ''
+  for (let i = 0, l = bytes.length; i < l; i += 3) {
+    const x = (bytes[i] << 16) | (bytes[i + 1] << 8) | bytes[i + 2]
+    res += base64Alphabet[(x >> 18) & 0x3f] + base64Alphabet[(x >> 12) & 0x3f]
+    res += base64Alphabet[(x >> 6) & 0x3f] + base64Alphabet[x & 0x3f]
   }
+  return res
 }
 /**
- * @param {number} length
+ * @param {string} base64
  * @returns {number[]}
+ * @throws {Error}
  * @private
  */
-function arrayNew (length) {
-  const a = []
-  for (let i = 0; i < length; i++) {
-    a[i] = 0
+function base64Decode (base64) {
+  checkBase64Alphabet(base64)
+  const res = []
+  for (let i = 0, l = base64.length; i < l; i += 4) {
+    let x = (base64Alphabet.indexOf(base64[i]) << 18)
+    x |= (base64Alphabet.indexOf(base64[i + 1]) << 12)
+    x |= (base64Alphabet.indexOf(base64[i + 2]) << 6)
+    x |= base64Alphabet.indexOf(base64[i + 3])
+    res.push(((x >> 16) & 0xff), ((x >> 8) & 0xff), (x & 0xff))
   }
-  return a
+  return res
 }
 /**
- * @param {number[]} a
- * @param {number[]|Uint8Array|Buffer} b
- * @param {number} [offset]
- * @param {number} [length]
+ * @param {string} chars
+ * @throws {Error}
  * @private
  */
-function arraySet (a, b, offset, length) {
-  const o = offset || 0
-  const l = length || b.length
-  for (let i = 0; i < l; i++) {
-    a[o + i] = b[i]
+function checkBase64Alphabet (chars) {
+  for (const chr of chars) {
+    if (base64Alphabet.indexOf(chr) === -1) {
+      throw new Error('base64: invalid character')
+    }
   }
 }
 
-exports.arrayFill = arrayFill
-exports.arrayNew = arrayNew
-exports.arraySet = arraySet
+exports.base64Decode = base64Decode
+exports.base64Encode = base64Encode

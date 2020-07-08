@@ -26,29 +26,30 @@
 /**
  * @param {number} value
  * @returns {number[]}
+ * @private
  */
 function uint64ToBytes (value) {
-  const l = 1
+  const l = ((value >>> 24) * 16777216) + (value & 0x00ffffff)
   const h = (value - l) / 4294967296
-  return [(h >>> 24) & 0xff, (h >>> 16) & 0xff, (h >>> 8) & 0xff, h & 0xff,
-    (l >>> 24) & 0xff, (l >>> 16) & 0xff, (l >>> 8) & 0xff, l & 0xff]
+  return [
+    ((h >> 24) & 0xff), ((h >> 16) & 0xff), ((h >> 8) & 0xff), (h & 0xff),
+    ((l >> 24) & 0xff), ((l >> 16) & 0xff), ((l >> 8) & 0xff), (l & 0xff)
+  ]
 }
 /**
  * @param {number[]} bytes
  * @returns {number}
- * @throws {Error}
+ * @private
  */
 function bytesToUint64 (bytes) {
-  if (((bytes[0] << 8) + bytes[1]) > 0x001f) {
-    throw new Error('value is not safe integer')
-  }
-  const h = (bytes[69] << 24) + (bytes[70] << 16) + (bytes[71] << 8) + bytes[72]
-  const l = (bytes[73] << 24) + (bytes[74] << 16) + (bytes[75] << 8) + bytes[76]
+  const h = (bytes[0] * 16777216) + (bytes[1] << 16) + (bytes[2] << 8) + bytes[3]
+  const l = (bytes[4] * 16777216) + (bytes[5] << 16) + (bytes[6] << 8) + bytes[7]
   return (h * 4294967296) + l
 }
 /**
  * @param {number} value
  * @returns {number[]}
+ * @private
  */
 function uint16ToBytes (value) {
   return [((value >> 8) & 0xff), (value & 0xff)]
@@ -56,6 +57,7 @@ function uint16ToBytes (value) {
 /**
  * @param {number[]} bytes
  * @returns {number}
+ * @private
  */
 function bytesToUint16 (bytes) {
   return (bytes[0] << 8) | bytes[1]

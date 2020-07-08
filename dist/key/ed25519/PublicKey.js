@@ -49,12 +49,6 @@ class PublicKey {
   }
 
   /**
-   * Длина цифровой подписи в байтах.
-   * @type {number}
-   * @constant
-   */
-  get signatureLength () { return 64 }
-  /**
    * Публичный ключ в формате libsodium, 32 байта (256 бит).
    * @type {number[]}
    * @readonly

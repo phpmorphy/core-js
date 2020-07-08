@@ -35,7 +35,7 @@ const bech32 = require('../util/bech32.js')
  */
 class Address {
   /**
-   * @param {number[]|Uint8Array} [bytes] Адрес в бинарном виде, длина 34 байта.
+   * @param {number[]|Uint8Array|Buffer} [bytes] Адрес в бинарном виде, длина 34 байта.
    * @throws {Error}
    */
   constructor (bytes) {
@@ -44,10 +44,9 @@ class Address {
      * @type {number[]}
      * @private
      */
-    this._bytes = []
+    this._bytes = array.arrayNew(34)
     if (bytes === undefined) {
-      array.arrayFill(this._bytes, 34)
-      this.version = Address.Umi
+      this.setVersion(Address.Umi)
     } else {
       if (bytes.length !== 34) {
         throw new Error('bytes length must be 34 bytes')
@@ -57,7 +56,7 @@ class Address {
   }
 
   /**
-   * Версия Genesis-адрса.
+   * Версия Genesis-адреса.
    * @type {number}
    * @constant
    */
@@ -80,7 +79,6 @@ class Address {
   /**
    * Версия адреса, префикс в числовом виде.
    * @type {number}
-   * @throws {Error}
    */
   get version () {
     return integer.bytesToUint16(this._bytes.slice(0, 2))
@@ -92,7 +90,7 @@ class Address {
   }
 
   /**
-   * Устанавливает версию адреса и возвращяет this.
+   * Устанавливает версию адреса и возвращает this.
    * @param {number} version Версия адреса.
    * @returns {Address}
    * @throws {Error}
@@ -105,7 +103,6 @@ class Address {
   /**
    * Публичный ключ.
    * @type {PublicKey}
-   * @throws {Error}
    */
   get publicKey () {
     return new PublicKey.PublicKey(this._bytes.slice(2))
@@ -119,7 +116,7 @@ class Address {
   }
 
   /**
-   * Устанавливает публичный ключи и возвращяет this.
+   * Устанавливает публичный ключи и возвращает this.
    * @param {PublicKey} publicKey Публичный ключ.
    * @returns {Address}
    * @throws {Error}
@@ -132,7 +129,6 @@ class Address {
   /**
    * Префикс адреса, три символа латиницы в нижнем регистре.
    * @type {string}
-   * @throws {Error}
    */
   get prefix () {
     return converter.versionToPrefix(this.version)
@@ -143,7 +139,7 @@ class Address {
   }
 
   /**
-   * Устанавливает префикс адреса и возвращяет this.
+   * Устанавливает префикс адреса и возвращает this.
    * @param {string} prefix Префикс адреса, три символа латиницы в нижнем регистре.
    * @returns {Address}
    * @throws {Error}
@@ -156,14 +152,13 @@ class Address {
   /**
    * Адрес в формате Bech32, длина 62 символа.
    * @type {string}
-   * @throws {Error}
    */
   get bech32 () {
-    return bech32.encode(this._bytes)
+    return bech32.bech32Encode(this._bytes)
   }
 
   set bech32 (bech32$1) {
-    array.arraySet(this._bytes, bech32.decode(bech32$1))
+    array.arraySet(this._bytes, bech32.bech32Decode(bech32$1))
   }
 
   /**
@@ -178,8 +173,8 @@ class Address {
   }
 
   /**
-   * Статический фабричный метод, создающий объект из адреса в формате Bech32.
-   * @param {string} bech32 Адрес в формате Bech32, длина 62 символа.
+   * Статический метод, создает объект из адреса в формате Bech32.
+   * @param {string} bech32 Адрес в формате Bech32, длина 62 или 65 символов.
    * @returns {Address}
    * @throws {Error}
    */
@@ -188,10 +183,9 @@ class Address {
   }
 
   /**
-   * Статический фабричный метод, создающий объект из публичного или приватного ключа.
+   * Статический метод, создает объект из публичного или приватного ключа.
    * @param {PublicKey|SecretKey} key Публичный или приватный ключ.
    * @returns {Address}
-   * @throws {Error}
    */
   static fromKey (key) {
     return new Address().setPublicKey(key.publicKey)

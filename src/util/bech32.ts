@@ -19,7 +19,7 @@
 // SOFTWARE.
 
 import { prefixToVersion, versionToPrefix } from './converter'
-import { arrayNew } from './array'
+import { arrayNew, arraySet } from './array'
 import { uint16ToBytes } from './integer'
 
 const bech32Alphabet = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l'
@@ -27,8 +27,10 @@ const bech32Alphabet = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l'
 /**
  * @param {number[]|Uint8Array|Buffer} bytes
  * @returns {string}
+ * @private
+ * @internal
  */
-function encode (bytes: number[] | Uint8Array | Buffer): string {
+function bech32Encode (bytes: number[] | Uint8Array | Buffer): string {
   const prefix = versionToPrefix((bytes[0] << 8) + bytes[1])
   const data = convert8to5(bytes.slice(2))
   const checksum = createChecksum(prefix, data)
@@ -39,8 +41,10 @@ function encode (bytes: number[] | Uint8Array | Buffer): string {
 /**
  * @param {string} bech32
  * @returns {number[]}
+ * @private
+ * @internal
  */
-function decode (bech32: string): number[] {
+function bech32Decode (bech32: string): number[] {
   if (bech32.length !== 62 && bech32.length !== 66) {
     throw new Error('bech32: invalid length')
   }
@@ -61,6 +65,12 @@ function decode (bech32: string): number[] {
   return uint16ToBytes(ver).concat(convert5to8(data.slice(0, -6)))
 }
 
+/**
+ * @param {string} data
+ * @returns {number[]}
+ * @private
+ * @internal
+ */
 function convert5to8 (data: string): number[] {
   let value = 0
   let bits = 0
@@ -84,6 +94,12 @@ function convert5to8 (data: string): number[] {
   return result
 }
 
+/**
+ * @param {number[]|Uint8Array|Buffer} data
+ * @returns {string}
+ * @private
+ * @internal
+ */
 function convert8to5 (data: number[] | Uint8Array | Buffer): string {
   let value = 0
   let bits = 0
@@ -107,12 +123,19 @@ function convert8to5 (data: number[] | Uint8Array | Buffer): string {
   return result
 }
 
+/**
+ * @param {string} prefix
+ * @param {string} data
+ * @returns {string}
+ * @private
+ * @internal
+ */
 function createChecksum (prefix: string, data: string): string {
   const bytes = strToBytes(data)
   const pfx = prefixExpand(prefix)
-  const values = new Uint8Array(pfx.length + bytes.length + 6)
-  values.set(pfx)
-  values.set(bytes, pfx.length)
+  const values = arrayNew(pfx.length + bytes.length + 6)
+  arraySet(values, pfx)
+  arraySet(values, bytes, pfx.length)
 
   const poly = polyMod(values) ^ 1
 
@@ -124,6 +147,12 @@ function createChecksum (prefix: string, data: string): string {
   return checksum
 }
 
+/**
+ * @param {number[]|Uint8Array|Buffer} values
+ * @returns {number}
+ * @private
+ * @internal
+ */
 function polyMod (values: number[] | Uint8Array | Buffer): number {
   const gen = [0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3]
   let chk = 1
@@ -141,6 +170,12 @@ function polyMod (values: number[] | Uint8Array | Buffer): number {
   return chk
 }
 
+/**
+ * @param {string} prefix
+ * @returns {number[]}
+ * @private
+ * @internal
+ */
 function prefixExpand (prefix: string): number[] {
   const res = arrayNew((prefix.length * 2) + 1)
 
@@ -153,6 +188,12 @@ function prefixExpand (prefix: string): number[] {
   return res
 }
 
+/**
+ * @param {string} str
+ * @returns {number[]}
+ * @private
+ * @internal
+ */
 function strToBytes (str: string): number[] {
   const bytes: number[] = []
   for (const chr of str) {
@@ -162,13 +203,19 @@ function strToBytes (str: string): number[] {
   return bytes
 }
 
+/**
+ * @param {string} prefix
+ * @param {string} data
+ * @private
+ * @internal
+ */
 function verifyChecksum (prefix: string, data: string): void {
   const pfx = prefixExpand(prefix)
   const bytes = strToBytes(data)
 
-  const values = new Uint8Array(pfx.length + bytes.length)
-  values.set(pfx)
-  values.set(bytes, pfx.length)
+  const values = arrayNew(pfx.length + bytes.length)
+  arraySet(values, pfx)
+  arraySet(values, bytes, pfx.length)
 
   const poly = polyMod(values)
 
@@ -177,6 +224,11 @@ function verifyChecksum (prefix: string, data: string): void {
   }
 }
 
+/**
+ * @param {string} chars
+ * @private
+ * @internal
+ */
 function checkAlphabet (chars: string): void {
   for (const chr of chars) {
     if (bech32Alphabet.indexOf(chr) === -1) {
@@ -185,4 +237,4 @@ function checkAlphabet (chars: string): void {
   }
 }
 
-export { encode, decode }
+export { bech32Encode, bech32Decode }

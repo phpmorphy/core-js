@@ -27,13 +27,6 @@ import { arraySet } from '../../util/array'
  */
 export class PublicKey {
   /**
-   * Длина цифровой подписи в байтах.
-   * @type {number}
-   * @constant
-   */
-  get signatureLength (): number { return 64 }
-
-  /**
    * Публичный ключ в бинарном виде. В формате libsodium.
    * @type {number[]}
    * @private
@@ -66,7 +59,7 @@ export class PublicKey {
    * @type {PublicKey}
    * @readonly
    */
-  get publicKey (): PublicKey {
+  get publicKey (): this {
     return this
   }
 

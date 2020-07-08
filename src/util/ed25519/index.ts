@@ -11,7 +11,6 @@ const I: number[] = [
   0xd7a7, 0x3dfb, 0x0099, 0x2b4d, 0xdf0b, 0x4fc1, 0x2480, 0x2b83]
 
 /**
- * Note: difference from C - smlen returned, not passed as argument.
  * @param {number[]|Uint8Array|Buffer} message
  * @param {number[]|Uint8Array|Buffer} secretKey
  * @returns {number[]}
@@ -86,12 +85,12 @@ function verify (signature: number[] | Uint8Array | Buffer, message: number[] | 
 
 /**
  * @param {number[][]} r
- * @param {number[]|Uint8Array} p
+ * @param {number[]|Uint8Array|Buffer} p
  * @returns {boolean}
  * @private
  * @internal
  */
-function unpackneg (r: number[][], p: number[] | Uint8Array): boolean {
+function unpackneg (r: number[][], p: number[] | Uint8Array | Buffer): boolean {
   const t: number[] = []
   const chk: number[] = []
   const num: number[] = []
@@ -160,11 +159,11 @@ function cryptoVerify32 (x: number[], y: number[]): boolean {
 
 /**
  * @param {number[]} o
- * @param {number[]} n
+ * @param {number[]|Uint8Array|Buffer} n
  * @private
  * @internal
  */
-function unpack25519 (o: number[], n: number[] | Uint8Array): void {
+function unpack25519 (o: number[], n: number[] | Uint8Array | Buffer): void {
   for (let i = 0; i < 16; i++) {
     o[i] = n[2 * i] + (n[2 * i + 1] << 8)
   }
@@ -215,6 +214,8 @@ function neq25519 (a: number[], b: number[]): boolean {
 /**
  * @param {number[]|Uint8Array|Buffer} seed
  * @returns {number[]}
+ * @private
+ * @internal
  */
 function secretKeyFromSeed (seed: number[] | Uint8Array | Buffer): number[] {
   const sk: number[] = []

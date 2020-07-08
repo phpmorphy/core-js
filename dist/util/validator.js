@@ -28,6 +28,7 @@
  * @param {number} min
  * @param {number} max
  * @throws {Error}
+ * @private
  */
 function validateInt (arg, min, max) {
   if (typeof arg !== 'number') {
@@ -43,6 +44,8 @@ function validateInt (arg, min, max) {
 /**
  * @param {string} arg
  * @param {number} [len]
+ * @throws {Error}
+ * @private
  */
 function validateStr (arg, len) {
   if (typeof arg !== 'string') {

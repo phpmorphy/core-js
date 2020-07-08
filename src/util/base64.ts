@@ -18,50 +18,56 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-/**
- * @param {number} value
- * @returns {number[]}
- * @private
- * @internal
- */
-function uint64ToBytes (value: number): number[] {
-  const l = ((value >>> 24) * 16777216) + (value & 0x00ffffff)
-  const h = (value - l) / 4294967296 // value >>> 32
-  return [
-    ((h >> 24) & 0xff), ((h >> 16) & 0xff), ((h >> 8) & 0xff), (h & 0xff),
-    ((l >> 24) & 0xff), ((l >> 16) & 0xff), ((l >> 8) & 0xff), (l & 0xff)]
-}
+const base64Alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
 
 /**
  * @param {number[]} bytes
- * @returns {number}
+ * @returns {string}
  * @private
  * @internal
  */
-function bytesToUint64 (bytes: number[]): number {
-  const h = (bytes[0] * 16777216) + (bytes[1] << 16) + (bytes[2] << 8) + bytes[3]
-  const l = (bytes[4] * 16777216) + (bytes[5] << 16) + (bytes[6] << 8) + bytes[7]
-  return (h * 4294967296) + l // h << 32 | l
+function base64Encode (bytes: number[]): string {
+  let res = ''
+  for (let i = 0, l = bytes.length; i < l; i += 3) {
+    const x = (bytes[i] << 16) | (bytes[i + 1] << 8) | bytes[i + 2]
+    res += base64Alphabet[(x >> 18) & 0x3f] + base64Alphabet[(x >> 12) & 0x3f]
+    res += base64Alphabet[(x >> 6) & 0x3f] + base64Alphabet[x & 0x3f]
+  }
+  return res
 }
 
 /**
- * @param {number} value
+ * @param {string} base64
  * @returns {number[]}
+ * @throws {Error}
  * @private
  * @internal
  */
-function uint16ToBytes (value: number): number[] {
-  return [((value >> 8) & 0xff), (value & 0xff)]
+function base64Decode (base64: string): number[] {
+  checkBase64Alphabet(base64)
+  const res: number[] = []
+  for (let i = 0, l = base64.length; i < l; i += 4) {
+    let x = (base64Alphabet.indexOf(base64[i]) << 18)
+    x |= (base64Alphabet.indexOf(base64[i + 1]) << 12)
+    x |= (base64Alphabet.indexOf(base64[i + 2]) << 6)
+    x |= base64Alphabet.indexOf(base64[i + 3])
+    res.push(((x >> 16) & 0xff), ((x >> 8) & 0xff), (x & 0xff))
+  }
+  return res
 }
 
 /**
- * @param {number[]} bytes
- * @returns {number}
+ * @param {string} chars
+ * @throws {Error}
  * @private
  * @internal
  */
-function bytesToUint16 (bytes: number[]): number {
-  return (bytes[0] << 8) | bytes[1]
+function checkBase64Alphabet (chars: string): void {
+  for (const chr of chars) {
+    if (base64Alphabet.indexOf(chr) === -1) {
+      throw new Error('base64: invalid character')
+    }
+  }
 }
 
-export { uint64ToBytes, bytesToUint64, uint16ToBytes, bytesToUint16 }
+export { base64Encode, base64Decode }

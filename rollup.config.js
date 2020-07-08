@@ -1,5 +1,5 @@
 import cleanup from 'rollup-plugin-cleanup'
-// import { terser } from 'rollup-plugin-terser'
+import { terser } from 'rollup-plugin-terser'
 
 const license = '/**\n' +
   ' * @license\n' +
@@ -56,7 +56,10 @@ export default [
     ],
     plugins: [
       cleanup({ comments: 'jsdoc', compactComments: false })
-    ]
+    ],
+    treeshake: {
+      moduleSideEffects: false
+    }
   },
   {
     input: 'tmp/es5/index.js',
@@ -72,6 +75,7 @@ export default [
     },
     context: 'this',
     plugins: [
+      terser()
     ]
   }
 ]

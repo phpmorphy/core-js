@@ -23,6 +23,8 @@
  * @param {number} min
  * @param {number} max
  * @throws {Error}
+ * @private
+ * @internal
  */
 function validateInt (arg: number, min: number, max: number): void {
   if (typeof arg !== 'number') {
@@ -39,22 +41,11 @@ function validateInt (arg: number, min: number, max: number): void {
 }
 
 /**
- * @param {Uint8Array} arg
- * @param {number} [len]
- */
-function validateUint8Array (arg: Uint8Array, len?: number): void {
-  if (!(arg instanceof Uint8Array)) {
-    throw new Error('incorrect type')
-  }
-
-  if (len !== undefined && arg.length !== len) {
-    throw new Error('incorrect length')
-  }
-}
-
-/**
  * @param {string} arg
  * @param {number} [len]
+ * @throws {Error}
+ * @private
+ * @internal
  */
 function validateStr (arg: string, len?: number): void {
   if (typeof arg !== 'string') {
@@ -66,4 +57,4 @@ function validateStr (arg: string, len?: number): void {
   }
 }
 
-export { validateInt, validateStr, validateUint8Array }
+export { validateInt, validateStr }

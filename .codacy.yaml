@@ -3,6 +3,5 @@ exclude_paths:
   - 'lib/**'
   - 'test/**'
   - 'src/**'
-  - 'mocha.html'
   - 'package.json'
   - 'rollup.config.js'

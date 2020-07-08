@@ -24,6 +24,7 @@ import { sha256 } from '../util/sha256'
 import { validateInt } from '../util/validator'
 import { arrayNew, arraySet } from '../util/array'
 import { uint64ToBytes, bytesToUint64 } from '../util/integer'
+import { base64Encode } from '../util/base64'
 
 /**
  * Базовый класс для работы с транзакциями.
@@ -35,7 +36,7 @@ abstract class AbstractTransaction {
   /**
    * Genesis-транзакция.
    * Может быть добавлена только в Genesis-блок.
-   * Адрес отправителя должен иметь префикс genesis, адрес получаетеля - umi.
+   * Адрес отправителя должен иметь префикс genesis, адрес получателя - umi.
    * @type {number}
    * @constant
    * @example
@@ -121,7 +122,7 @@ abstract class AbstractTransaction {
   static get UpdateProfitAddress (): number { return 4 }
 
   /**
-   * Изменение адреса на который переводоится комиссия.
+   * Изменение адреса на который переводится комиссия.
    * @type {number}
    * @constant
    * @example
@@ -181,7 +182,7 @@ abstract class AbstractTransaction {
    * @throws {Error}
    * @private
    */
-  constructor (bytes?: number[] | Uint8Array | Buffer) {
+  protected constructor (bytes?: number[] | Uint8Array | Buffer) {
     if (bytes !== undefined) {
       if (bytes.length !== 150) {
         throw new Error('incorrect length')
@@ -200,6 +201,15 @@ abstract class AbstractTransaction {
   }
 
   /**
+   * Транзакция в виде строки в формате Base64.
+   * @type {string}
+   * @readonly
+   */
+  get base64 (): string {
+    return base64Encode(this._bytes)
+  }
+
+  /**
    * Хэш транзакции, sha256 от всех 150 байт.
    * @type {number[]}
    * @readonly
@@ -213,7 +223,6 @@ abstract class AbstractTransaction {
    * Обязательное поле, необходимо задать сразу после создания новой транзакции.
    * Изменять тип транзакции, после того как он был задан, нельзя.
    * @type {number}
-   * @throws {Error}
    * @see Transaction.Genesis
    * @see Transaction.Basic
    * @see Transaction.CreateStructure
@@ -229,14 +238,13 @@ abstract class AbstractTransaction {
 
   set version (version: number) {
     validateInt(version, 0, 7)
-
     this._bytes[0] = version
   }
 
   /**
-   * Устанавливает версию и возвращяет this.
+   * Устанавливает версию и возвращает this.
    * @param {number} version Версия адреса.
-   * @returns {this}
+   * @returns {Transaction}
    * @throws {Error}
    * @see Transaction.Genesis
    * @see Transaction.Basic
@@ -255,12 +263,8 @@ abstract class AbstractTransaction {
   /**
    * Отправитель. Доступно для всех типов транзакций.
    * @type {Address}
-   * @throws {Error}
    */
   get sender (): Address {
-    // sender length = 34
-    // sender begin = 1
-    // sender end = 35
     return new Address(this._bytes.slice(1, 35))
   }
 
@@ -268,25 +272,13 @@ abstract class AbstractTransaction {
     if (!(address instanceof Address)) {
       throw new Error('address type must be Address')
     }
-
-    if (this.version === AbstractTransaction.Genesis &&
-      address.version !== Address.Genesis) {
-      throw new Error('address version must be genesis')
-    }
-
-    if (this.version !== AbstractTransaction.Genesis &&
-      address.version === Address.Genesis) {
-      throw new Error('address version must not be genesis')
-    }
-
-    // sender offset = 1
     arraySet(this._bytes, address.bytes, 1)
   }
 
   /**
-   * Устанавливает отправителя и возвращяет this.
+   * Устанавливает отправителя и возвращает this.
    * @param {Address} address Адрес получателя.
-   * @returns {this}
+   * @returns {Transaction}
    * @throws {Error}
    */
   setSender (address: Address): this {
@@ -298,11 +290,8 @@ abstract class AbstractTransaction {
    * Получатель.
    * Недоступно для транзакций CreateStructure и UpdateStructure.
    * @type {Address}
-   * @throws {Error}
    */
   get recipient (): Address {
-    // recipient begin = 35
-    // recipient end = 69
     return new Address(this._bytes.slice(35, 69))
   }
 
@@ -310,31 +299,14 @@ abstract class AbstractTransaction {
     if (!(address instanceof Address)) {
       throw new Error('recipient type must be Address')
     }
-
-    if (address.version === Address.Genesis) {
-      throw new Error('recipient version must not be genesis')
-    }
-
-    if (this.version === AbstractTransaction.Genesis &&
-      address.version !== Address.Umi) {
-      throw new Error('recipient version must be umi')
-    }
-
-    if (this.version !== AbstractTransaction.Genesis &&
-      this.version !== AbstractTransaction.Basic &&
-      address.version === Address.Umi) {
-      throw new Error('recipient version must not be umi')
-    }
-
-    // recipient offset = 35
     arraySet(this._bytes, address.bytes, 35)
   }
 
   /**
-   * Устанавливает получателя и возвращяет this.
+   * Устанавливает получателя и возвращает this.
    * Доступно для всех типов транзакций кроме CreateStructure и UpdateStructure.
    * @param {Address} address Адрес получателя.
-   * @returns {this}
+   * @returns {Transaction}
    * @throws {Error}
    */
   setRecipient (address: Address): this {
@@ -347,26 +319,22 @@ abstract class AbstractTransaction {
    * Из-за ограничений JavaScript максимальное доступное значение 9007199254740991.
    * Доступно только для Genesis и Basic транзакций.
    * @type {number}
-   * @throws {Error}
    */
   get value (): number {
-    // value offset = 69
-    return bytesToUint64(this._bytes.slice(69, 76))
+    return bytesToUint64(this._bytes.slice(69, 77))
   }
 
   set value (value: number) {
-    validateInt(value, 1, 9007199254740991)
-
-    // value offset = 69
+    validateInt(value, 1, 18446744073709551615)
     arraySet(this._bytes, uint64ToBytes(value), 69)
   }
 
   /**
-   * Устанавливает сумму и возвращяет this.
-   * Принимает значения в промежутке от 1 до 9007199254740991.
+   * Устанавливает сумму и возвращает this.
+   * Принимает значения в промежутке от 1 до 18446744073709551615.
    * Доступно только для Genesis и Basic транзакций.
    * @param {number} value
-   * @returns {this}
+   * @returns {Transaction}
    * @throws {Error}
    */
   setValue (value: number): this {
@@ -376,27 +344,22 @@ abstract class AbstractTransaction {
 
   /**
    * Nonce, целое число в промежутке от 0 до 18446744073709551615.
-   * Из-за ограничений JavaScript максимальное доступное значение 9007199254740991.
-   * Генерируется автоматичеки при вызове sign().
+   * Генерируется автоматически при вызове sign().
    * @type {number}
-   * @throws {Error}
    */
   get nonce (): number {
-    // nonce offset = 77
     return bytesToUint64(this._bytes.slice(77, 85))
   }
 
   set nonce (nonce: number) {
-    validateInt(nonce, 0, 9007199254740991)
-
-    // nonce offset = 77
+    validateInt(nonce, 0, 18446744073709551615)
     arraySet(this._bytes, uint64ToBytes(nonce), 77)
   }
 
   /**
-   * Устанавливает nonce и возвращяет this.
-   * @param {number} nonce Nonce, целое числов промежутке от 0 до 9007199254740991.
-   * @returns {this}
+   * Устанавливает nonce и возвращает this.
+   * @param {number} nonce Nonce, целое число в промежутке от 0 до 18446744073709551615.
+   * @returns {Transaction}
    * @throws {Error}
    */
   setNonce (nonce: number): this {
@@ -407,30 +370,23 @@ abstract class AbstractTransaction {
   /**
    * Цифровая подпись транзакции, длина 64 байта.
    * Генерируется автоматически при вызове sign().
-   * @type {number[]}
-   * @throws {Error}
+   * @type {number[]|Uint8Array|Buffer}
    */
   get signature (): number[] | Uint8Array | Buffer {
-    // signature length = 64
-    const len = this.sender.publicKey.signatureLength
-
-    // signature offset = 85
-    return this._bytes.slice(85, 85 + len)
+    return this._bytes.slice(85, 149)
   }
 
   set signature (signature: number[] | Uint8Array | Buffer) {
-    if (signature.length !== this.sender.publicKey.signatureLength) {
+    if (signature.length !== 64) {
       throw new Error('invalid length')
     }
-
-    // signature offset = 85
     arraySet(this._bytes, signature, 85)
   }
 
   /**
-   * Устанавливает цифровую подпись и возвращяет this.
+   * Устанавливает цифровую подпись и возвращает this.
    * @param {number[]|Uint8Array|Buffer} signature Подпись, длина 64 байта.
-   * @returns {this}
+   * @returns {Transaction}
    * @throws {Error}
    */
   setSignature (signature: number[] | Uint8Array | Buffer): this {
@@ -439,30 +395,24 @@ abstract class AbstractTransaction {
   }
 
   /**
-   * Подписать транзакцию приватным ключем.
+   * Подписать транзакцию приватным ключом.
    * @param {SecretKey} secretKey
-   * @returns {this}
+   * @returns {Transaction}
    * @throws {Error}
    */
   sign (secretKey: SecretKey): this {
     if (!(secretKey instanceof SecretKey)) {
       throw new Error('secretKey type must be SecretKey')
     }
-
-    // unsigned begin = 0
-    // unsigned end = 85
-    this.signature = secretKey.sign(this._bytes.slice(0, 85))
-    return this
+    return this.setSignature(secretKey.sign(this._bytes.slice(0, 85)))
   }
 
   /**
-   * Проверить транзакцию на соотвествие формальным правилам.
+   * Проверить транзакцию на соответствие формальным правилам.
    * @returns {boolean}
    * @throws {Error}
    */
   verify (): boolean {
-    // unsigned begin = 0
-    // unsigned end = 85
     return this.sender.publicKey.verifySignature(this.signature, this._bytes.slice(0, 85))
   }
 }

@@ -36,7 +36,6 @@ const I = [
   0xd7a7, 0x3dfb, 0x0099, 0x2b4d, 0xdf0b, 0x4fc1, 0x2480, 0x2b83
 ]
 /**
- * Note: difference from C - smlen returned, not passed as argument.
  * @param {number[]|Uint8Array|Buffer} message
  * @param {number[]|Uint8Array|Buffer} secretKey
  * @returns {number[]}
@@ -94,7 +93,7 @@ function verify (signature, message, pubKey) {
 }
 /**
  * @param {number[][]} r
- * @param {number[]|Uint8Array} p
+ * @param {number[]|Uint8Array|Buffer} p
  * @returns {boolean}
  * @private
  */
@@ -154,7 +153,7 @@ function cryptoVerify32 (x, y) {
 }
 /**
  * @param {number[]} o
- * @param {number[]} n
+ * @param {number[]|Uint8Array|Buffer} n
  * @private
  */
 function unpack25519 (o, n) {
@@ -199,6 +198,7 @@ function neq25519 (a, b) {
 /**
  * @param {number[]|Uint8Array|Buffer} seed
  * @returns {number[]}
+ * @private
  */
 function secretKeyFromSeed (seed) {
   const sk = []

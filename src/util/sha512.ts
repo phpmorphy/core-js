@@ -41,7 +41,7 @@ const sha512K: [number, number][] = [
  * Безопасный алгоритм хеширования, SHA2-512.
  * @see https://en.wikipedia.org/wiki/SHA-2
  * @param {number[]|Uint8Array|Buffer} message message
- * @returns {number[]} hash
+ * @returns {number[]}
  * @private
  * @internal
  */
@@ -78,7 +78,9 @@ function sha512 (message: number[] | Uint8Array | Buffer): number[] {
 
 /**
  * @param {number[]|Uint8Array|Buffer} message
- * @returns {[number, number][][]}
+ * @returns {number[][][]}
+ * @private
+ * @internal
  */
 function sha512PreProcess (message: number[] | Uint8Array | Buffer): [number, number][][] {
   const bytez: number[] = []
@@ -111,8 +113,11 @@ function sha512PreProcess (message: number[] | Uint8Array | Buffer): [number, nu
 }
 
 /**
- * @param {[number, number][]} h
- * @param {[number, number][]} w
+ * @param {number[][]} h
+ * @param {number[][]} w
+ * @returns {number[][]}
+ * @private
+ * @internal
  */
 function sha512Block (h: [number, number][], w: [number, number][]) {
   // Initialize working variables to current hash value.
@@ -146,10 +151,24 @@ function sha512Block (h: [number, number][], w: [number, number][]) {
   })
 }
 
+/**
+ * @param {number[]} n
+ * @param {number} i
+ * @returns {number[]}
+ * @private
+ * @internal
+ */
 function shft64 (n: [number, number], i: number): [number, number] {
   return [(n[0] >>> i), (n[1] >>> i) | (n[0] << (32 - i))]
 }
 
+/**
+ * @param {number[]} n
+ * @param {number[]} i
+ * @returns {number[]}
+ * @private
+ * @internal
+ */
 function rotr64 (n: [number, number], i: number): [number, number] {
   if (i < 32) {
     return [n[0] >>> i | n[1] << (32 - i), n[1] >>> i | n[0] << (32 - i)]
@@ -159,22 +178,42 @@ function rotr64 (n: [number, number], i: number): [number, number] {
     n[0] >>> (i - 32) | n[1] << (32 - (i - 32))]
 }
 
+/**
+ * @param {number[]} a
+ * @param {number[]} b
+ * @returns {number[]}
+ * @private
+ * @internal
+ */
 function xor64 (a: [number, number], b: [number, number]): [number, number] {
   return [(a[0] ^ b[0]), (a[1] ^ b[1])]
 }
 
+/**
+ * @param {number[]} a
+ * @param {number[]} b
+ * @returns {number[]}
+ * @private
+ * @internal
+ */
 function and64 (a: [number, number], b: [number, number]): [number, number] {
   return [(a[0] & b[0]), (a[1] & b[1])]
 }
 
+/**
+ * @param {number[]} n
+ * @returns {number[]}
+ * @private
+ * @internal
+ */
 function not64 (n: [number, number]): [number, number] {
   return [~n[0], ~n[1]]
 }
 
 /**
- * @param {[number, number]} a
- * @param {[number, number]} b
- * @returns {[number, number]}
+ * @param {number[]} a
+ * @param {number[]} b
+ * @returns {number[]}
  * @private
  * @internal
  */

@@ -45,7 +45,7 @@ const sha512K = [
  * Безопасный алгоритм хеширования, SHA2-512.
  * @see https://en.wikipedia.org/wiki/SHA-2
  * @param {number[]|Uint8Array|Buffer} message message
- * @returns {number[]} hash
+ * @returns {number[]}
  * @private
  */
 function sha512 (message) {
@@ -71,7 +71,8 @@ function sha512 (message) {
 }
 /**
  * @param {number[]|Uint8Array|Buffer} message
- * @returns {[number, number][][]}
+ * @returns {number[][][]}
+ * @private
  */
 function sha512PreProcess (message) {
   const bytez = []
@@ -96,8 +97,10 @@ function sha512PreProcess (message) {
   return chunks
 }
 /**
- * @param {[number, number][]} h
- * @param {[number, number][]} w
+ * @param {number[][]} h
+ * @param {number[][]} w
+ * @returns {number[][]}
+ * @private
  */
 function sha512Block (h, w) {
   const a = []
@@ -124,9 +127,21 @@ function sha512Block (h, w) {
     h[i] = sum64(h[i], v)
   })
 }
+/**
+ * @param {number[]} n
+ * @param {number} i
+ * @returns {number[]}
+ * @private
+ */
 function shft64 (n, i) {
   return [(n[0] >>> i), (n[1] >>> i) | (n[0] << (32 - i))]
 }
+/**
+ * @param {number[]} n
+ * @param {number[]} i
+ * @returns {number[]}
+ * @private
+ */
 function rotr64 (n, i) {
   if (i < 32) {
     return [n[0] >>> i | n[1] << (32 - i), n[1] >>> i | n[0] << (32 - i)]
@@ -136,19 +151,36 @@ function rotr64 (n, i) {
     n[0] >>> (i - 32) | n[1] << (32 - (i - 32))
   ]
 }
+/**
+ * @param {number[]} a
+ * @param {number[]} b
+ * @returns {number[]}
+ * @private
+ */
 function xor64 (a, b) {
   return [(a[0] ^ b[0]), (a[1] ^ b[1])]
 }
+/**
+ * @param {number[]} a
+ * @param {number[]} b
+ * @returns {number[]}
+ * @private
+ */
 function and64 (a, b) {
   return [(a[0] & b[0]), (a[1] & b[1])]
 }
+/**
+ * @param {number[]} n
+ * @returns {number[]}
+ * @private
+ */
 function not64 (n) {
   return [~n[0], ~n[1]]
 }
 /**
- * @param {[number, number]} a
- * @param {[number, number]} b
- * @returns {[number, number]}
+ * @param {number[]} a
+ * @param {number[]} b
+ * @returns {number[]}
  * @private
  */
 function sum64 (a, b) {

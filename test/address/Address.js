@@ -4,6 +4,20 @@ if (typeof window === 'undefined') {
 }
 
 describe('Address', function () {
+  describe('константы', function () {
+    const tests = [
+      { args: 'Genesis', expected: 0 },
+      { args: 'Umi', expected: 21929 }
+    ]
+
+    tests.forEach(function (test) {
+      it(test.args, function () {
+        const actual = umi.Address[test.args]
+        assert.strictEqual(actual, test.expected)
+      })
+    })
+  })
+
   describe('new Address()', function () {
     it('ошибка если некорректная длина', function () {
       assert.throws(function () {
@@ -130,6 +144,15 @@ describe('Address', function () {
     it('ошибка если некорректный тип', function () {
       const adr = new umi.Address()
       assert.throws(function () { adr.publicKey = {} }, Error)
+    })
+
+    it('публичный ключ', function () {
+      const expected = new Uint8Array(32)
+      expected[0] = 128
+      expected[31] = 255
+      const pubKey = new umi.PublicKey(expected)
+      const actual = new Uint8Array(new umi.Address().setPublicKey(pubKey).publicKey.bytes)
+      assert.deepEqual(actual, expected)
     })
   })
 

@@ -1,7 +1,7 @@
 Node >= 4
 Edge >= 12
-Explorer >= 11
-iOS >= 5
+Explorer >= 9
+iOS >= 6
 Safari >= 6
 Chrome >= 11
 Firefox >= 15

@@ -20,10 +20,10 @@
 
 /**
  * Конвертер строки в типизированный массив UTF-8 байтов.
- * @function
  * @param {string} text
  * @returns {number[]}
  * @private
+ * @internal
  */
 function Utf8Encode (text: string): number[] {
   const bytes: number[] = []
@@ -49,10 +49,10 @@ function Utf8Encode (text: string): number[] {
 
 /**
  * Конвертер из типизированного массива UTF-8 байтов в строку.
- * @function
  * @param {number[]|Uint8Array|Buffer} bytes
  * @returns {string}
  * @private
+ * @internal
  */
 function Utf8Decode (bytes: number[] | Uint8Array | Buffer): string {
   let str = ''

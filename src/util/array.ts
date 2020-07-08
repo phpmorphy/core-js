@@ -22,6 +22,8 @@
  * @param {number[]} array
  * @param {number} [length]
  * @param [value]
+ * @private
+ * @internal
  */
 function arrayFill (array: number[], length: number, value?: any) {
   const v = value || 0
@@ -33,6 +35,8 @@ function arrayFill (array: number[], length: number, value?: any) {
 /**
  * @param {number} length
  * @returns {number[]}
+ * @private
+ * @internal
  */
 function arrayNew (length: number): number[] {
   const a: number[] = []
@@ -44,9 +48,11 @@ function arrayNew (length: number): number[] {
 
 /**
  * @param {number[]} a
- * @param {number[]} b
- * @param {number} offset
- * @param {number} length
+ * @param {number[]|Uint8Array|Buffer} b
+ * @param {number} [offset]
+ * @param {number} [length]
+ * @private
+ * @internal
  */
 function arraySet (a: number[], b: number[] | Uint8Array | Buffer, offset?: number, length?: number) {
   const o = offset || 0

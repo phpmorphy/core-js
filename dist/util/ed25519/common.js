@@ -55,6 +55,7 @@ function reduce (r) {
 /**
  * @param {number[]} r
  * @param {number[]} x
+ * @returns {number[]}
  * @private
  */
 function modL (r, x) {
@@ -73,6 +74,12 @@ function modL (r, x) {
   }
   return modLSub(r, x)
 }
+/**
+ * @param {number[]} r
+ * @param {number[]} x
+ * @returns {number[]}
+ * @private
+ */
 function modLSub (r, x) {
   let carry = 0
   for (let j = 0; j < 32; j++) {

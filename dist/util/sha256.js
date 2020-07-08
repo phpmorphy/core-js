@@ -60,6 +60,7 @@ function sha256 (message) {
 /**
  * @param {number[]|Uint8Array|Buffer} message
  * @returns {number[][]}
+ * @private
  */
 function sha256PreProcess (message) {
   const bytes = []
@@ -83,6 +84,7 @@ function sha256PreProcess (message) {
 /**
  * @param {number[]} h
  * @param {number[]} w
+ * @private
  */
 function sha256Block (h, w) {
   const a = []
@@ -113,6 +115,7 @@ function sha256Block (h, w) {
  * @param {number} n
  * @param {number} i
  * @returns {number}
+ * @private
  */
 function rotr (n, i) {
   return (n >>> i) | (n << (32 - i))

@@ -67,6 +67,7 @@ function prefixToVersion (prefix) {
 /**
  * @param {number[]} chars
  * @throws {Error}
+ * @private
  */
 function checkChars (chars) {
   for (const chr of chars) {
