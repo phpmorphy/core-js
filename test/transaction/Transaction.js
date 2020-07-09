@@ -1,4 +1,6 @@
-const { Transaction, Address, SecretKey } = require('../../dist/index.js')
+const Transaction = require('../../dist/index.js').Transaction
+const Address = require('../../dist/index.js').Address
+const SecretKey = require('../../dist/index.js').SecretKey
 const assert = require('chai').assert
 
 describe('Transaction', function () {

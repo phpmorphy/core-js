@@ -1,4 +1,6 @@
-const { Address, SecretKey, PublicKey } = require('../../dist/index.js')
+const Address = require('../../dist/index.js').Address
+const SecretKey = require('../../dist/index.js').SecretKey
+const PublicKey = require('../../dist/index.js').PublicKey
 const assert = require('chai').assert
 
 describe('Address', function () {
