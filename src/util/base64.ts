@@ -63,8 +63,8 @@ function base64Decode (base64: string): number[] {
  * @internal
  */
 function checkBase64Alphabet (chars: string): void {
-  for (const chr of chars) {
-    if (base64Alphabet.indexOf(chr) === -1) {
+  for (let i = 0, l = chars.length; i < l; i++) {
+    if (base64Alphabet.indexOf(chars[i]) === -1) {
       throw new Error('base64: invalid character')
     }
   }

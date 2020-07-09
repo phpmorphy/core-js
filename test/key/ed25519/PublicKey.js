@@ -1,18 +1,18 @@
-const umi = require('../../../dist/index.js')
+const PublicKey = require('../../../dist/index.js').PublicKey
 const assert = require('chai').assert
 
 describe('PublicKey', function () {
   describe('new PublicKey()', function () {
     it('ошибка если некорректная длина', function () {
       assert.throws(function () {
-        return new umi.PublicKey([0, 1, 2])
+        return new PublicKey([0, 1, 2])
       }, Error)
     })
   })
 
   describe('#verifySignature()', function () {
     it('ошибка если некорректная длина signature', function () {
-      const pub = new umi.PublicKey(new Uint8Array(32))
+      const pub = new PublicKey(new Uint8Array(32))
       assert.throws(function () {
         pub.verifySignature([0, 1, 2], [0, 1])
       }, Error)
@@ -21,7 +21,7 @@ describe('PublicKey', function () {
     describe('подпись', function () {
       const tests = [
         {
-          desc: 'валидная',
+          desc: 'корректная',
           key: [
             160, 62, 194, 204, 204, 104, 221, 70, 35, 94, 15, 212, 70, 182, 79, 150,
             227, 146, 58, 48, 27, 205, 133, 113, 33, 112, 242, 56, 217, 81, 230, 146
@@ -41,7 +41,7 @@ describe('PublicKey', function () {
           exp: true
         },
         {
-          desc: 'невалидная',
+          desc: 'некорректная',
           key: [
             244, 186, 139, 82, 99, 250, 152, 226, 27, 252, 62, 9, 75, 171, 115, 195,
             95, 116, 96, 227, 166, 67, 238, 71, 174, 60, 16, 179, 219, 108, 110, 11
@@ -65,7 +65,7 @@ describe('PublicKey', function () {
 
       tests.forEach(function (test) {
         it(test.desc, function () {
-          const pub = new umi.PublicKey(test.key)
+          const pub = new PublicKey(test.key)
           const act = pub.verifySignature(test.sig, test.msg)
           assert.equal(test.exp, act)
         })

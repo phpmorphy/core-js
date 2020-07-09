@@ -64,14 +64,16 @@ function sha256 (message) {
  */
 function sha256PreProcess (message) {
   const bytes = []
-  for (let i = 0, l = message.length + 8 + (64 - ((message.length + 8) % 64)); i < l; i++) {
+  let i
+  let l
+  for (i = 0, l = message.length + 8 + (64 - ((message.length + 8) % 64)); i < l; i++) {
     bytes[i] = message[i] || 0
   }
   bytes[message.length] = 0x80
   bytes[bytes.length - 2] = ((message.length * 8) >>> 8) & 0xff
   bytes[bytes.length - 1] = (message.length * 8) & 0xff
   const chunks = []
-  for (let i = 0, l = bytes.length; i < l; i += 64) {
+  for (i = 0, l = bytes.length; i < l; i += 64) {
     const chunk = []
     for (let j = 0; j < 64; j += 4) {
       let n = i + j

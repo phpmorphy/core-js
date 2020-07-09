@@ -24,7 +24,7 @@ sed -i -e '/^import/d' -e '/^export {/d' -e '/^\/\//d' "$(pwd)/tmp/index.ts"
 # compile TypeScript
 tsc
 tsc --module es2015 --target es2015 --outDir "$(pwd)/tmp" "$(pwd)/tmp/index.ts"
-tsc --module es2015 --target es5 --outDir "$(pwd)/tmp/es5" "$(pwd)/tmp/index.ts"
+tsc --module es2015 --target es3 --outDir "$(pwd)/tmp/es5" "$(pwd)/tmp/index.ts"
 
 # fix codestyle (4 spaces to 2 spaces)
 sed -i -e 's/^/~/' -e ': r' -e 's/^\( *\)~    /\1  ~/' -e 't r' -e 's/~//' "$(pwd)/tmp/index.js"

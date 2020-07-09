@@ -82,15 +82,16 @@ function modL (r, x) {
  */
 function modLSub (r, x) {
   let carry = 0
-  for (let j = 0; j < 32; j++) {
-    x[j] += carry - (x[31] >> 4) * L[j]
-    carry = x[j] >> 8
-    x[j] &= 255
+  let i
+  for (i = 0; i < 32; i++) {
+    x[i] += carry - (x[31] >> 4) * L[i]
+    carry = x[i] >> 8
+    x[i] &= 255
   }
-  for (let j = 0; j < 32; j++) {
-    x[j] -= carry * L[j]
+  for (i = 0; i < 32; i++) {
+    x[i] -= carry * L[i]
   }
-  for (let i = 0; i < 32; i++) {
+  for (i = 0; i < 32; i++) {
     x[i + 1] += x[i] >> 8
     r[i] = x[i] & 255
   }
@@ -179,12 +180,13 @@ function fnA (o, a, b) {
  */
 function fnM (o, a, b) {
   const t = array.arrayNew(31)
-  for (let i = 0; i < 16; i++) {
+  let i
+  for (i = 0; i < 16; i++) {
     for (let j = 0; j < 16; j++) {
       t[i + j] += a[i] * b[j]
     }
   }
-  for (let i = 0; i < 15; i++) {
+  for (i = 0; i < 15; i++) {
     t[i] += 38 * t[i + 16]
   }
   array.arraySet(o, t, 0, 16)
@@ -295,9 +297,10 @@ function pack25519 (o, n) {
   car25519(t)
   car25519(t)
   car25519(t)
+  let i
   for (let j = 0; j < 2; j++) {
     m[0] = t[0] - 0xffed
-    for (let i = 1; i < 15; i++) {
+    for (i = 1; i < 15; i++) {
       m[i] = t[i] - 0xffff - ((m[i - 1] >> 16) & 1)
       m[i - 1] &= 0xffff
     }
@@ -306,7 +309,7 @@ function pack25519 (o, n) {
     m[14] &= 0xffff
     sel25519(t, m, 1 - b)
   }
-  for (let i = 0; i < 16; i++) {
+  for (i = 0; i < 16; i++) {
     o[2 * i] = t[i] & 0xff
     o[2 * i + 1] = t[i] >> 8
   }

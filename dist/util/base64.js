@@ -62,8 +62,8 @@ function base64Decode (base64) {
  * @private
  */
 function checkBase64Alphabet (chars) {
-  for (const chr of chars) {
-    if (base64Alphabet.indexOf(chr) === -1) {
+  for (let i = 0, l = chars.length; i < l; i++) {
+    if (base64Alphabet.indexOf(chars[i]) === -1) {
       throw new Error('base64: invalid character')
     }
   }

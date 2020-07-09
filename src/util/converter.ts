@@ -79,8 +79,8 @@ function prefixToVersion (prefix: string): number {
  * @internal
  */
 function checkChars (chars: number[]): void {
-  for (const chr of chars) {
-    if (chr < 1 || chr > 26) {
+  for (let i = 0, l = chars.length; i < l; i++) {
+    if (chars[i] < 1 || chars[i] > 26) {
       throw new Error('bech32: incorrect prefix character')
     }
   }

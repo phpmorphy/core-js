@@ -35,14 +35,14 @@ export class Address {
    * @type {number}
    * @constant
    */
-  static get Genesis (): number { return 0 }
+  static Genesis: number = 0
 
   /**
    * Версия Umi-адреса.
    * @type {number}
    * @constant
    */
-  static get Umi (): number { return 21929 }
+  static Umi: number = 21929
 
   /**
    * Адрес в бинарном виде, длина 34 байта.
@@ -52,41 +52,16 @@ export class Address {
    */
   private readonly _bytes: number[] = arrayNew(34)
 
-  /**
-   * @param {number[]|Uint8Array|Buffer} [bytes] Адрес в бинарном виде, длина 34 байта.
-   * @throws {Error}
-   */
-  constructor (bytes?: number[] | Uint8Array | Buffer) {
-    if (bytes === undefined) {
-      this.setVersion(Address.Umi)
-    } else {
-      if (bytes.length !== 34) {
-        throw new Error('bytes length must be 34 bytes')
-      }
-      arraySet(this._bytes, bytes)
-    }
-  }
-
-  /**
-   * Адрес в бинарном виде, длина 34 байта.
-   * @type {number[]}
-   * @readonly
-   */
-  get bytes (): number[] {
-    return this._bytes.slice(0)
+  constructor () {
+    this.setVersion(Address.Umi)
   }
 
   /**
    * Версия адреса, префикс в числовом виде.
-   * @type {number}
+   * @returns {number}
    */
-  get version (): number {
+  getVersion (): number {
     return bytesToUint16(this._bytes.slice(0, 2))
-  }
-
-  set version (version: number) {
-    versionToPrefix(version) // validation
-    arraySet(this._bytes, uint16ToBytes(version))
   }
 
   /**
@@ -95,24 +70,18 @@ export class Address {
    * @returns {Address}
    * @throws {Error}
    */
-  setVersion (version: number): this {
-    this.version = version
+  setVersion (version: number) {
+    versionToPrefix(version) // validation
+    arraySet(this._bytes, uint16ToBytes(version))
     return this
   }
 
   /**
    * Публичный ключ.
-   * @type {PublicKey}
+   * @returns {PublicKey}
    */
-  get publicKey (): PublicKey {
+  getPublicKey (): PublicKey {
     return new PublicKey(this._bytes.slice(2))
-  }
-
-  set publicKey (publicKey: PublicKey) {
-    if (!(publicKey instanceof PublicKey)) {
-      throw new Error('publicKey type must be PublicKey')
-    }
-    arraySet(this._bytes, publicKey.bytes, 2)
   }
 
   /**
@@ -122,20 +91,19 @@ export class Address {
    * @throws {Error}
    */
   setPublicKey (publicKey: PublicKey): this {
-    this.publicKey = publicKey
+    if (!(publicKey instanceof PublicKey)) {
+      throw new Error('publicKey type must be PublicKey')
+    }
+    arraySet(this._bytes, publicKey.toBytes(), 2)
     return this
   }
 
   /**
    * Префикс адреса, три символа латиницы в нижнем регистре.
-   * @type {string}
+   * @returns {string}
    */
-  get prefix (): string {
-    return versionToPrefix(this.version)
-  }
-
-  set prefix (prefix: string) {
-    this.version = prefixToVersion(prefix)
+  getPrefix (): string {
+    return versionToPrefix(this.getVersion())
   }
 
   /**
@@ -145,31 +113,37 @@ export class Address {
    * @throws {Error}
    */
   setPrefix (prefix: string): this {
-    this.prefix = prefix
-    return this
+    return this.setVersion(prefixToVersion(prefix))
   }
 
   /**
    * Адрес в формате Bech32, длина 62 символа.
-   * @type {string}
+   * @returns {string}
    */
-  get bech32 (): string {
+  toBech32 (): string {
     return bech32Encode(this._bytes)
   }
 
-  set bech32 (bech32: string) {
-    arraySet(this._bytes, bech32Decode(bech32))
+  /**
+   * Адрес в бинарном виде, длина 34 байта.
+   * @returns {number[]}
+   */
+  toBytes (): number[] {
+    return this._bytes.slice(0)
   }
 
   /**
-   * Устанавливает адрес в формате Bech32.
-   * @param {string} bech32 Адрес в формате Bech32, длина 62 символа.
+   * @param {number[]|Uint8Array|Buffer} bytes
    * @returns {Address}
    * @throws {Error}
    */
-  setBech32 (bech32: string): this {
-    this.bech32 = bech32
-    return this
+  static fromBytes (bytes: number[] | Uint8Array | Buffer): Address {
+    if (bytes.length !== 34) {
+      throw new Error('bytes length must be 34 bytes')
+    }
+    const adr = new Address()
+    arraySet(adr._bytes, bytes)
+    return adr
   }
 
   /**
@@ -179,7 +153,9 @@ export class Address {
    * @throws {Error}
    */
   static fromBech32 (bech32: string): Address {
-    return new Address().setBech32(bech32)
+    const adr = new Address()
+    arraySet(adr._bytes, bech32Decode(bech32))
+    return adr
   }
 
   /**
@@ -188,6 +164,6 @@ export class Address {
    * @returns {Address}
    */
   static fromKey (key: PublicKey | SecretKey): Address {
-    return new Address().setPublicKey(key.publicKey)
+    return new Address().setPublicKey(key.getPublicKey())
   }
 }

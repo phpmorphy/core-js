@@ -156,8 +156,9 @@ function createChecksum (prefix: string, data: string): string {
 function polyMod (values: number[] | Uint8Array | Buffer): number {
   const gen = [0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3]
   let chk = 1
-  for (let i = 0; i < values.length; i++) {
-    const top = chk >> 25
+  let top
+  for (let i = 0, l = values.length; i < l; i++) {
+    top = chk >> 25
     chk = (chk & 0x1ffffff) << 5 ^ values[i]
 
     for (let j = 0; j < 5; j++) {
@@ -196,8 +197,8 @@ function prefixExpand (prefix: string): number[] {
  */
 function strToBytes (str: string): number[] {
   const bytes: number[] = []
-  for (const chr of str) {
-    bytes.push(bech32Alphabet.indexOf(chr))
+  for (let i = 0, l = str.length; i < l; i++) {
+    bytes.push(bech32Alphabet.indexOf(str[i]))
   }
 
   return bytes
@@ -230,8 +231,8 @@ function verifyChecksum (prefix: string, data: string): void {
  * @internal
  */
 function checkAlphabet (chars: string): void {
-  for (const chr of chars) {
-    if (bech32Alphabet.indexOf(chr) === -1) {
+  for (let i = 0, l = chars.length; i < l; i++) {
+    if (bech32Alphabet.indexOf(chars[i]) === -1) {
       throw new Error('bech32: invalid character')
     }
   }

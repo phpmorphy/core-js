@@ -73,9 +73,11 @@ function sha256 (message: number[] | Uint8Array | Buffer): number[] {
  */
 function sha256PreProcess (message: number[] | Uint8Array | Buffer): number[][] {
   const bytes: number[] = []
+  let i
+  let l
 
   // Length a multiple of 512 bits
-  for (let i = 0, l = message.length + 8 + (64 - ((message.length + 8) % 64)); i < l; i++) {
+  for (i = 0, l = message.length + 8 + (64 - ((message.length + 8) % 64)); i < l; i++) {
     bytes[i] = message[i] || 0
   }
 
@@ -86,7 +88,7 @@ function sha256PreProcess (message: number[] | Uint8Array | Buffer): number[][] 
 
   const chunks: number[][] = []
 
-  for (let i = 0, l = bytes.length; i < l; i += 64) {
+  for (i = 0, l = bytes.length; i < l; i += 64) {
     const chunk: number[] = []
     for (let j = 0; j < 64; j += 4) {
       let n = i + j

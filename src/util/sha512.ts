@@ -84,9 +84,11 @@ function sha512 (message: number[] | Uint8Array | Buffer): number[] {
  */
 function sha512PreProcess (message: number[] | Uint8Array | Buffer): [number, number][][] {
   const bytez: number[] = []
+  let i
+  let l
 
   // Length a multiple of 1024 bits
-  for (let i = 0, l = message.length + 16 + (128 - ((message.length + 16) % 128)); i < l; i++) {
+  for (i = 0, l = message.length + 16 + (128 - ((message.length + 16) % 128)); i < l; i++) {
     bytez[i] = message[i] || 0
   }
 
@@ -97,7 +99,7 @@ function sha512PreProcess (message: number[] | Uint8Array | Buffer): [number, nu
 
   const chunks: [number, number][][] = []
 
-  for (let i = 0, l = bytez.length; i < l; i += 128) {
+  for (i = 0, l = bytez.length; i < l; i += 128) {
     const chunk: [number, number][] = []
     for (let j = 0; j < 128; j += 8) {
       let n = i + j

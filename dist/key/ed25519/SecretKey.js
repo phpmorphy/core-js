@@ -53,19 +53,17 @@ class SecretKey {
 
   /**
    * Приватный ключ в бинарном виде. В формате libsodium, 64 байта (512 бит).
-   * @type {number[]}
-   * @readonly
+   * @returns {number[]}
    */
-  get bytes () {
+  toBytes () {
     return this._bytes.slice(0)
   }
 
   /**
    * Публичный ключ, соответствующий приватному ключу.
-   * @type {PublicKey}
-   * @readonly
+   * @returns {PublicKey}
    */
-  get publicKey () {
+  getPublicKey () {
     return new PublicKey.PublicKey(this._bytes.slice(32, 64))
   }
 

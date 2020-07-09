@@ -1,18 +1,18 @@
-const umi = require('../../../dist/index.js')
+const SecretKey = require('../../../dist/index.js').SecretKey
 const assert = require('chai').assert
 
 describe('SecretKey', function () {
   describe('new SecretKey()', function () {
     it('ошибка если некорректная длина', function () {
       assert.throws(function () {
-        return new umi.SecretKey([0, 1, 2])
+        return new SecretKey([0, 1, 2])
       }, Error)
     })
 
     it('bytes', function () {
       const expected = new Uint8Array(64)
       expected[1] = 255
-      const actual = new Uint8Array(new umi.SecretKey(expected).bytes)
+      const actual = new Uint8Array(new SecretKey(expected).toBytes())
       assert.deepEqual(actual, expected)
     })
   })
@@ -72,7 +72,7 @@ describe('SecretKey', function () {
 
     tests.forEach(function (test) {
       it(test.desc, function () {
-        const actual = umi.SecretKey.fromSeed(test.seed).publicKey.bytes
+        const actual = SecretKey.fromSeed(test.seed).getPublicKey().toBytes()
         assert.deepEqual(actual, test.pub)
       })
     })
@@ -110,7 +110,7 @@ describe('SecretKey', function () {
 
     tests.forEach(function (test) {
       it(test.desc, function () {
-        const actual = new umi.SecretKey(test.key).sign(test.msg)
+        const actual = new SecretKey(test.key).sign(test.msg)
         assert.deepEqual(actual, test.sig)
       })
     })

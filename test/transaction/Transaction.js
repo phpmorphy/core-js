@@ -1,7 +1,5 @@
-if (typeof window === 'undefined') {
-  var umi = require('../../dist/index.js')
-  var assert = require('chai').assert
-}
+const { Transaction, Address, SecretKey } = require('../../dist/index.js')
+const assert = require('chai').assert
 
 describe('Transaction', function () {
   describe('константы', function () {
@@ -18,7 +16,7 @@ describe('Transaction', function () {
 
     tests.forEach(function (test) {
       it(test.args, function () {
-        const actual = umi.Transaction[test.args]
+        const actual = Transaction[test.args]
         assert.strictEqual(actual, test.expected)
       })
     })
@@ -27,46 +25,46 @@ describe('Transaction', function () {
   describe('new Transaction()', function () {
     it('ошибка если некорректная длина', function () {
       assert.throws(function () {
-        return new umi.Transaction([0, 1, 2])
+        return Transaction.fromBytes([0, 1, 2])
       }, Error)
     })
 
     describe('создает транзакцию', function () {
       it('если вызвать без параметров', function () {
         const expected = new Uint8Array(150)
-        const actual = new Uint8Array(new umi.Transaction().bytes)
+        const actual = new Uint8Array(new Transaction().toBytes())
         assert.deepEqual(actual, expected)
       })
 
       it('передать Uint8Array длиной 150 байт', function () {
         const expected = new Uint8Array(150)
         expected[0] = 7
-        const actual = new Uint8Array(new umi.Transaction(expected).bytes)
+        const actual = new Uint8Array(Transaction.fromBytes(expected).toBytes())
         assert.deepEqual(actual, expected)
       })
     })
   })
 
-  it('hash', function () {
+  it('#getHash()', function () {
     const bytes = new Uint8Array(150)
     const expected = [
       29, 131, 81, 139, 137, 123, 20, 226, 148, 57, 144, 239, 246, 85, 131,
       130, 70, 204, 2, 7, 167, 201, 90, 95, 61, 252, 204, 46, 57, 95, 139, 191]
-    const actual = new umi.Transaction(bytes).hash
+    const actual = Transaction.fromBytes(bytes).getHash()
 
     assert.deepEqual(actual, expected)
   })
 
   describe('version', function () {
     it('устанавливает версию', function () {
-      const expected = umi.Transaction.CreateTransitAddress
-      const actual = new umi.Transaction().setVersion(expected).version
+      const expected = Transaction.CreateTransitAddress
+      const actual = new Transaction().setVersion(expected).getVersion()
       assert.strictEqual(actual, expected)
     })
 
     it('возвращает ошибку для некорректной версии', function () {
       assert.throws(function () {
-        return new umi.Transaction().setVersion(255)
+        return new Transaction().setVersion(255)
       }, Error)
     })
   })
@@ -74,53 +72,53 @@ describe('Transaction', function () {
   describe('sender', function () {
     it('ошибка если некорректный тип', function () {
       assert.throws(function () {
-        return new umi.Transaction().setSender([0, 1, 2])
+        return new Transaction().setSender([0, 1, 2])
       }, Error)
     })
 
     it('устанавливает отправителя', function () {
-      const expected = new umi.Address().setPrefix('zzz')
-      const actual = new umi.Transaction().setSender(expected).sender
-      assert.deepEqual(actual, expected)
+      const expected = new Address().setPrefix('zzz')
+      const actual = new Transaction().setSender(expected).getSender()
+      assert.deepEqual(actual.toBytes(), expected.toBytes())
     })
   })
 
   describe('recipient', function () {
     it('ошибка если некорректный тип', function () {
       assert.throws(function () {
-        return new umi.Transaction().setRecipient([0, 1, 2])
+        return new Transaction().setRecipient([0, 1, 2])
       }, Error)
     })
 
     it('устанавливает получателя', function () {
-      const expected = new umi.Address().setPrefix('yyy')
-      const actual = new umi.Transaction().setRecipient(expected).recipient
+      const expected = new Address().setPrefix('yyy')
+      const actual = new Transaction().setRecipient(expected).getRecipient()
       assert.deepEqual(actual, expected)
     })
   })
 
   it('value', function () {
     const expected = 9007199254740991
-    const actual = new umi.Transaction().setValue(expected).value
+    const actual = new Transaction().setValue(expected).getValue()
     assert.strictEqual(actual, expected)
   })
 
   it('prefix', function () {
     const expected = 'lll'
-    const actual = new umi.Transaction().setPrefix(expected).prefix
+    const actual = new Transaction().setPrefix(expected).getPrefix()
     assert.strictEqual(actual, expected)
   })
 
   describe('name', function () {
     it('устанваливает имя', function () {
       const expected = 'ab-Пр-小篆-😭😰🥰'
-      const actual = new umi.Transaction().setName(expected).name
+      const actual = new Transaction().setName(expected).getName()
       assert.strictEqual(actual, expected)
     })
 
     it('ошибка если некорректная длина', function () {
       assert.throws(function () {
-        return new umi.Transaction().setName('a'.repeat(36))
+        return new Transaction().setName('a'.repeat(36))
       }, Error)
     })
 
@@ -128,26 +126,26 @@ describe('Transaction', function () {
       const bytes = new Uint8Array(150)
       bytes[41] = 36
       assert.throws(function () {
-        return new umi.Transaction(bytes).name
+        return Transaction.fromBytes(bytes).getName()
       }, Error)
     })
   })
 
   it('profitPercent', function () {
     const expected = 321
-    const actual = new umi.Transaction().setProfitPercent(expected).profitPercent
+    const actual = new Transaction().setProfitPercent(expected).getProfitPercent()
     assert.strictEqual(actual, expected)
   })
 
   it('feePercent', function () {
     const expected = 1234
-    const actual = new umi.Transaction().setFeePercent(expected).feePercent
+    const actual = new Transaction().setFeePercent(expected).getFeePercent()
     assert.strictEqual(actual, expected)
   })
 
   it('nonce', function () {
     const expected = 9007199254740991
-    const actual = new umi.Transaction().setNonce(expected).nonce
+    const actual = new Transaction().setNonce(expected).getNonce()
     assert.strictEqual(actual, expected)
   })
 
@@ -155,20 +153,20 @@ describe('Transaction', function () {
     const expected = '' +
       'AQQhBNO+JWxYyqg/hwCNNTf+OSi4FPLvb+CdCgDNCQp0z6EIQk7qqt8TASDt45OWqVpIpGN34agVA7EWGndxFuVsnIF0AB//////' +
       '//8CAAAAAAAAAH9el6Akogt7CM0d1L8VBf2n436itp8C/lrd+4aksXn+XqGWBSCVxRVJSrICcuhwaO/xRaYwr4xAUyu0/5MYVQsA'
-    const actual = umi.Transaction.fromBase64(expected).base64
+    const actual = Transaction.fromBase64(expected).toBase64()
     assert.strictEqual(actual, expected)
   })
 
   describe('.fromBase64()', function () {
     it('ошибка если некорректная длина', function () {
       assert.throws(function () {
-        return umi.Transaction.fromBase64('A'.repeat(199))
+        return Transaction.fromBase64('A'.repeat(199))
       }, Error)
     })
 
     it('ошибка если некорректные символы', function () {
       assert.throws(function () {
-        return umi.Transaction.fromBase64('('.repeat(200))
+        return Transaction.fromBase64('('.repeat(200))
       }, Error)
     })
   })
@@ -176,7 +174,7 @@ describe('Transaction', function () {
   describe('signature', function () {
     it('ошибка если некорректная длина', function () {
       assert.throws(function () {
-        return new umi.Transaction().setSignature([1, 2, 3])
+        return new Transaction().setSignature([1, 2, 3])
       }, Error)
     })
   })
@@ -184,13 +182,13 @@ describe('Transaction', function () {
   describe('sign()', function () {
     it('ошибка если некорректный тип', function () {
       assert.throws(function () {
-        return new umi.Transaction().sign({})
+        return new Transaction().sign({})
       }, Error)
     })
 
     it('verify()', function () {
-      const key = umi.SecretKey.fromSeed([1, 2, 3])
-      const tx = new umi.Transaction().setSender(umi.Address.fromKey(key)).sign(key)
+      const key = SecretKey.fromSeed([1, 2, 3])
+      const tx = new Transaction().setSender(Address.fromKey(key)).sign(key)
       assert.isTrue(tx.verify())
     })
   })

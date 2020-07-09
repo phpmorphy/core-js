@@ -50,19 +50,17 @@ class PublicKey {
 
   /**
    * Публичный ключ в формате libsodium, 32 байта (256 бит).
-   * @type {number[]}
-   * @readonly
+   * @returns {number[]}
    */
-  get bytes () {
+  toBytes () {
     return this._bytes.slice(0)
   }
 
   /**
-   * Публичный ключ
-   * @type {PublicKey}
-   * @readonly
+   * Публичный ключ.
+   * @returns {PublicKey}
    */
-  get publicKey () {
+  getPublicKey () {
     return this
   }
 

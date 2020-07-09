@@ -178,19 +178,20 @@ function unpack25519 (o: number[], n: number[] | Uint8Array | Buffer): void {
  */
 function pow2523 (o: number[], i: number[]): void {
   const c: number[] = []
+  let a
 
-  for (let a = 0; a < 16; a++) {
+  for (a = 0; a < 16; a++) {
     c[a] = i[a]
   }
 
-  for (let a = 250; a >= 0; a--) {
+  for (a = 250; a >= 0; a--) {
     fnM(c, c, c)
     if (a !== 1) {
       fnM(c, c, i)
     }
   }
 
-  for (let a = 0; a < 16; a++) {
+  for (a = 0; a < 16; a++) {
     o[a] = c[a]
   }
 }

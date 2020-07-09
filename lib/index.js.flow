@@ -6,18 +6,18 @@
  */
 
 declare export class Address {
-  Genesis: number;
-  Umi: number;
-  constructor(bytes?: number[] | Uint8Array | Buffer): this;
-  bytes: number[];
-  version: number;
+  static Genesis: number;
+  static Umi: number;
+  constructor(): this;
+  getVersion(): number;
   setVersion(version: number): this;
-  publicKey: PublicKey;
+  getPublicKey(): PublicKey;
   setPublicKey(publicKey: PublicKey): this;
-  prefix: string;
+  getPrefix(): string;
   setPrefix(prefix: string): this;
-  bech32: string;
-  setBech32(bech32: string): this;
+  toBech32(): string;
+  toBytes(): number[];
+  static fromBytes(bytes: number[] | Uint8Array | Buffer): Address;
   static fromBech32(bech32: string): Address;
   static fromKey(key: PublicKey | SecretKey): Address;
 }
@@ -25,8 +25,8 @@ declare export class Block {}
 declare export class BlockHeader {}
 declare export class PublicKey {
   constructor(bytes: number[] | Uint8Array | Buffer): this;
-  bytes: number[];
-  publicKey: this;
+  toBytes(): number[];
+  getPublicKey(): this;
   verifySignature(
     signature: number[] | Uint8Array | Buffer,
     message: number[] | Uint8Array | Buffer
@@ -34,48 +34,45 @@ declare export class PublicKey {
 }
 declare export class SecretKey {
   constructor(bytes: number[] | Uint8Array | Buffer): this;
-  bytes: number[];
-  publicKey: PublicKey;
+  toBytes(): number[];
+  getPublicKey(): PublicKey;
   sign(message: number[] | Uint8Array | Buffer): number[];
   static fromSeed(seed: number[] | Uint8Array | Buffer): SecretKey;
 }
-declare class AbstractTransaction {
-  Genesis: number;
-  Basic: number;
-  CreateStructure: number;
-  UpdateStructure: number;
-  UpdateProfitAddress: number;
-  UpdateFeeAddress: number;
-  CreateTransitAddress: number;
-  DeleteTransitAddress: number;
-  constructor(bytes?: number[] | Uint8Array | Buffer): this;
-  bytes: number[];
-  base64: string;
-  hash: number[];
-  version: number;
+declare export class Transaction {
+  static Genesis: number;
+  static Basic: number;
+  static CreateStructure: number;
+  static UpdateStructure: number;
+  static UpdateProfitAddress: number;
+  static UpdateFeeAddress: number;
+  static CreateTransitAddress: number;
+  static DeleteTransitAddress: number;
+  toBytes(): number[];
+  toBase64(): string;
+  getHash(): number[];
+  getVersion(): number;
   setVersion(version: number): this;
-  sender: Address;
+  getSender(): Address;
   setSender(address: Address): this;
-  recipient: Address;
+  getRecipient(): Address;
   setRecipient(address: Address): this;
-  value: number;
+  getValue(): number;
   setValue(value: number): this;
-  nonce: number;
+  getNonce(): number;
   setNonce(nonce: number): this;
-  signature: number[] | Uint8Array | Buffer;
+  getSignature(): number[] | Uint8Array | Buffer;
   setSignature(signature: number[] | Uint8Array | Buffer): this;
   sign(secretKey: SecretKey): this;
   verify(): boolean;
-}
-declare export class Transaction mixins AbstractTransaction {
-  prefix: string;
+  getPrefix(): string;
   setPrefix(prefix: string): this;
-  name: string;
+  getName(): string;
   setName(name: string): this;
-  profitPercent: number;
+  getProfitPercent(): number;
   setProfitPercent(percent: number): this;
-  feePercent: number;
+  getFeePercent(): number;
   setFeePercent(percent: number): this;
   static fromBase64(base64: string): Transaction;
+  static fromBytes(bytes: number[] | Uint8Array | Buffer): Transaction;
 }
-declare export {};

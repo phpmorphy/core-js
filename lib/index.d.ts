@@ -9,30 +9,19 @@ export declare class Address {
      * @type {number}
      * @constant
      */
-    static get Genesis(): number;
+    static Genesis: number;
     /**
      * Версия Umi-адреса.
      * @type {number}
      * @constant
      */
-    static get Umi(): number;
-    /**
-     * @param {number[]|Uint8Array|Buffer} [bytes] Адрес в бинарном виде, длина 34 байта.
-     * @throws {Error}
-     */
-    constructor(bytes?: number[] | Uint8Array | Buffer);
-    /**
-     * Адрес в бинарном виде, длина 34 байта.
-     * @type {number[]}
-     * @readonly
-     */
-    get bytes(): number[];
+    static Umi: number;
+    constructor();
     /**
      * Версия адреса, префикс в числовом виде.
-     * @type {number}
+     * @returns {number}
      */
-    get version(): number;
-    set version(version: number);
+    getVersion(): number;
     /**
      * Устанавливает версию адреса и возвращает this.
      * @param {number} version Версия адреса.
@@ -42,10 +31,9 @@ export declare class Address {
     setVersion(version: number): this;
     /**
      * Публичный ключ.
-     * @type {PublicKey}
+     * @returns {PublicKey}
      */
-    get publicKey(): PublicKey;
-    set publicKey(publicKey: PublicKey);
+    getPublicKey(): PublicKey;
     /**
      * Устанавливает публичный ключи и возвращает this.
      * @param {PublicKey} publicKey Публичный ключ.
@@ -55,10 +43,9 @@ export declare class Address {
     setPublicKey(publicKey: PublicKey): this;
     /**
      * Префикс адреса, три символа латиницы в нижнем регистре.
-     * @type {string}
+     * @returns {string}
      */
-    get prefix(): string;
-    set prefix(prefix: string);
+    getPrefix(): string;
     /**
      * Устанавливает префикс адреса и возвращает this.
      * @param {string} prefix Префикс адреса, три символа латиницы в нижнем регистре.
@@ -68,17 +55,20 @@ export declare class Address {
     setPrefix(prefix: string): this;
     /**
      * Адрес в формате Bech32, длина 62 символа.
-     * @type {string}
+     * @returns {string}
      */
-    get bech32(): string;
-    set bech32(bech32: string);
+    toBech32(): string;
     /**
-     * Устанавливает адрес в формате Bech32.
-     * @param {string} bech32 Адрес в формате Bech32, длина 62 символа.
+     * Адрес в бинарном виде, длина 34 байта.
+     * @returns {number[]}
+     */
+    toBytes(): number[];
+    /**
+     * @param {number[]|Uint8Array|Buffer} bytes
      * @returns {Address}
      * @throws {Error}
      */
-    setBech32(bech32: string): this;
+    static fromBytes(bytes: number[] | Uint8Array | Buffer): Address;
     /**
      * Статический метод, создает объект из адреса в формате Bech32.
      * @param {string} bech32 Адрес в формате Bech32, длина 62 или 65 символов.
@@ -117,16 +107,14 @@ export declare class PublicKey {
     constructor(bytes: number[] | Uint8Array | Buffer);
     /**
      * Публичный ключ в формате libsodium, 32 байта (256 бит).
-     * @type {number[]}
-     * @readonly
+     * @returns {number[]}
      */
-    get bytes(): number[];
+    toBytes(): number[];
     /**
-     * Публичный ключ
-     * @type {PublicKey}
-     * @readonly
+     * Публичный ключ.
+     * @returns {PublicKey}
      */
-    get publicKey(): this;
+    getPublicKey(): this;
     /**
      * Проверяет цифровую подпись.
      * @param {number[]|Uint8Array|Buffer} signature Подпись, 64 байта.
@@ -154,16 +142,14 @@ export declare class SecretKey {
     constructor(bytes: number[] | Uint8Array | Buffer);
     /**
      * Приватный ключ в бинарном виде. В формате libsodium, 64 байта (512 бит).
-     * @type {number[]}
-     * @readonly
+     * @returns {number[]}
      */
-    get bytes(): number[];
+    toBytes(): number[];
     /**
      * Публичный ключ, соответствующий приватному ключу.
-     * @type {PublicKey}
-     * @readonly
+     * @returns {PublicKey}
      */
-    get publicKey(): PublicKey;
+    getPublicKey(): PublicKey;
     /**
      * Создает цифровую подпись сообщения.
      * @param {number[]|Uint8Array|Buffer} message Сообщение, которое необходимо подписать.
@@ -187,12 +173,12 @@ export declare class SecretKey {
     static fromSeed(seed: number[] | Uint8Array | Buffer): SecretKey;
 }
 /**
- * Базовый класс для работы с транзакциями.
+ * Класс для работы с транзакциями.
  * @class
- * @lends Transaction
- * @private
+ * @param {number[]|Uint8Array|Buffer} [bytes] Транзакция в бинарном виде, 150 байт.
+ * @throws {Error}
  */
-declare abstract class AbstractTransaction {
+export declare class Transaction {
     /**
      * Genesis-транзакция.
      * Может быть добавлена только в Genesis-блок.
@@ -210,7 +196,7 @@ declare abstract class AbstractTransaction {
      *   setValue(42).
      *   sign(secKey)
      */
-    static get Genesis(): number;
+    static Genesis: number;
     /**
      * Стандартная транзакция. Перевод монет из одного кошелька в другой.
      * @type {number}
@@ -226,7 +212,7 @@ declare abstract class AbstractTransaction {
      *   setValue(42).
      *   sign(secKey)
      */
-    static get Basic(): number;
+    static Basic: number;
     /**
      * Создание новой структуры.
      * @type {number}
@@ -243,7 +229,7 @@ declare abstract class AbstractTransaction {
      *   setFeePercent(0).
      *   sign(secKey)
      */
-    static get CreateStructure(): number;
+    static CreateStructure: number;
     /**
      * Обновление настроек существующей структуры.
      * @type {number}
@@ -260,7 +246,7 @@ declare abstract class AbstractTransaction {
      *   setFeePercent(2000).
      *   sign(secKey)
      */
-    static get UpdateStructure(): number;
+    static UpdateStructure: number;
     /**
      * Изменение адреса для начисления профита.
      * @type {number}
@@ -275,7 +261,7 @@ declare abstract class AbstractTransaction {
      *   setRecipient(newPrf).
      *   sign(secKey)
      */
-    static get UpdateProfitAddress(): number;
+    static UpdateProfitAddress: number;
     /**
      * Изменение адреса на который переводится комиссия.
      * @type {number}
@@ -290,7 +276,7 @@ declare abstract class AbstractTransaction {
      *   setRecipient(newFee).
      *   sign(secKey)
      */
-    static get UpdateFeeAddress(): number;
+    static UpdateFeeAddress: number;
     /**
      * Активация транзитного адреса.
      * @type {number}
@@ -305,7 +291,7 @@ declare abstract class AbstractTransaction {
      *   setRecipient(transit).
      *   sign(secKey)
      */
-    static get CreateTransitAddress(): number;
+    static CreateTransitAddress: number;
     /**
      * Деактивация транзитного адреса.
      * @type {number}
@@ -320,36 +306,27 @@ declare abstract class AbstractTransaction {
      *   setRecipient(transit).
      *   sign(secKey)
      */
-    static get DeleteTransitAddress(): number;
-    /**
-     * @param {number[]|Uint8Array|Buffer} [bytes] Транзакция в бинарном виде, 150 байт.
-     * @throws {Error}
-     * @private
-     */
-    protected constructor(bytes?: number[] | Uint8Array | Buffer);
+    static DeleteTransitAddress: number;
     /**
      * Транзакция в бинарном виде, 150 байт.
-     * @type {number[]}
-     * @readonly
+     * @returns {number[]}
      */
-    get bytes(): number[];
+    toBytes(): number[];
     /**
      * Транзакция в виде строки в формате Base64.
-     * @type {string}
-     * @readonly
+     * @returns {string}
      */
-    get base64(): string;
+    toBase64(): string;
     /**
      * Хэш транзакции, sha256 от всех 150 байт.
-     * @type {number[]}
-     * @readonly
+     * @returns {number[]}
      */
-    get hash(): number[];
+    getHash(): number[];
     /**
      * Версия (тип) транзакции.
      * Обязательное поле, необходимо задать сразу после создания новой транзакции.
      * Изменять тип транзакции, после того как он был задан, нельзя.
-     * @type {number}
+     * @returns {number}
      * @see Transaction.Genesis
      * @see Transaction.Basic
      * @see Transaction.CreateStructure
@@ -359,8 +336,7 @@ declare abstract class AbstractTransaction {
      * @see Transaction.CreateTransitAddress
      * @see Transaction.DeleteTransitAddress
      */
-    get version(): number;
-    set version(version: number);
+    getVersion(): number;
     /**
      * Устанавливает версию и возвращает this.
      * @param {number} version Версия адреса.
@@ -378,10 +354,9 @@ declare abstract class AbstractTransaction {
     setVersion(version: number): this;
     /**
      * Отправитель. Доступно для всех типов транзакций.
-     * @type {Address}
+     * @returns {Address}
      */
-    get sender(): Address;
-    set sender(address: Address);
+    getSender(): Address;
     /**
      * Устанавливает отправителя и возвращает this.
      * @param {Address} address Адрес получателя.
@@ -392,10 +367,9 @@ declare abstract class AbstractTransaction {
     /**
      * Получатель.
      * Недоступно для транзакций CreateStructure и UpdateStructure.
-     * @type {Address}
+     * @returns {Address}
      */
-    get recipient(): Address;
-    set recipient(address: Address);
+    getRecipient(): Address;
     /**
      * Устанавливает получателя и возвращает this.
      * Доступно для всех типов транзакций кроме CreateStructure и UpdateStructure.
@@ -408,10 +382,9 @@ declare abstract class AbstractTransaction {
      * Сумма перевода в UMI-центах, цело число в промежутке от 1 до 18446744073709551615.
      * Из-за ограничений JavaScript максимальное доступное значение 9007199254740991.
      * Доступно только для Genesis и Basic транзакций.
-     * @type {number}
+     * @returns {number}
      */
-    get value(): number;
-    set value(value: number);
+    getValue(): number;
     /**
      * Устанавливает сумму и возвращает this.
      * Принимает значения в промежутке от 1 до 18446744073709551615.
@@ -424,10 +397,9 @@ declare abstract class AbstractTransaction {
     /**
      * Nonce, целое число в промежутке от 0 до 18446744073709551615.
      * Генерируется автоматически при вызове sign().
-     * @type {number}
+     * @returns {number}
      */
-    get nonce(): number;
-    set nonce(nonce: number);
+    getNonce(): number;
     /**
      * Устанавливает nonce и возвращает this.
      * @param {number} nonce Nonce, целое число в промежутке от 0 до 18446744073709551615.
@@ -438,10 +410,9 @@ declare abstract class AbstractTransaction {
     /**
      * Цифровая подпись транзакции, длина 64 байта.
      * Генерируется автоматически при вызове sign().
-     * @type {number[]|Uint8Array|Buffer}
+     * @returns {number[]}
      */
-    get signature(): number[] | Uint8Array | Buffer;
-    set signature(signature: number[] | Uint8Array | Buffer);
+    getSignature(): number[] | Uint8Array | Buffer;
     /**
      * Устанавливает цифровую подпись и возвращает this.
      * @param {number[]|Uint8Array|Buffer} signature Подпись, длина 64 байта.
@@ -462,21 +433,13 @@ declare abstract class AbstractTransaction {
      * @throws {Error}
      */
     verify(): boolean;
-}
-/**
- * Класс для работы с транзакциями.
- * @class
- * @param {number[]|Uint8Array|Buffer} [bytes] Транзакция в бинарном виде, 150 байт.
- * @throws {Error}
- */
-export declare class Transaction extends AbstractTransaction {
     /**
      * Префикс адресов, принадлежащих структуре.
      * Доступно только для CreateStructure и UpdateStructure.
-     * @type {string}
+     * @returns {string}
+     * @returns {Error}
      */
-    get prefix(): string;
-    set prefix(prefix: string);
+    getPrefix(): string;
     /**
      * Устанавливает префикс и возвращает this.
      * Доступно только для CreateStructure и UpdateStructure.
@@ -488,10 +451,10 @@ export declare class Transaction extends AbstractTransaction {
     /**
      * Название структуры в кодировке UTF-8.
      * Доступно только для CreateStructure и UpdateStructure.
-     * @type {string}
+     * @returns {string}
+     * @throws {Error}
      */
-    get name(): string;
-    set name(name: string);
+    getName(): string;
     /**
      * Устанавливает название структуры.
      * Доступно только для CreateStructure и UpdateStructure.
@@ -504,10 +467,9 @@ export declare class Transaction extends AbstractTransaction {
      * Профита в сотых долях процента с шагом в 0.01%.
      * Принимает значения от 100 до 500 (соответственно от 1% до 5%).
      * Доступно только для CreateStructure и UpdateStructure.
-     * @type {number}
+     * @returns {number}
      */
-    get profitPercent(): number;
-    set profitPercent(percent: number);
+    getProfitPercent(): number;
     /**
      * Устанавливает процент профита и возвращает this.
      * Доступно только для CreateStructure и UpdateStructure.
@@ -521,10 +483,9 @@ export declare class Transaction extends AbstractTransaction {
      * Комиссия в сотых долях процента с шагом в 0.01%.
      * Принимает значения от 0 до 2000 (соответственно от 0% до 20%).
      * Доступно только для CreateStructure и UpdateStructure.
-     * @type {number}
+     * @returns {number}
      */
-    get feePercent(): number;
-    set feePercent(percent: number);
+    getFeePercent(): number;
     /**
      * Устанавливает размер комиссии и возвращает this.
      * Доступно только для CreateStructure и UpdateStructure.
@@ -540,5 +501,10 @@ export declare class Transaction extends AbstractTransaction {
      * @throws {Error}
      */
     static fromBase64(base64: string): Transaction;
+    /**
+     * @param {number[]|Uint8Array|Buffer} bytes
+     * @returns {Transaction}
+     * @throws {Error}
+     */
+    static fromBytes(bytes: number[] | Uint8Array | Buffer): Transaction;
 }
-export {};

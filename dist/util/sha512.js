@@ -76,14 +76,16 @@ function sha512 (message) {
  */
 function sha512PreProcess (message) {
   const bytez = []
-  for (let i = 0, l = message.length + 16 + (128 - ((message.length + 16) % 128)); i < l; i++) {
+  let i
+  let l
+  for (i = 0, l = message.length + 16 + (128 - ((message.length + 16) % 128)); i < l; i++) {
     bytez[i] = message[i] || 0
   }
   bytez[message.length] = 0x80
   bytez[bytez.length - 2] = ((message.length * 8) >>> 8) & 0xff
   bytez[bytez.length - 1] = (message.length * 8) & 0xff
   const chunks = []
-  for (let i = 0, l = bytez.length; i < l; i += 128) {
+  for (i = 0, l = bytez.length; i < l; i += 128) {
     const chunk = []
     for (let j = 0; j < 128; j += 8) {
       let n = i + j

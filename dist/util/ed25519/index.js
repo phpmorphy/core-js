@@ -169,16 +169,17 @@ function unpack25519 (o, n) {
  */
 function pow2523 (o, i) {
   const c = []
-  for (let a = 0; a < 16; a++) {
+  let a
+  for (a = 0; a < 16; a++) {
     c[a] = i[a]
   }
-  for (let a = 250; a >= 0; a--) {
+  for (a = 250; a >= 0; a--) {
     common.fnM(c, c, c)
     if (a !== 1) {
       common.fnM(c, c, i)
     }
   }
-  for (let a = 0; a < 16; a++) {
+  for (a = 0; a < 16; a++) {
     o[a] = c[a]
   }
 }

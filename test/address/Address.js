@@ -1,7 +1,5 @@
-if (typeof window === 'undefined') {
-  var umi = require('../../dist/index.js')
-  var assert = require('chai').assert
-}
+const { Address, SecretKey, PublicKey } = require('../../dist/index.js')
+const assert = require('chai').assert
 
 describe('Address', function () {
   describe('константы', function () {
@@ -12,16 +10,16 @@ describe('Address', function () {
 
     tests.forEach(function (test) {
       it(test.args, function () {
-        const actual = umi.Address[test.args]
+        const actual = Address[test.args]
         assert.strictEqual(actual, test.expected)
       })
     })
   })
 
-  describe('new Address()', function () {
+  describe('.fromBytes()', function () {
     it('ошибка если некорректная длина', function () {
       assert.throws(function () {
-        return new umi.Address([0, 1, 2])
+        return Address.fromBytes([0, 1, 2])
       }, Error)
     })
   })
@@ -53,7 +51,7 @@ describe('Address', function () {
 
       tests.forEach(function (test) {
         it(test.desc, function () {
-          const actual = umi.Address.fromBech32(test.args).bech32
+          const actual = Address.fromBech32(test.args).toBech32()
           assert.equal(test.args, actual)
         })
       })
@@ -103,56 +101,47 @@ describe('Address', function () {
       tests.forEach(function (test) {
         it(test.desc, function () {
           assert.throws(function () {
-            umi.Address.fromBech32(test.args)
+            Address.fromBech32(test.args)
           }, Error)
         })
       })
     })
   })
 
-  describe('setBech32()', function () {
-    it('адрес', function () {
-      const expected = 'aaa1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq48c9jj'
-      const actual = umi.Address.fromBech32(expected).bech32
-      assert.strictEqual(actual, expected)
-    })
-  })
-
   describe('fromKey()', function () {
     it('ошибка если некорректный тип', function () {
-      assert.throws(function () { umi.Address.fromKey({}) }, Error)
+      assert.throws(function () { Address.fromKey({}) }, Error)
     })
 
     it('из публичного ключа', function () {
-      const pubKey = new umi.PublicKey(new Uint8Array(32))
+      const pubKey = new PublicKey(new Uint8Array(32))
       const expected = 'umi1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqr5zcpj'
-      const actual = umi.Address.fromKey(pubKey).bech32
+      const actual = Address.fromKey(pubKey).toBech32()
 
       assert.strictEqual(actual, expected)
     })
 
     it('из секретного ключа', function () {
-      const secKey = umi.SecretKey.fromSeed(new Uint8Array(32))
+      const secKey = SecretKey.fromSeed(new Uint8Array(32))
       const expected = 'umi18d4z00xwk6jz6c4r4rgz5mcdwdjny9thrh3y8f36cpy2rz6emg5s6rxnf6'
-      const actual = umi.Address.fromKey(secKey).bech32
+      const actual = Address.fromKey(secKey).toBech32()
 
       assert.strictEqual(actual, expected)
     })
   })
 
-  describe('publicKey', function () {
+  describe('#setPublicKey()', function () {
     it('ошибка если некорректный тип', function () {
-      const adr = new umi.Address()
-      assert.throws(function () { adr.publicKey = {} }, Error)
+      assert.throws(function () { new Address().setPublicKey({}) }, Error)
     })
 
     it('публичный ключ', function () {
       const expected = new Uint8Array(32)
       expected[0] = 128
       expected[31] = 255
-      const pubKey = new umi.PublicKey(expected)
-      const actual = new Uint8Array(new umi.Address().setPublicKey(pubKey).publicKey.bytes)
-      assert.deepEqual(actual, expected)
+      const pubKey = new PublicKey(expected)
+      const actual = new Address().setPublicKey(pubKey).getPublicKey().toBytes()
+      assert.deepEqual(new Uint8Array(actual), expected)
     })
   })
 
@@ -186,8 +175,9 @@ describe('Address', function () {
 
       tests.forEach(function (test) {
         it(test.desc, function () {
-          const adr = new umi.Address()
-          assert.throws(function () { adr.version = test.args }, Error)
+          assert.throws(function () {
+            new Address().setVersion(test.args)
+          }, Error)
         })
       })
     })
@@ -203,7 +193,7 @@ describe('Address', function () {
 
       tests.forEach(function (test) {
         it(test.desc, function () {
-          const actual = new umi.Address().setVersion(test.args).version
+          const actual = new Address().setVersion(test.args).getVersion()
           assert.strictEqual(actual, test.expected)
         })
       })
@@ -226,8 +216,9 @@ describe('Address', function () {
 
       tests.forEach(function (test) {
         it(test.desc, function () {
-          const adr = new umi.Address()
-          assert.throws(function () { adr.prefix = test.args }, Error)
+          assert.throws(function () {
+            new Address().setPrefix(test.args)
+          }, Error)
         })
       })
     })
@@ -243,7 +234,7 @@ describe('Address', function () {
 
       tests.forEach(function (test) {
         it(test.desc, function () {
-          const actual = new umi.Address().setPrefix(test.args).prefix
+          const actual = new Address().setPrefix(test.args).getPrefix()
           assert.strictEqual(actual, test.expected)
         })
       })
