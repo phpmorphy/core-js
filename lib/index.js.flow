@@ -7,15 +7,15 @@
 
 declare export class Address {
   constructor(): this;
-  getPublicKey(): PublicKey;
-  setPublicKey(publicKey: PublicKey): Address;
+  static fromBech32(bech32: string): Address;
+  static fromBytes(bytes: ArrayLike<number>): Address;
+  static fromKey(key: PublicKey | SecretKey): Address;
   getPrefix(): string;
   setPrefix(prefix: string): Address;
+  getPublicKey(): PublicKey;
+  setPublicKey(publicKey: PublicKey): Address;
   toBech32(): string;
   toBytes(): number[];
-  static fromBytes(bytes: ArrayLike<number>): Address;
-  static fromBech32(bech32: string): Address;
-  static fromKey(key: PublicKey | SecretKey): Address;
 }
 declare export class Block {}
 declare export class BlockHeader {}
@@ -29,10 +29,10 @@ declare export class PublicKey {
 }
 declare export class SecretKey {
   constructor(bytes: ArrayLike<number>): this;
-  toBytes(): number[];
+  static fromSeed(seed: ArrayLike<number>): SecretKey;
   getPublicKey(): PublicKey;
   sign(message: ArrayLike<number>): number[];
-  static fromSeed(seed: ArrayLike<number>): SecretKey;
+  toBytes(): number[];
 }
 declare export class Transaction {
   static Genesis: number;
@@ -43,8 +43,9 @@ declare export class Transaction {
   static UpdateFeeAddress: number;
   static CreateTransitAddress: number;
   static DeleteTransitAddress: number;
-  toBytes(): number[];
-  toBase64(): string;
+  constructor(): this;
+  static fromBase64(base64: string): Transaction;
+  static fromBytes(bytes: ArrayLike<number>): Transaction;
   getHash(): number[];
   getVersion(): number;
   setVersion(version: number): Transaction;
@@ -59,7 +60,6 @@ declare export class Transaction {
   getSignature(): number[];
   setSignature(signature: ArrayLike<number>): Transaction;
   sign(secretKey: SecretKey): Transaction;
-  verify(): boolean;
   getPrefix(): string;
   setPrefix(prefix: string): Transaction;
   getName(): string;
@@ -68,6 +68,7 @@ declare export class Transaction {
   setProfitPercent(percent: number): Transaction;
   getFeePercent(): number;
   setFeePercent(percent: number): Transaction;
-  static fromBase64(base64: string): Transaction;
-  static fromBytes(bytes: ArrayLike<number>): Transaction;
+  toBytes(): number[];
+  toBase64(): string;
+  verify(): boolean;
 }

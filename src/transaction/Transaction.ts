@@ -178,24 +178,52 @@ export class Transaction {
   protected readonly _bytes: number[] = arrayNew(150)
 
   /**
-   * Транзакция в бинарном виде, 150 байт.
-   * @returns {number[]}
+   * @example
+   * let trx = new Transaction()
    */
-  toBytes (): number[] {
-    return this._bytes.slice(0)
+  constructor () {
+    this.setVersion(Transaction.Basic)
   }
 
   /**
-   * Транзакция в виде строки в формате Base64.
-   * @returns {string}
+   * Статический метод, создает объект из Base64 строки.
+   * @param {string} base64 Транзакция в формате Base64.
+   * @returns {Transaction}
+   * @throws {Error}
+   * @example
+   * let b64 = 'A'.repeat(200)
+   * let trx = Transaction.fromBase64(b64)
    */
-  toBase64 (): string {
-    return base64Encode(this._bytes)
+  static fromBase64 (base64: string): Transaction {
+    if (base64.length !== 200) {
+      throw new Error('invalid length')
+    }
+    return Transaction.fromBytes(base64Decode(base64))
+  }
+
+  /**
+   * Статический метод, создает объект из массива байтов.
+   * @param {ArrayLike<number>} bytes Транзакция в бинарном виде.
+   * @returns {Transaction}
+   * @throws {Error}
+   * @example
+   * let bytes = new Uint8Array(150)
+   * let trx = Transaction.fromBytes(bytes)
+   */
+  static fromBytes (bytes: ArrayLike<number>): Transaction {
+    if (bytes.length !== 150) {
+      throw new Error('incorrect length')
+    }
+    const tx = new Transaction()
+    arraySet(tx._bytes, bytes)
+    return tx
   }
 
   /**
    * Хэш транзакции, sha256 от всех 150 байт.
    * @returns {number[]}
+   * @example
+   * let hash = new Transaction().getHash()
    */
   getHash (): number[] {
     return sha256(this._bytes)
@@ -204,6 +232,8 @@ export class Transaction {
   /**
    * Версия (тип) транзакции.
    * @returns {number}
+   * @example
+   * let ver = new Transaction().getVersion()
    */
   getVersion (): number {
     return this._bytes[0]
@@ -211,7 +241,7 @@ export class Transaction {
 
   /**
    * Устанавливает версию и возвращает this.
-   * @param {number} version Версия адреса.
+   * @param {number} version Версия (тип) транзакции.
    * @returns {Transaction}
    * @throws {Error}
    * @see Transaction.Genesis
@@ -232,6 +262,8 @@ export class Transaction {
   /**
    * Отправитель. Доступно для всех типов транзакций.
    * @returns {Address}
+   * @example
+   * let sender = new Transaction().getSender()
    */
   getSender (): Address {
     return Address.fromBytes(this._bytes.slice(1, 35))
@@ -242,6 +274,9 @@ export class Transaction {
    * @param {Address} address Адрес получателя.
    * @returns {Transaction}
    * @throws {Error}
+   * @example
+   * let sender = new Address()
+   * let trx = new Transaction().setSender(sender)
    */
   setSender (address: Address): Transaction {
     if (!(address instanceof Address)) {
@@ -255,8 +290,11 @@ export class Transaction {
    * Получатель.\
    * Недоступно для транзакций CreateStructure и UpdateStructure.
    * @returns {Address}
+   * @example
+   * let recipient = new Transaction().getRecipient()
    */
   getRecipient (): Address {
+    this.checkVersion([0, 1, 4, 5, 6, 7])
     return Address.fromBytes(this._bytes.slice(35, 69))
   }
 
@@ -266,8 +304,12 @@ export class Transaction {
    * @param {Address} address Адрес получателя.
    * @returns {Transaction}
    * @throws {Error}
+   * @example
+   * let recipient = new Address()
+   * let trx = new Transaction().setRecipient(recipient)
    */
   setRecipient (address: Address): Transaction {
+    this.checkVersion([0, 1, 4, 5, 6, 7])
     if (!(address instanceof Address)) {
       throw new Error('recipient type must be Address')
     }
@@ -279,8 +321,11 @@ export class Transaction {
    * Сумма перевода в UMI-центах, цело число в промежутке от 1 до 18446744073709551615.\
    * Доступно только для Genesis и Basic транзакций.
    * @returns {number}
+   * @example
+   * let value = new Transaction().getValue()
    */
   getValue (): number {
+    this.checkVersion([0, 1])
     return bytesToUint64(this._bytes.slice(69, 77))
   }
 
@@ -288,11 +333,14 @@ export class Transaction {
    * Устанавливает сумму и возвращает this.\
    * Принимает значения в промежутке от 1 до 18446744073709551615.\
    * Доступно только для Genesis и Basic транзакций.
-   * @param {number} value
+   * @param {number} value Целом число от 1 до 18446744073709551615.
    * @returns {Transaction}
    * @throws {Error}
+   * @example
+   * let trx = new Transaction().setValue(42)
    */
   setValue (value: number): Transaction {
+    this.checkVersion([0, 1])
     validateInt(value, 1, 18446744073709551615)
     arraySet(this._bytes, uint64ToBytes(value), 69)
     return this
@@ -302,6 +350,8 @@ export class Transaction {
    * Nonce, целое число в промежутке от 0 до 18446744073709551615.\
    * Генерируется автоматически при вызове sign().
    * @returns {number}
+   * @example
+   * let nonce = new Transaction().getNonce()
    */
   getNonce (): number {
     return bytesToUint64(this._bytes.slice(77, 85))
@@ -309,9 +359,12 @@ export class Transaction {
 
   /**
    * Устанавливает nonce и возвращает this.
-   * @param {number} nonce Nonce, целое число в промежутке от 0 до 18446744073709551615.
+   * @param {number} nonce Целое число в промежутке от 0 до 18446744073709551615.
    * @returns {Transaction}
    * @throws {Error}
+   * @example
+   * let nonce = Date.now()
+   * let trx = new Transaction().setNonce(nonce)
    */
   setNonce (nonce: number): Transaction {
     validateInt(nonce, 0, 18446744073709551615)
@@ -322,6 +375,8 @@ export class Transaction {
   /**
    * Цифровая подпись транзакции, длина 64 байта.
    * @returns {number[]}
+   * @example
+   * let signature = new Transaction().getSignature()
    */
   getSignature (): number[] {
     return this._bytes.slice(85, 149)
@@ -332,6 +387,9 @@ export class Transaction {
    * @param {ArrayLike<number>} signature Подпись, длина 64 байта.
    * @returns {Transaction}
    * @throws {Error}
+   * @example
+   * let signature = new Uint8Array(64)
+   * let trx = new Transaction().setSignature(signature)
    */
   setSignature (signature: ArrayLike<number>): Transaction {
     if (signature.length !== 64) {
@@ -343,9 +401,12 @@ export class Transaction {
 
   /**
    * Подписать транзакцию приватным ключом.
-   * @param {SecretKey} secretKey
+   * @param {SecretKey} secretKey Приватный ключ.
    * @returns {Transaction}
    * @throws {Error}
+   * @example
+   * let secKey = SecretKey.fromSeed(new Uint8Array(32))
+   * let trx = new Transaction().sign(secKey)
    */
   sign (secretKey: SecretKey): Transaction {
     if (!(secretKey instanceof SecretKey)) {
@@ -355,21 +416,16 @@ export class Transaction {
   }
 
   /**
-   * Проверить транзакцию на соответствие формальным правилам.
-   * @returns {boolean}
-   * @throws {Error}
-   */
-  verify (): boolean {
-    return this.getSender().getPublicKey().verifySignature(this.getSignature(), this._bytes.slice(0, 85))
-  }
-
-  /**
    * Префикс адресов, принадлежащих структуре.\
    * Доступно только для CreateStructure и UpdateStructure.
    * @returns {string}
    * @returns {Error}
+   * @example
+   * let trx = new Transaction().setVersion(Transaction.CreateStructure)
+   * let prefix = trx.getPrefix()
    */
   getPrefix (): string {
+    this.checkVersion([2, 3])
     return versionToPrefix(bytesToUint16(this._bytes.slice(35, 37)))
   }
 
@@ -379,8 +435,12 @@ export class Transaction {
    * @param {string} prefix Префикс адресов, принадлежащих структуре.
    * @returns {Transaction}
    * @throws {Error}
+   * @example
+   * let trx = new Transaction().setVersion(CreateStructure)
+   * trx.setPrefix('aaa')
    */
   setPrefix (prefix: string): Transaction {
+    this.checkVersion([2, 3])
     arraySet(this._bytes, uint16ToBytes(prefixToVersion(prefix)), 35)
     return this
   }
@@ -390,8 +450,12 @@ export class Transaction {
    * Доступно только для CreateStructure и UpdateStructure.
    * @returns {string}
    * @throws {Error}
+   * @example
+   * let trx = new Transaction().setVersion(Transaction.CreateStructure)
+   * let name = trx.getName()
    */
   getName (): string {
+    this.checkVersion([2, 3])
     if (this._bytes[41] > 35) {
       throw new Error('invalid length')
     }
@@ -404,8 +468,12 @@ export class Transaction {
    * @param {string} name Название структуры в кодировке UTF-8.
    * @returns {Transaction}
    * @throws {Error}
+   * @example
+   * let trx = new Transaction().setVersion(Transaction.CreateStructure)
+   * trx.setName('Hello World')
    */
   setName (name: string): Transaction {
+    this.checkVersion([2, 3])
     const bytes = Utf8Encode(name)
     if (bytes.length > 35) {
       throw new Error('name is too long')
@@ -421,8 +489,12 @@ export class Transaction {
    * Принимает значения от 100 до 500 (соответственно от 1% до 5%).\
    * Доступно только для CreateStructure и UpdateStructure.
    * @returns {number}
+   * @example
+   * let trx = new Transaction().setVersion(Transaction.CreateStructure)
+   * let profit = trx.getProfitPercent(100)
    */
   getProfitPercent (): number {
+    this.checkVersion([2, 3])
     return bytesToUint16(this._bytes.slice(37, 39))
   }
 
@@ -433,8 +505,12 @@ export class Transaction {
    * Принимает значения от 100 до 500 (соответственно от 1% до 5%).
    * @returns {Transaction}
    * @throws {Error}
+   * @example
+   * let trx = new Transaction().setVersion(Transaction.CreateStructure)
+   * trx.setProfitPercent(100)
    */
   setProfitPercent (percent: number): Transaction {
+    this.checkVersion([2, 3])
     validateInt(percent, 100, 500)
     arraySet(this._bytes, uint16ToBytes(percent), 37)
     return this
@@ -445,8 +521,12 @@ export class Transaction {
    * Принимает значения от 0 до 2000 (соответственно от 0% до 20%).\
    * Доступно только для CreateStructure и UpdateStructure.
    * @returns {number}
+   * @example
+   * let trx = new Transaction().setVersion(Transaction.CreateStructure)
+   * let fee = trx.getFeePercent()
    */
   getFeePercent (): number {
+    this.checkVersion([2, 3])
     return bytesToUint16(this._bytes.slice(39, 41))
   }
 
@@ -456,38 +536,57 @@ export class Transaction {
    * @param {number} percent Комиссия в сотых долях процента с шагом в 0.01%. Принимает значения от 0 до 2000 (соответственно от 0% до 20%).
    * @returns {Transaction}
    * @throws {Error}
+   * @example
+   * let trx = new Transaction().setVersion(Transaction.CreateStructure)
+   * trx.setFeePercent(100)
    */
   setFeePercent (percent: number): Transaction {
+    this.checkVersion([2, 3])
     validateInt(percent, 0, 2000)
     arraySet(this._bytes, uint16ToBytes(percent), 39)
     return this
   }
 
   /**
-   * Статический метод, создает объект из Base64 строки.
-   * @param {string} base64
-   * @returns {Transaction}
-   * @throws {Error}
+   * Транзакция в бинарном виде, 150 байт.
+   * @returns {number[]}
+   * @example
+   * let bytes = new Transaction().toBytes()
    */
-  static fromBase64 (base64: string): Transaction {
-    if (base64.length !== 200) {
-      throw new Error('invalid length')
-    }
-    return Transaction.fromBytes(base64Decode(base64))
+  toBytes (): number[] {
+    return this._bytes.slice(0)
   }
 
   /**
-   * Статический метод, создает объект из массива байтов.
-   * @param {ArrayLike<number>} bytes
-   * @returns {Transaction}
-   * @throws {Error}
+   * Транзакция в виде строки в формате Base64.
+   * @returns {string}
+   * @example
+   * let base64 = new Transaction().toBase64()
    */
-  static fromBytes (bytes: ArrayLike<number>): Transaction {
-    if (bytes.length !== 150) {
-      throw new Error('incorrect length')
+  toBase64 (): string {
+    return base64Encode(this._bytes)
+  }
+
+  /**
+   * Проверить транзакцию на соответствие формальным правилам.
+   * @returns {boolean}
+   * @throws {Error}
+   * @example
+   * let ver = new Transaction().verify()
+   */
+  verify (): boolean {
+    return this.getSender().getPublicKey().verifySignature(this.getSignature(), this._bytes.slice(0, 85))
+  }
+
+  /**
+   * @param {number[]} vers
+   * @throws {Error}
+   * @private
+   * @internal
+   */
+  private checkVersion (vers: number[]): void {
+    if (vers.indexOf(this.getVersion()) === -1) {
+      throw new Error('incorrect version')
     }
-    const tx = new Transaction()
-    arraySet(tx._bytes, bytes)
-    return tx
   }
 }

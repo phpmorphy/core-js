@@ -59,8 +59,6 @@
         - Создать и подписать блок
         - Распарсить блок
 
--   [PGP](#pgp)
-
 -   [Лицензия](#лицензия)
 
 ## Введение
@@ -306,11 +304,11 @@ console.log(tx.toBase64())
 ```javascript
 const secKey = umi.SecretKey.fromSeed(new Uint8Array(32))
 const sender = umi.Address.fromKey(secKey).setPrefix('umi')
-const newPrf = umi.Address.fromBech32('aaa18d4z00xwk6jz6c4r4rgz5mcdwdjny9thrh3y8f36cpy2rz6emg5svsuw66')
+const newFee = umi.Address.fromBech32('aaa18d4z00xwk6jz6c4r4rgz5mcdwdjny9thrh3y8f36cpy2rz6emg5svsuw66')
 const tx = new umi.Transaction()
-  .setVersion(umi.Transaction.UpdateProfitAddress)
+  .setVersion(umi.Transaction.UpdateFeeAddress)
   .setSender(sender)
-  .setRecipient(newPrf)
+  .setRecipient(newFee)
   .sign(secKey)
 
 console.log(tx.verify())
@@ -350,12 +348,6 @@ console.log(tx.toBase64())
 ```
 
 ### Блоки
-
-## PGP
-
-Все коммиты в git-репозиторий подписываются PGP-ключем:
-[24BA6A3987E78C47](https://keybase.io/umitop)
-(fingerprint: 7D4971661AD7E312F18DFB4424BA6A3987E78C47)
 
 ## Лицензия
 

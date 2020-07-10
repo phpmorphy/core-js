@@ -34,6 +34,9 @@ class PublicKey {
   /**
    * @param {ArrayLike<number>} bytes Публичный ключ в формате libsodium, 32 байта (256 бит).
    * @throws {Error}
+   * @example
+   * let bytes = new Uint8Array(32)
+   * let pubKey = new PublicKey(bytes)
    */
   constructor (bytes) {
     /**
@@ -49,14 +52,6 @@ class PublicKey {
   }
 
   /**
-   * Публичный ключ в формате libsodium, 32 байта (256 бит).
-   * @returns {number[]}
-   */
-  toBytes () {
-    return this._bytes.slice(0)
-  }
-
-  /**
    * Публичный ключ.
    * @returns {PublicKey}
    * @private
@@ -66,16 +61,26 @@ class PublicKey {
   }
 
   /**
+   * Публичный ключ в формате libsodium, 32 байта (256 бит).
+   * @returns {number[]}
+   * @example
+   * let bytes = new PublicKey(new Uint8Array(32)).toBytes()
+   */
+  toBytes () {
+    return this._bytes.slice(0)
+  }
+
+  /**
    * Проверяет цифровую подпись.
    * @param {ArrayLike<number>} signature Подпись, 64 байта.
    * @param {ArrayLike<number>} message Сообщение.
    * @returns {boolean}
    * @throws {Error}
    * @example
-   * let key = new Uint8Array(32)
-   * let sig = new Uint8Array(64)
-   * let msg = new Uint8Array(1)
-   * let ver = new PublicKey(key).verifySignature(sig, msg)
+   * let pubKey = new PublicKey(new Uint8Array(32))
+   * let signature = new Uint8Array(64)
+   * let message = new TextEncoder().encode('Hello World')
+   * let ver = pubKey.verifySignature(signature, message)
    */
   verifySignature (signature, message) {
     if (signature.length !== 64) {

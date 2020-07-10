@@ -37,6 +37,9 @@ class SecretKey {
    * @param {ArrayLike<number>} bytes Приватный ключ в бинарном виде.
    * В формате libsodium, 64 байта (512 бит).
    * @throws {Error}
+   * @example
+   * let bytes = SecretKey.fromSeed(new Uint8Array(32)).toBytes()
+   * let secKey = new SecretKey(bytes)
    */
   constructor (bytes) {
     /**
@@ -52,16 +55,29 @@ class SecretKey {
   }
 
   /**
-   * Приватный ключ в бинарном виде. В формате libsodium, 64 байта (512 бит).
-   * @returns {number[]}
+   * Статический фабричный метод, создающий приватный ключ из seed.\
+   * Libsodium принимает seed длиной 32 байта (256 бит), поэтому если длина
+   * отличается, то берется sha256 хэш.
+   * @param {ArrayLike<number>} seed Массив байтов любой длины.
+   * @returns {SecretKey}
+   * @example
+   * let seed = new Uint8Array(32)
+   * let secKey = SecretKey.fromSeed(seed)
    */
-  toBytes () {
-    return this._bytes.slice(0)
+  static fromSeed (seed) {
+    let entropy = seed
+    if (seed.length !== 32) {
+      entropy = sha256.sha256(entropy)
+    }
+    return new SecretKey(index.secretKeyFromSeed(entropy))
   }
 
   /**
    * Публичный ключ, соответствующий приватному ключу.
    * @returns {PublicKey}
+   * @example
+   * let secKey = SecretKey.fromSeed(new Uint8Array(32))
+   * let pubKey = secKey.getPublicKey()
    */
   getPublicKey () {
     return new PublicKey.PublicKey(this._bytes.slice(32, 64))
@@ -70,32 +86,25 @@ class SecretKey {
   /**
    * Создает цифровую подпись сообщения.
    * @param {ArrayLike<number>} message Сообщение, которое необходимо подписать.
-   * @returns {number[]} Цифровая подпись длиной 64 байта (512 бит).
+   * @returns {number[]} Подпись длиной 64 байта.
    * @example
-   * let seed = new Uint8Array(32)
-   * let msg = new Uint8Array(1)
-   * let sig = SecretKey.fromSeed(seed).sign(msg)
+   * let secKey = SecretKey.fromSeed(new Uint8Array(32))
+   * let message = new TextEncoder().encode('Hello World')
+   * let signature = secKey.sign(message)
    */
   sign (message) {
     return index.sign(message, this._bytes)
   }
 
   /**
-   * Статический фабричный метод, создающий приватный ключ из seed.
-   * Libsodium принимает seed длиной 32 байта (256 бит), поэтому если длина
-   * отличается, то берется sha256 хэш.
-   * @param {ArrayLike<number>} seed Массив байтов любой длины.
-   * @returns {SecretKey}
+   * Приватный ключ в бинарном виде. В формате libsodium, 64 байта (512 бит).
+   * @returns {number[]}
    * @example
-   * let seed = new Uint8Array(32)
-   * let key = SecretKey.fromSeed(seed)
+   * let secKey = SecretKey.fromSeed(new Uint8Array(32))
+   * let bytes = secKey.toBytes()
    */
-  static fromSeed (seed) {
-    let entropy = seed
-    if (seed.length !== 32) {
-      entropy = sha256.sha256(entropy)
-    }
-    return new SecretKey(index.secretKeyFromSeed(entropy))
+  toBytes () {
+    return this._bytes.slice(0)
   }
 }
 

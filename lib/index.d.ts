@@ -1,25 +1,46 @@
 /**
- * Базовый класс для работы с адресами.
+ * Класс для работы с адресами.
  * @class
  */
 export declare class Address {
+    /**
+     * @example
+     * let address = new Address()
+     */
     constructor();
     /**
-     * Публичный ключ.
-     * @returns {PublicKey}
-     */
-    getPublicKey(): PublicKey;
-    /**
-     * Устанавливает публичный ключи и возвращает this.
-     * @param {PublicKey} publicKey Публичный ключ.
+     * Статический метод, создает объект из адреса в формате Bech32.
+     * @param {string} bech32 Адрес в формате Bech32, длина 62 или 65 символов.
      * @returns {Address}
      * @throws {Error}
+     * @example
+     * let address = Address.fromBech32('umi18d4z00xwk6jz6c4r4rgz5mcdwdjny9thrh3y8f36cpy2rz6emg5s6rxnf6')
      */
-    setPublicKey(publicKey: PublicKey): Address;
+    static fromBech32(bech32: string): Address;
+    /**
+     * Статический метод, создает объект из бинарного представления.
+     * @param {ArrayLike<number>} bytes Адрес в бинарном виде, длина 34 байта.
+     * @returns {Address}
+     * @throws {Error}
+     * @example
+     * let address = Address.fromBytes(new Uint8Array(34))
+     */
+    static fromBytes(bytes: ArrayLike<number>): Address;
+    /**
+     * Статический метод, создает объект из публичного или приватного ключа.
+     * @param {(PublicKey|SecretKey)} key Публичный или приватный ключ.
+     * @returns {Address}
+     * @example
+     * let secKey = SecretKey.fromSeed([])
+     * let address = Address.fromKey(secKey)
+     */
+    static fromKey(key: PublicKey | SecretKey): Address;
     /**
      * Префикс адреса, три символа латиницы в нижнем регистре.
      * @returns {string}
      * @throws {Error}
+     * @example
+     * let prefix = new Address().getPrefix()
      */
     getPrefix(): string;
     /**
@@ -27,37 +48,41 @@ export declare class Address {
      * @param {string} prefix Префикс адреса, три символа латиницы в нижнем регистре.
      * @returns {Address}
      * @throws {Error}
+     * @example
+     * let address = new Address().setPrefix('umi')
      */
     setPrefix(prefix: string): Address;
     /**
-     * Адрес в формате Bech32, длина 62 символа.
+     * Публичный ключ.
+     * @returns {PublicKey}
+     * @example
+     * let pubKey = new Address().getPublicKey()
+     */
+    getPublicKey(): PublicKey;
+    /**
+     * Устанавливает публичный ключи и возвращает this.
+     * @param {PublicKey} publicKey Публичный ключ.
+     * @returns {Address}
+     * @throws {Error}
+     * @example
+     * let pubKey = SecretKey.fromSeed([]).getPublicKey()
+     * let address = new Address().setPublicKey(pubKey)
+     */
+    setPublicKey(publicKey: PublicKey): Address;
+    /**
+     * Адрес в формате Bech32, длина 62 или 65 символов.
      * @returns {string}
+     * @example
+     * let bech32 = new Address().toBech32()
      */
     toBech32(): string;
     /**
      * Адрес в бинарном виде, длина 34 байта.
      * @returns {number[]}
+     * @example
+     * let bytes = new Address().toBytes()
      */
     toBytes(): number[];
-    /**
-     * @param {ArrayLike<number>} bytes
-     * @returns {Address}
-     * @throws {Error}
-     */
-    static fromBytes(bytes: ArrayLike<number>): Address;
-    /**
-     * Статический метод, создает объект из адреса в формате Bech32.
-     * @param {string} bech32 Адрес в формате Bech32, длина 62 или 65 символов.
-     * @returns {Address}
-     * @throws {Error}
-     */
-    static fromBech32(bech32: string): Address;
-    /**
-     * Статический метод, создает объект из публичного или приватного ключа.
-     * @param {(PublicKey|SecretKey)} key Публичный или приватный ключ.
-     * @returns {Address}
-     */
-    static fromKey(key: PublicKey | SecretKey): Address;
 }
 /**
  * Базовый класс для работы с блоками.
@@ -79,11 +104,16 @@ export declare class PublicKey {
     /**
      * @param {ArrayLike<number>} bytes Публичный ключ в формате libsodium, 32 байта (256 бит).
      * @throws {Error}
+     * @example
+     * let bytes = new Uint8Array(32)
+     * let pubKey = new PublicKey(bytes)
      */
     constructor(bytes: ArrayLike<number>);
     /**
      * Публичный ключ в формате libsodium, 32 байта (256 бит).
      * @returns {number[]}
+     * @example
+     * let bytes = new PublicKey(new Uint8Array(32)).toBytes()
      */
     toBytes(): number[];
     /**
@@ -93,10 +123,10 @@ export declare class PublicKey {
      * @returns {boolean}
      * @throws {Error}
      * @example
-     * let key = new Uint8Array(32)
-     * let sig = new Uint8Array(64)
-     * let msg = new Uint8Array(1)
-     * let ver = new PublicKey(key).verifySignature(sig, msg)
+     * let pubKey = new PublicKey(new Uint8Array(32))
+     * let signature = new Uint8Array(64)
+     * let message = new TextEncoder().encode('Hello World')
+     * let ver = pubKey.verifySignature(signature, message)
      */
     verifySignature(signature: ArrayLike<number>, message: ArrayLike<number>): boolean;
 }
@@ -109,39 +139,48 @@ export declare class SecretKey {
      * @param {ArrayLike<number>} bytes Приватный ключ в бинарном виде.
      * В формате libsodium, 64 байта (512 бит).
      * @throws {Error}
+     * @example
+     * let bytes = SecretKey.fromSeed(new Uint8Array(32)).toBytes()
+     * let secKey = new SecretKey(bytes)
      */
     constructor(bytes: ArrayLike<number>);
     /**
-     * Приватный ключ в бинарном виде. В формате libsodium, 64 байта (512 бит).
-     * @returns {number[]}
-     */
-    toBytes(): number[];
-    /**
-     * Публичный ключ, соответствующий приватному ключу.
-     * @returns {PublicKey}
-     */
-    getPublicKey(): PublicKey;
-    /**
-     * Создает цифровую подпись сообщения.
-     * @param {ArrayLike<number>} message Сообщение, которое необходимо подписать.
-     * @returns {number[]} Цифровая подпись длиной 64 байта (512 бит).
-     * @example
-     * let seed = new Uint8Array(32)
-     * let msg = new Uint8Array(1)
-     * let sig = SecretKey.fromSeed(seed).sign(msg)
-     */
-    sign(message: ArrayLike<number>): number[];
-    /**
-     * Статический фабричный метод, создающий приватный ключ из seed.
+     * Статический фабричный метод, создающий приватный ключ из seed.\
      * Libsodium принимает seed длиной 32 байта (256 бит), поэтому если длина
      * отличается, то берется sha256 хэш.
      * @param {ArrayLike<number>} seed Массив байтов любой длины.
      * @returns {SecretKey}
      * @example
      * let seed = new Uint8Array(32)
-     * let key = SecretKey.fromSeed(seed)
+     * let secKey = SecretKey.fromSeed(seed)
      */
     static fromSeed(seed: ArrayLike<number>): SecretKey;
+    /**
+     * Публичный ключ, соответствующий приватному ключу.
+     * @returns {PublicKey}
+     * @example
+     * let secKey = SecretKey.fromSeed(new Uint8Array(32))
+     * let pubKey = secKey.getPublicKey()
+     */
+    getPublicKey(): PublicKey;
+    /**
+     * Создает цифровую подпись сообщения.
+     * @param {ArrayLike<number>} message Сообщение, которое необходимо подписать.
+     * @returns {number[]} Подпись длиной 64 байта.
+     * @example
+     * let secKey = SecretKey.fromSeed(new Uint8Array(32))
+     * let message = new TextEncoder().encode('Hello World')
+     * let signature = secKey.sign(message)
+     */
+    sign(message: ArrayLike<number>): number[];
+    /**
+     * Приватный ключ в бинарном виде. В формате libsodium, 64 байта (512 бит).
+     * @returns {number[]}
+     * @example
+     * let secKey = SecretKey.fromSeed(new Uint8Array(32))
+     * let bytes = secKey.toBytes()
+     */
+    toBytes(): number[];
 }
 /**
  * Класс для работы с транзакциями.
@@ -277,28 +316,47 @@ export declare class Transaction {
      */
     static DeleteTransitAddress: number;
     /**
-     * Транзакция в бинарном виде, 150 байт.
-     * @returns {number[]}
+     * @example
+     * let trx = new Transaction()
      */
-    toBytes(): number[];
+    constructor();
     /**
-     * Транзакция в виде строки в формате Base64.
-     * @returns {string}
+     * Статический метод, создает объект из Base64 строки.
+     * @param {string} base64 Транзакция в формате Base64.
+     * @returns {Transaction}
+     * @throws {Error}
+     * @example
+     * let b64 = 'A'.repeat(200)
+     * let trx = Transaction.fromBase64(b64)
      */
-    toBase64(): string;
+    static fromBase64(base64: string): Transaction;
+    /**
+     * Статический метод, создает объект из массива байтов.
+     * @param {ArrayLike<number>} bytes Транзакция в бинарном виде.
+     * @returns {Transaction}
+     * @throws {Error}
+     * @example
+     * let bytes = new Uint8Array(150)
+     * let trx = Transaction.fromBytes(bytes)
+     */
+    static fromBytes(bytes: ArrayLike<number>): Transaction;
     /**
      * Хэш транзакции, sha256 от всех 150 байт.
      * @returns {number[]}
+     * @example
+     * let hash = new Transaction().getHash()
      */
     getHash(): number[];
     /**
      * Версия (тип) транзакции.
      * @returns {number}
+     * @example
+     * let ver = new Transaction().getVersion()
      */
     getVersion(): number;
     /**
      * Устанавливает версию и возвращает this.
-     * @param {number} version Версия адреса.
+     * @param {number} version Версия (тип) транзакции.
      * @returns {Transaction}
      * @throws {Error}
      * @see Transaction.Genesis
@@ -314,6 +372,8 @@ export declare class Transaction {
     /**
      * Отправитель. Доступно для всех типов транзакций.
      * @returns {Address}
+     * @example
+     * let sender = new Transaction().getSender()
      */
     getSender(): Address;
     /**
@@ -321,12 +381,17 @@ export declare class Transaction {
      * @param {Address} address Адрес получателя.
      * @returns {Transaction}
      * @throws {Error}
+     * @example
+     * let sender = new Address()
+     * let trx = new Transaction().setSender(sender)
      */
     setSender(address: Address): Transaction;
     /**
      * Получатель.\
      * Недоступно для транзакций CreateStructure и UpdateStructure.
      * @returns {Address}
+     * @example
+     * let recipient = new Transaction().getRecipient()
      */
     getRecipient(): Address;
     /**
@@ -335,39 +400,53 @@ export declare class Transaction {
      * @param {Address} address Адрес получателя.
      * @returns {Transaction}
      * @throws {Error}
+     * @example
+     * let recipient = new Address()
+     * let trx = new Transaction().setRecipient(recipient)
      */
     setRecipient(address: Address): Transaction;
     /**
      * Сумма перевода в UMI-центах, цело число в промежутке от 1 до 18446744073709551615.\
      * Доступно только для Genesis и Basic транзакций.
      * @returns {number}
+     * @example
+     * let value = new Transaction().getValue()
      */
     getValue(): number;
     /**
      * Устанавливает сумму и возвращает this.\
      * Принимает значения в промежутке от 1 до 18446744073709551615.\
      * Доступно только для Genesis и Basic транзакций.
-     * @param {number} value
+     * @param {number} value Целом число от 1 до 18446744073709551615.
      * @returns {Transaction}
      * @throws {Error}
+     * @example
+     * let trx = new Transaction().setValue(42)
      */
     setValue(value: number): Transaction;
     /**
      * Nonce, целое число в промежутке от 0 до 18446744073709551615.\
      * Генерируется автоматически при вызове sign().
      * @returns {number}
+     * @example
+     * let nonce = new Transaction().getNonce()
      */
     getNonce(): number;
     /**
      * Устанавливает nonce и возвращает this.
-     * @param {number} nonce Nonce, целое число в промежутке от 0 до 18446744073709551615.
+     * @param {number} nonce Целое число в промежутке от 0 до 18446744073709551615.
      * @returns {Transaction}
      * @throws {Error}
+     * @example
+     * let nonce = Date.now()
+     * let trx = new Transaction().setNonce(nonce)
      */
     setNonce(nonce: number): Transaction;
     /**
      * Цифровая подпись транзакции, длина 64 байта.
      * @returns {number[]}
+     * @example
+     * let signature = new Transaction().getSignature()
      */
     getSignature(): number[];
     /**
@@ -375,26 +454,29 @@ export declare class Transaction {
      * @param {ArrayLike<number>} signature Подпись, длина 64 байта.
      * @returns {Transaction}
      * @throws {Error}
+     * @example
+     * let signature = new Uint8Array(64)
+     * let trx = new Transaction().setSignature(signature)
      */
     setSignature(signature: ArrayLike<number>): Transaction;
     /**
      * Подписать транзакцию приватным ключом.
-     * @param {SecretKey} secretKey
+     * @param {SecretKey} secretKey Приватный ключ.
      * @returns {Transaction}
      * @throws {Error}
+     * @example
+     * let secKey = SecretKey.fromSeed(new Uint8Array(32))
+     * let trx = new Transaction().sign(secKey)
      */
     sign(secretKey: SecretKey): Transaction;
-    /**
-     * Проверить транзакцию на соответствие формальным правилам.
-     * @returns {boolean}
-     * @throws {Error}
-     */
-    verify(): boolean;
     /**
      * Префикс адресов, принадлежащих структуре.\
      * Доступно только для CreateStructure и UpdateStructure.
      * @returns {string}
      * @returns {Error}
+     * @example
+     * let trx = new Transaction().setVersion(Transaction.CreateStructure)
+     * let prefix = trx.getPrefix()
      */
     getPrefix(): string;
     /**
@@ -403,6 +485,9 @@ export declare class Transaction {
      * @param {string} prefix Префикс адресов, принадлежащих структуре.
      * @returns {Transaction}
      * @throws {Error}
+     * @example
+     * let trx = new Transaction().setVersion(CreateStructure)
+     * trx.setPrefix('aaa')
      */
     setPrefix(prefix: string): Transaction;
     /**
@@ -410,6 +495,9 @@ export declare class Transaction {
      * Доступно только для CreateStructure и UpdateStructure.
      * @returns {string}
      * @throws {Error}
+     * @example
+     * let trx = new Transaction().setVersion(Transaction.CreateStructure)
+     * let name = trx.getName()
      */
     getName(): string;
     /**
@@ -418,6 +506,9 @@ export declare class Transaction {
      * @param {string} name Название структуры в кодировке UTF-8.
      * @returns {Transaction}
      * @throws {Error}
+     * @example
+     * let trx = new Transaction().setVersion(Transaction.CreateStructure)
+     * trx.setName('Hello World')
      */
     setName(name: string): Transaction;
     /**
@@ -425,6 +516,9 @@ export declare class Transaction {
      * Принимает значения от 100 до 500 (соответственно от 1% до 5%).\
      * Доступно только для CreateStructure и UpdateStructure.
      * @returns {number}
+     * @example
+     * let trx = new Transaction().setVersion(Transaction.CreateStructure)
+     * let profit = trx.getProfitPercent(100)
      */
     getProfitPercent(): number;
     /**
@@ -434,6 +528,9 @@ export declare class Transaction {
      * Принимает значения от 100 до 500 (соответственно от 1% до 5%).
      * @returns {Transaction}
      * @throws {Error}
+     * @example
+     * let trx = new Transaction().setVersion(Transaction.CreateStructure)
+     * trx.setProfitPercent(100)
      */
     setProfitPercent(percent: number): Transaction;
     /**
@@ -441,6 +538,9 @@ export declare class Transaction {
      * Принимает значения от 0 до 2000 (соответственно от 0% до 20%).\
      * Доступно только для CreateStructure и UpdateStructure.
      * @returns {number}
+     * @example
+     * let trx = new Transaction().setVersion(Transaction.CreateStructure)
+     * let fee = trx.getFeePercent()
      */
     getFeePercent(): number;
     /**
@@ -449,20 +549,31 @@ export declare class Transaction {
      * @param {number} percent Комиссия в сотых долях процента с шагом в 0.01%. Принимает значения от 0 до 2000 (соответственно от 0% до 20%).
      * @returns {Transaction}
      * @throws {Error}
+     * @example
+     * let trx = new Transaction().setVersion(Transaction.CreateStructure)
+     * trx.setFeePercent(100)
      */
     setFeePercent(percent: number): Transaction;
     /**
-     * Статический метод, создает объект из Base64 строки.
-     * @param {string} base64
-     * @returns {Transaction}
-     * @throws {Error}
+     * Транзакция в бинарном виде, 150 байт.
+     * @returns {number[]}
+     * @example
+     * let bytes = new Transaction().toBytes()
      */
-    static fromBase64(base64: string): Transaction;
+    toBytes(): number[];
     /**
-     * Статический метод, создает объект из массива байтов.
-     * @param {ArrayLike<number>} bytes
-     * @returns {Transaction}
-     * @throws {Error}
+     * Транзакция в виде строки в формате Base64.
+     * @returns {string}
+     * @example
+     * let base64 = new Transaction().toBase64()
      */
-    static fromBytes(bytes: ArrayLike<number>): Transaction;
+    toBase64(): string;
+    /**
+     * Проверить транзакцию на соответствие формальным правилам.
+     * @returns {boolean}
+     * @throws {Error}
+     * @example
+     * let ver = new Transaction().verify()
+     */
+    verify(): boolean;
 }

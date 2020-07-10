@@ -34,6 +34,7 @@ describe('Transaction', function () {
     describe('создает транзакцию', function () {
       it('если вызвать без параметров', function () {
         const expected = new Uint8Array(150)
+        expected[0] = 1
         const actual = new Uint8Array(new Transaction().toBytes())
         assert.deepEqual(actual, expected)
       })
@@ -114,50 +115,57 @@ describe('Transaction', function () {
   })
 
   it('prefix', function () {
+    const trx = new Transaction().setVersion(Transaction.CreateStructure)
     const expected = 'lll'
-    const actual = new Transaction().setPrefix(expected).getPrefix()
+    const actual = trx.setPrefix(expected).getPrefix()
     assert.strictEqual(actual, expected)
   })
 
   describe('name', function () {
     it('устанавливает имя', function () {
+      const trx = new Transaction().setVersion(Transaction.CreateStructure)
       const expected = 'ab-Пр-小篆-😭😰🥰'
-      const actual = new Transaction().setName(expected).getName()
+      const actual = trx.setName(expected).getName()
       assert.strictEqual(actual, expected)
     })
 
     it('ошибка если некорректная длина', function () {
+      const trx = new Transaction().setVersion(Transaction.CreateStructure)
       assert.throws(function () {
-        return new Transaction().setName('a'.repeat(36))
-      }, Error)
+        return trx.setName('a'.repeat(36))
+      }, Error, 'name is too long')
     })
 
     it('ошибка если некорректная длина (bytes)', function () {
       const bytes = new Uint8Array(150)
+      bytes[0] = 2
       bytes[41] = 36
       assert.throws(function () {
         return Transaction.fromBytes(bytes).getName()
-      }, Error)
+      }, Error, 'invalid length')
     })
   })
 
   describe('profitPercent', function () {
     it('устанавливает profitPercent', function () {
+      const trx = new Transaction().setVersion(Transaction.CreateStructure)
       const expected = 321
-      const actual = new Transaction().setProfitPercent(expected).getProfitPercent()
+      const actual = trx.setProfitPercent(expected).getProfitPercent()
       assert.strictEqual(actual, expected)
     })
 
     it('ошибка, если некорректный тип', function () {
+      const trx = new Transaction().setVersion(Transaction.CreateStructure)
       assert.throws(function () {
-        return new Transaction().setProfitPercent('100')
+        return trx.setProfitPercent('100')
       }, Error, 'incorrect type')
     })
   })
 
   it('feePercent', function () {
+    const trx = new Transaction().setVersion(Transaction.CreateStructure)
     const expected = 1234
-    const actual = new Transaction().setFeePercent(expected).getFeePercent()
+    const actual = trx.setFeePercent(expected).getFeePercent()
     assert.strictEqual(actual, expected)
   })
 
@@ -209,5 +217,11 @@ describe('Transaction', function () {
       const tx = new Transaction().setSender(Address.fromKey(key)).sign(key)
       assert.isTrue(tx.verify())
     })
+  })
+
+  it('checkVersion()', function () {
+    assert.throws(function () {
+      return new Transaction().setPrefix('aaa')
+    }, Error)
   })
 })

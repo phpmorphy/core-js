@@ -30,10 +30,14 @@ const integer = require('../util/integer.js')
 const bech32 = require('../util/bech32.js')
 
 /**
- * Базовый класс для работы с адресами.
+ * Класс для работы с адресами.
  * @class
  */
 class Address {
+  /**
+   * @example
+   * let address = new Address()
+   */
   constructor () {
     /**
      * Адрес в бинарном виде, длина 34 байта.
@@ -45,67 +49,26 @@ class Address {
   }
 
   /**
-   * Публичный ключ.
-   * @returns {PublicKey}
-   */
-  getPublicKey () {
-    return new PublicKey.PublicKey(this._bytes.slice(2))
-  }
-
-  /**
-   * Устанавливает публичный ключи и возвращает this.
-   * @param {PublicKey} publicKey Публичный ключ.
+   * Статический метод, создает объект из адреса в формате Bech32.
+   * @param {string} bech32 Адрес в формате Bech32, длина 62 или 65 символов.
    * @returns {Address}
    * @throws {Error}
+   * @example
+   * let address = Address.fromBech32('umi18d4z00xwk6jz6c4r4rgz5mcdwdjny9thrh3y8f36cpy2rz6emg5s6rxnf6')
    */
-  setPublicKey (publicKey) {
-    if (!(publicKey instanceof PublicKey.PublicKey)) {
-      throw new Error('publicKey type must be PublicKey')
-    }
-    array.arraySet(this._bytes, publicKey.toBytes(), 2)
-    return this
+  static fromBech32 (bech32$1) {
+    const adr = new Address()
+    array.arraySet(adr._bytes, bech32.bech32Decode(bech32$1))
+    return adr
   }
 
   /**
-   * Префикс адреса, три символа латиницы в нижнем регистре.
-   * @returns {string}
-   * @throws {Error}
-   */
-  getPrefix () {
-    return converter.versionToPrefix(integer.bytesToUint16(this._bytes.slice(0, 2)))
-  }
-
-  /**
-   * Устанавливает префикс адреса и возвращает this.
-   * @param {string} prefix Префикс адреса, три символа латиницы в нижнем регистре.
+   * Статический метод, создает объект из бинарного представления.
+   * @param {ArrayLike<number>} bytes Адрес в бинарном виде, длина 34 байта.
    * @returns {Address}
    * @throws {Error}
-   */
-  setPrefix (prefix) {
-    array.arraySet(this._bytes, integer.uint16ToBytes(converter.prefixToVersion(prefix)))
-    return this
-  }
-
-  /**
-   * Адрес в формате Bech32, длина 62 символа.
-   * @returns {string}
-   */
-  toBech32 () {
-    return bech32.bech32Encode(this._bytes)
-  }
-
-  /**
-   * Адрес в бинарном виде, длина 34 байта.
-   * @returns {number[]}
-   */
-  toBytes () {
-    return this._bytes.slice(0)
-  }
-
-  /**
-   * @param {ArrayLike<number>} bytes
-   * @returns {Address}
-   * @throws {Error}
+   * @example
+   * let address = Address.fromBytes(new Uint8Array(34))
    */
   static fromBytes (bytes) {
     if (bytes.length !== 34) {
@@ -117,24 +80,86 @@ class Address {
   }
 
   /**
-   * Статический метод, создает объект из адреса в формате Bech32.
-   * @param {string} bech32 Адрес в формате Bech32, длина 62 или 65 символов.
-   * @returns {Address}
-   * @throws {Error}
-   */
-  static fromBech32 (bech32$1) {
-    const adr = new Address()
-    array.arraySet(adr._bytes, bech32.bech32Decode(bech32$1))
-    return adr
-  }
-
-  /**
    * Статический метод, создает объект из публичного или приватного ключа.
    * @param {(PublicKey|SecretKey)} key Публичный или приватный ключ.
    * @returns {Address}
+   * @example
+   * let secKey = SecretKey.fromSeed([])
+   * let address = Address.fromKey(secKey)
    */
   static fromKey (key) {
     return new Address().setPublicKey(key.getPublicKey())
+  }
+
+  /**
+   * Префикс адреса, три символа латиницы в нижнем регистре.
+   * @returns {string}
+   * @throws {Error}
+   * @example
+   * let prefix = new Address().getPrefix()
+   */
+  getPrefix () {
+    return converter.versionToPrefix(integer.bytesToUint16(this._bytes.slice(0, 2)))
+  }
+
+  /**
+   * Устанавливает префикс адреса и возвращает this.
+   * @param {string} prefix Префикс адреса, три символа латиницы в нижнем регистре.
+   * @returns {Address}
+   * @throws {Error}
+   * @example
+   * let address = new Address().setPrefix('umi')
+   */
+  setPrefix (prefix) {
+    array.arraySet(this._bytes, integer.uint16ToBytes(converter.prefixToVersion(prefix)))
+    return this
+  }
+
+  /**
+   * Публичный ключ.
+   * @returns {PublicKey}
+   * @example
+   * let pubKey = new Address().getPublicKey()
+   */
+  getPublicKey () {
+    return new PublicKey.PublicKey(this._bytes.slice(2))
+  }
+
+  /**
+   * Устанавливает публичный ключи и возвращает this.
+   * @param {PublicKey} publicKey Публичный ключ.
+   * @returns {Address}
+   * @throws {Error}
+   * @example
+   * let pubKey = SecretKey.fromSeed([]).getPublicKey()
+   * let address = new Address().setPublicKey(pubKey)
+   */
+  setPublicKey (publicKey) {
+    if (!(publicKey instanceof PublicKey.PublicKey)) {
+      throw new Error('publicKey type must be PublicKey')
+    }
+    array.arraySet(this._bytes, publicKey.toBytes(), 2)
+    return this
+  }
+
+  /**
+   * Адрес в формате Bech32, длина 62 или 65 символов.
+   * @returns {string}
+   * @example
+   * let bech32 = new Address().toBech32()
+   */
+  toBech32 () {
+    return bech32.bech32Encode(this._bytes)
+  }
+
+  /**
+   * Адрес в бинарном виде, длина 34 байта.
+   * @returns {number[]}
+   * @example
+   * let bytes = new Address().toBytes()
+   */
+  toBytes () {
+    return this._bytes.slice(0)
   }
 }
 
