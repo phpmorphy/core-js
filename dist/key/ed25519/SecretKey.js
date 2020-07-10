@@ -34,7 +34,7 @@ const sha256 = require('../../util/sha256.js')
  */
 class SecretKey {
   /**
-   * @param {number[]|Uint8Array|Buffer} bytes Приватный ключ в бинарном виде.
+   * @param {ArrayLike<number>} bytes Приватный ключ в бинарном виде.
    * В формате libsodium, 64 байта (512 бит).
    * @throws {Error}
    */
@@ -69,7 +69,7 @@ class SecretKey {
 
   /**
    * Создает цифровую подпись сообщения.
-   * @param {number[]|Uint8Array|Buffer} message Сообщение, которое необходимо подписать.
+   * @param {ArrayLike<number>} message Сообщение, которое необходимо подписать.
    * @returns {number[]} Цифровая подпись длиной 64 байта (512 бит).
    * @example
    * let seed = new Uint8Array(32)
@@ -82,9 +82,9 @@ class SecretKey {
 
   /**
    * Статический фабричный метод, создающий приватный ключ из seed.
-   * Libsodium принимает seed длиной 32 байта (256 бит), если длина
+   * Libsodium принимает seed длиной 32 байта (256 бит), поэтому если длина
    * отличается, то берется sha256 хэш.
-   * @param {number[]|Uint8Array|Buffer} seed Seed длиной от 0 до 128 байт.
+   * @param {ArrayLike<number>} seed Массив байтов любой длины.
    * @returns {SecretKey}
    * @example
    * let seed = new Uint8Array(32)

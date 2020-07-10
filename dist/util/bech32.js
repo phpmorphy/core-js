@@ -29,7 +29,7 @@ const integer = require('./integer.js')
 
 const bech32Alphabet = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l'
 /**
- * @param {number[]|Uint8Array|Buffer} bytes
+ * @param {number[]} bytes
  * @returns {string}
  * @private
  */
@@ -84,7 +84,7 @@ function convert5to8 (data) {
   return result
 }
 /**
- * @param {number[]|Uint8Array|Buffer} data
+ * @param {number[]} data
  * @returns {string}
  * @private
  */
@@ -126,7 +126,7 @@ function createChecksum (prefix, data) {
   return checksum
 }
 /**
- * @param {number[]|Uint8Array|Buffer} values
+ * @param {number[]} values
  * @returns {number}
  * @private
  */

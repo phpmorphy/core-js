@@ -6,38 +6,33 @@
  */
 
 declare export class Address {
-  static Genesis: number;
-  static Umi: number;
   constructor(): this;
-  getVersion(): number;
-  setVersion(version: number): this;
   getPublicKey(): PublicKey;
-  setPublicKey(publicKey: PublicKey): this;
+  setPublicKey(publicKey: PublicKey): Address;
   getPrefix(): string;
-  setPrefix(prefix: string): this;
+  setPrefix(prefix: string): Address;
   toBech32(): string;
   toBytes(): number[];
-  static fromBytes(bytes: number[] | Uint8Array | Buffer): Address;
+  static fromBytes(bytes: ArrayLike<number>): Address;
   static fromBech32(bech32: string): Address;
   static fromKey(key: PublicKey | SecretKey): Address;
 }
 declare export class Block {}
 declare export class BlockHeader {}
 declare export class PublicKey {
-  constructor(bytes: number[] | Uint8Array | Buffer): this;
+  constructor(bytes: ArrayLike<number>): this;
   toBytes(): number[];
-  getPublicKey(): this;
   verifySignature(
-    signature: number[] | Uint8Array | Buffer,
-    message: number[] | Uint8Array | Buffer
+    signature: ArrayLike<number>,
+    message: ArrayLike<number>
   ): boolean;
 }
 declare export class SecretKey {
-  constructor(bytes: number[] | Uint8Array | Buffer): this;
+  constructor(bytes: ArrayLike<number>): this;
   toBytes(): number[];
   getPublicKey(): PublicKey;
-  sign(message: number[] | Uint8Array | Buffer): number[];
-  static fromSeed(seed: number[] | Uint8Array | Buffer): SecretKey;
+  sign(message: ArrayLike<number>): number[];
+  static fromSeed(seed: ArrayLike<number>): SecretKey;
 }
 declare export class Transaction {
   static Genesis: number;
@@ -52,27 +47,27 @@ declare export class Transaction {
   toBase64(): string;
   getHash(): number[];
   getVersion(): number;
-  setVersion(version: number): this;
+  setVersion(version: number): Transaction;
   getSender(): Address;
-  setSender(address: Address): this;
+  setSender(address: Address): Transaction;
   getRecipient(): Address;
-  setRecipient(address: Address): this;
+  setRecipient(address: Address): Transaction;
   getValue(): number;
-  setValue(value: number): this;
+  setValue(value: number): Transaction;
   getNonce(): number;
-  setNonce(nonce: number): this;
-  getSignature(): number[] | Uint8Array | Buffer;
-  setSignature(signature: number[] | Uint8Array | Buffer): this;
-  sign(secretKey: SecretKey): this;
+  setNonce(nonce: number): Transaction;
+  getSignature(): number[];
+  setSignature(signature: ArrayLike<number>): Transaction;
+  sign(secretKey: SecretKey): Transaction;
   verify(): boolean;
   getPrefix(): string;
-  setPrefix(prefix: string): this;
+  setPrefix(prefix: string): Transaction;
   getName(): string;
-  setName(name: string): this;
+  setName(name: string): Transaction;
   getProfitPercent(): number;
-  setProfitPercent(percent: number): this;
+  setProfitPercent(percent: number): Transaction;
   getFeePercent(): number;
-  setFeePercent(percent: number): this;
+  setFeePercent(percent: number): Transaction;
   static fromBase64(base64: string): Transaction;
-  static fromBytes(bytes: number[] | Uint8Array | Buffer): Transaction;
+  static fromBytes(bytes: ArrayLike<number>): Transaction;
 }

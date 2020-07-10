@@ -44,7 +44,7 @@ const sha512K = [
 /**
  * Безопасный алгоритм хеширования, SHA2-512.
  * @see https://en.wikipedia.org/wiki/SHA-2
- * @param {number[]|Uint8Array|Buffer} message message
+ * @param {ArrayLike<number>} message message
  * @returns {number[]}
  * @private
  */
@@ -70,7 +70,7 @@ function sha512 (message) {
   return digest
 }
 /**
- * @param {number[]|Uint8Array|Buffer} message
+ * @param {ArrayLike<number>} message
  * @returns {number[][][]}
  * @private
  */

@@ -24,7 +24,7 @@
 'use strict'
 
 /**
- * @param {number} arg
+ * @param arg
  * @param {number} min
  * @param {number} max
  * @throws {Error}
@@ -42,7 +42,7 @@ function validateInt (arg, min, max) {
   }
 }
 /**
- * @param {string} arg
+ * @param arg
  * @param {number} [len]
  * @throws {Error}
  * @private

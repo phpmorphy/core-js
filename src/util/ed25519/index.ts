@@ -1,5 +1,5 @@
 import { sha512 } from '../sha512'
-import { arraySet } from '../array'
+import { arraySet, arraySlice } from '../array'
 import { gf0, gf1, reduce, modL, scalarbase, pack, scalarmult, add, fnA, fnM, fnZ, pack25519, par25519 } from './common'
 
 const D: number[] = [
@@ -11,14 +11,14 @@ const I: number[] = [
   0xd7a7, 0x3dfb, 0x0099, 0x2b4d, 0xdf0b, 0x4fc1, 0x2480, 0x2b83]
 
 /**
- * @param {number[]|Uint8Array|Buffer} message
- * @param {number[]|Uint8Array|Buffer} secretKey
+ * @param {ArrayLike<number>} message
+ * @param {ArrayLike<number>} secretKey
  * @returns {number[]}
  * @private
  * @internal
  */
-function sign (message: number[] | Uint8Array | Buffer, secretKey: number[] | Uint8Array | Buffer): number[] {
-  const d = sha512(secretKey.slice(0, 32))
+function sign (message: ArrayLike<number>, secretKey: ArrayLike<number>): number[] {
+  const d = sha512(arraySlice(secretKey, 0, 32))
   d[0] &= 248
   d[31] &= 127
   d[31] |= 64
@@ -33,7 +33,7 @@ function sign (message: number[] | Uint8Array | Buffer, secretKey: number[] | Ui
   scalarbase(p, r)
   pack(sm, p)
 
-  arraySet(sm, secretKey.slice(32), 32)
+  arraySet(sm, arraySlice(secretKey, 32), 32)
 
   const h = sha512(sm)
   reduce(h)
@@ -48,21 +48,21 @@ function sign (message: number[] | Uint8Array | Buffer, secretKey: number[] | Ui
 }
 
 /**
- * @param {number[]|Uint8Array|Buffer} signature
- * @param {number[]|Uint8Array|Buffer} message
- * @param {number[]|Uint8Array|Buffer} pubKey
+ * @param {ArrayLike<number>} signature
+ * @param {ArrayLike<number>} message
+ * @param {ArrayLike<number>} pubKey
  * @returns {boolean}
  * @private
  * @internal
  */
-function verify (signature: number[] | Uint8Array | Buffer, message: number[] | Uint8Array | Buffer, pubKey: number[] | Uint8Array | Buffer): boolean {
+function verify (signature: ArrayLike<number>, message: ArrayLike<number>, pubKey: ArrayLike<number>): boolean {
   const sm: number[] = []
   const t: number[] = []
   const p: number[][] = [[], [], [], []]
   const q: number[][] = [[], [], [], []]
 
   /** @istanbul ignore if */
-  if (!unpackneg(q, pubKey)) {
+  if (!unpackneg(q, arraySlice(pubKey))) {
     return false
   }
 
@@ -85,12 +85,12 @@ function verify (signature: number[] | Uint8Array | Buffer, message: number[] | 
 
 /**
  * @param {number[][]} r
- * @param {number[]|Uint8Array|Buffer} p
+ * @param {number[]} p
  * @returns {boolean}
  * @private
  * @internal
  */
-function unpackneg (r: number[][], p: number[] | Uint8Array | Buffer): boolean {
+function unpackneg (r: number[][], p: number[]): boolean {
   const t: number[] = []
   const chk: number[] = []
   const num: number[] = []
@@ -159,11 +159,11 @@ function cryptoVerify32 (x: number[], y: number[]): boolean {
 
 /**
  * @param {number[]} o
- * @param {number[]|Uint8Array|Buffer} n
+ * @param {number[]} n
  * @private
  * @internal
  */
-function unpack25519 (o: number[], n: number[] | Uint8Array | Buffer): void {
+function unpack25519 (o: number[], n: number[]): void {
   for (let i = 0; i < 16; i++) {
     o[i] = n[2 * i] + (n[2 * i + 1] << 8)
   }
@@ -213,12 +213,12 @@ function neq25519 (a: number[], b: number[]): boolean {
 }
 
 /**
- * @param {number[]|Uint8Array|Buffer} seed
+ * @param {ArrayLike<number>} seed
  * @returns {number[]}
  * @private
  * @internal
  */
-function secretKeyFromSeed (seed: number[] | Uint8Array | Buffer): number[] {
+function secretKeyFromSeed (seed: ArrayLike<number>): number[] {
   const sk: number[] = []
   const pk: number[] = []
   const p: number[][] = [[], [], [], []]

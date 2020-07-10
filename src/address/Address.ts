@@ -31,20 +31,6 @@ import { uint16ToBytes, bytesToUint16 } from '../util/integer'
  */
 export class Address {
   /**
-   * Версия Genesis-адреса.
-   * @type {number}
-   * @constant
-   */
-  static Genesis: number = 0
-
-  /**
-   * Версия Umi-адреса.
-   * @type {number}
-   * @constant
-   */
-  static Umi: number = 21929
-
-  /**
    * Адрес в бинарном виде, длина 34 байта.
    * @type {number[]}
    * @private
@@ -53,27 +39,7 @@ export class Address {
   private readonly _bytes: number[] = arrayNew(34)
 
   constructor () {
-    this.setVersion(Address.Umi)
-  }
-
-  /**
-   * Версия адреса, префикс в числовом виде.
-   * @returns {number}
-   */
-  getVersion (): number {
-    return bytesToUint16(this._bytes.slice(0, 2))
-  }
-
-  /**
-   * Устанавливает версию адреса и возвращает this.
-   * @param {number} version Версия адреса.
-   * @returns {Address}
-   * @throws {Error}
-   */
-  setVersion (version: number) {
-    versionToPrefix(version) // validation
-    arraySet(this._bytes, uint16ToBytes(version))
-    return this
+    this.setPrefix('umi')
   }
 
   /**
@@ -90,7 +56,7 @@ export class Address {
    * @returns {Address}
    * @throws {Error}
    */
-  setPublicKey (publicKey: PublicKey): this {
+  setPublicKey (publicKey: PublicKey): Address {
     if (!(publicKey instanceof PublicKey)) {
       throw new Error('publicKey type must be PublicKey')
     }
@@ -101,9 +67,10 @@ export class Address {
   /**
    * Префикс адреса, три символа латиницы в нижнем регистре.
    * @returns {string}
+   * @throws {Error}
    */
   getPrefix (): string {
-    return versionToPrefix(this.getVersion())
+    return versionToPrefix(bytesToUint16(this._bytes.slice(0, 2)))
   }
 
   /**
@@ -112,8 +79,9 @@ export class Address {
    * @returns {Address}
    * @throws {Error}
    */
-  setPrefix (prefix: string): this {
-    return this.setVersion(prefixToVersion(prefix))
+  setPrefix (prefix: string): Address {
+    arraySet(this._bytes, uint16ToBytes(prefixToVersion(prefix)))
+    return this
   }
 
   /**
@@ -133,11 +101,11 @@ export class Address {
   }
 
   /**
-   * @param {number[]|Uint8Array|Buffer} bytes
+   * @param {ArrayLike<number>} bytes
    * @returns {Address}
    * @throws {Error}
    */
-  static fromBytes (bytes: number[] | Uint8Array | Buffer): Address {
+  static fromBytes (bytes: ArrayLike<number>): Address {
     if (bytes.length !== 34) {
       throw new Error('bytes length must be 34 bytes')
     }
@@ -160,7 +128,7 @@ export class Address {
 
   /**
    * Статический метод, создает объект из публичного или приватного ключа.
-   * @param {PublicKey|SecretKey} key Публичный или приватный ключ.
+   * @param {(PublicKey|SecretKey)} key Публичный или приватный ключ.
    * @returns {Address}
    */
   static fromKey (key: PublicKey | SecretKey): Address {

@@ -32,12 +32,12 @@ const sha256K: number[] = [
 /**
  * Безопасный алгоритм хеширования, SHA2-256.
  * @see https://en.wikipedia.org/wiki/SHA-2
- * @param {number[]|Uint8Array|Buffer} message message
+ * @param {ArrayLike<number>} message message
  * @returns {number[]} hash
  * @private
  * @internal
  */
-function sha256 (message: number[] | Uint8Array | Buffer): number[] {
+function sha256 (message: ArrayLike<number>): number[] {
   // SHA-256 initial hash values.
   const h = [0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A, 0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19]
 
@@ -66,12 +66,12 @@ function sha256 (message: number[] | Uint8Array | Buffer): number[] {
 }
 
 /**
- * @param {number[]|Uint8Array|Buffer} message
+ * @param {ArrayLike<number>} message
  * @returns {number[][]}
  * @private
  * @internal
  */
-function sha256PreProcess (message: number[] | Uint8Array | Buffer): number[][] {
+function sha256PreProcess (message: ArrayLike<number>): number[][] {
   const bytes: number[] = []
   let i
   let l

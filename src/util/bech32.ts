@@ -25,12 +25,12 @@ import { uint16ToBytes } from './integer'
 const bech32Alphabet = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l'
 
 /**
- * @param {number[]|Uint8Array|Buffer} bytes
+ * @param {number[]} bytes
  * @returns {string}
  * @private
  * @internal
  */
-function bech32Encode (bytes: number[] | Uint8Array | Buffer): string {
+function bech32Encode (bytes: number[]): string {
   const prefix = versionToPrefix((bytes[0] << 8) + bytes[1])
   const data = convert8to5(bytes.slice(2))
   const checksum = createChecksum(prefix, data)
@@ -95,12 +95,12 @@ function convert5to8 (data: string): number[] {
 }
 
 /**
- * @param {number[]|Uint8Array|Buffer} data
+ * @param {number[]} data
  * @returns {string}
  * @private
  * @internal
  */
-function convert8to5 (data: number[] | Uint8Array | Buffer): string {
+function convert8to5 (data: number[]): string {
   let value = 0
   let bits = 0
   let result: string = ''
@@ -148,12 +148,12 @@ function createChecksum (prefix: string, data: string): string {
 }
 
 /**
- * @param {number[]|Uint8Array|Buffer} values
+ * @param {number[]} values
  * @returns {number}
  * @private
  * @internal
  */
-function polyMod (values: number[] | Uint8Array | Buffer): number {
+function polyMod (values: number[]): number {
   const gen = [0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3]
   let chk = 1
   let top

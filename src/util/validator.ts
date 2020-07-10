@@ -19,14 +19,14 @@
 // SOFTWARE.
 
 /**
- * @param {number} arg
+ * @param arg
  * @param {number} min
  * @param {number} max
  * @throws {Error}
  * @private
  * @internal
  */
-function validateInt (arg: number, min: number, max: number): void {
+function validateInt (arg: any, min: number, max: number): void {
   if (typeof arg !== 'number') {
     throw new Error('incorrect type')
   }
@@ -41,13 +41,13 @@ function validateInt (arg: number, min: number, max: number): void {
 }
 
 /**
- * @param {string} arg
+ * @param arg
  * @param {number} [len]
  * @throws {Error}
  * @private
  * @internal
  */
-function validateStr (arg: string, len?: number): void {
+function validateStr (arg: any, len?: number): void {
   if (typeof arg !== 'string') {
     throw new Error('incorrect type')
   }

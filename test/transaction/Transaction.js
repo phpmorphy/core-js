@@ -99,10 +99,18 @@ describe('Transaction', function () {
     })
   })
 
-  it('value', function () {
-    const expected = 9007199254740991
-    const actual = new Transaction().setValue(expected).getValue()
-    assert.strictEqual(actual, expected)
+  describe('value', function () {
+    it('ошибка если некорректный тип', function () {
+      assert.throws(function () {
+        return new Transaction().setValue(1.23)
+      }, Error, 'not integer')
+    })
+
+    it('устанавливает сумму', function () {
+      const expected = 9007199254740991
+      const actual = new Transaction().setValue(expected).getValue()
+      assert.strictEqual(actual, expected)
+    })
   })
 
   it('prefix', function () {
@@ -112,7 +120,7 @@ describe('Transaction', function () {
   })
 
   describe('name', function () {
-    it('устанваливает имя', function () {
+    it('устанавливает имя', function () {
       const expected = 'ab-Пр-小篆-😭😰🥰'
       const actual = new Transaction().setName(expected).getName()
       assert.strictEqual(actual, expected)
@@ -133,10 +141,18 @@ describe('Transaction', function () {
     })
   })
 
-  it('profitPercent', function () {
-    const expected = 321
-    const actual = new Transaction().setProfitPercent(expected).getProfitPercent()
-    assert.strictEqual(actual, expected)
+  describe('profitPercent', function () {
+    it('устанавливает profitPercent', function () {
+      const expected = 321
+      const actual = new Transaction().setProfitPercent(expected).getProfitPercent()
+      assert.strictEqual(actual, expected)
+    })
+
+    it('ошибка, если некорректный тип', function () {
+      assert.throws(function () {
+        return new Transaction().setProfitPercent('100')
+      }, Error, 'incorrect type')
+    })
   })
 
   it('feePercent', function () {
@@ -151,7 +167,7 @@ describe('Transaction', function () {
     assert.strictEqual(actual, expected)
   })
 
-  it('base64', function () {
+  it('#toBase64()', function () {
     const expected = '' +
       'AQQhBNO+JWxYyqg/hwCNNTf+OSi4FPLvb+CdCgDNCQp0z6EIQk7qqt8TASDt45OWqVpIpGN34agVA7EWGndxFuVsnIF0AB//////' +
       '//8CAAAAAAAAAH9el6Akogt7CM0d1L8VBf2n436itp8C/lrd+4aksXn+XqGWBSCVxRVJSrICcuhwaO/xRaYwr4xAUyu0/5MYVQsA'

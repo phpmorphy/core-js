@@ -36,13 +36,13 @@ const I = [
   0xd7a7, 0x3dfb, 0x0099, 0x2b4d, 0xdf0b, 0x4fc1, 0x2480, 0x2b83
 ]
 /**
- * @param {number[]|Uint8Array|Buffer} message
- * @param {number[]|Uint8Array|Buffer} secretKey
+ * @param {ArrayLike<number>} message
+ * @param {ArrayLike<number>} secretKey
  * @returns {number[]}
  * @private
  */
 function sign (message, secretKey) {
-  const d = sha512.sha512(secretKey.slice(0, 32))
+  const d = sha512.sha512(array.arraySlice(secretKey, 0, 32))
   d[0] &= 248
   d[31] &= 127
   d[31] |= 64
@@ -53,7 +53,7 @@ function sign (message, secretKey) {
   const p = [[], [], [], []]
   common.scalarbase(p, r)
   common.pack(sm, p)
-  array.arraySet(sm, secretKey.slice(32), 32)
+  array.arraySet(sm, array.arraySlice(secretKey, 32), 32)
   const h = sha512.sha512(sm)
   common.reduce(h)
   for (let i = 0; i < 32; i++) {
@@ -64,9 +64,9 @@ function sign (message, secretKey) {
   return sm.slice(0, 32).concat(common.modL(sm.slice(32), r).slice(0, 32))
 }
 /**
- * @param {number[]|Uint8Array|Buffer} signature
- * @param {number[]|Uint8Array|Buffer} message
- * @param {number[]|Uint8Array|Buffer} pubKey
+ * @param {ArrayLike<number>} signature
+ * @param {ArrayLike<number>} message
+ * @param {ArrayLike<number>} pubKey
  * @returns {boolean}
  * @private
  */
@@ -76,7 +76,7 @@ function verify (signature, message, pubKey) {
   const p = [[], [], [], []]
   const q = [[], [], [], []]
   /* istanbul ignore if */
-  if (!unpackneg(q, pubKey)) {
+  if (!unpackneg(q, array.arraySlice(pubKey))) {
     return false
   }
   array.arraySet(sm, signature, 0)
@@ -93,7 +93,7 @@ function verify (signature, message, pubKey) {
 }
 /**
  * @param {number[][]} r
- * @param {number[]|Uint8Array|Buffer} p
+ * @param {number[]} p
  * @returns {boolean}
  * @private
  */
@@ -153,7 +153,7 @@ function cryptoVerify32 (x, y) {
 }
 /**
  * @param {number[]} o
- * @param {number[]|Uint8Array|Buffer} n
+ * @param {number[]} n
  * @private
  */
 function unpack25519 (o, n) {
@@ -197,7 +197,7 @@ function neq25519 (a, b) {
   return cryptoVerify32(c, d)
 }
 /**
- * @param {number[]|Uint8Array|Buffer} seed
+ * @param {ArrayLike<number>} seed
  * @returns {number[]}
  * @private
  */

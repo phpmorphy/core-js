@@ -4,20 +4,6 @@ const PublicKey = require('../../dist/index.js').PublicKey
 const assert = require('chai').assert
 
 describe('Address', function () {
-  describe('константы', function () {
-    const tests = [
-      { args: 'Genesis', expected: 0 },
-      { args: 'Umi', expected: 21929 }
-    ]
-
-    tests.forEach(function (test) {
-      it(test.args, function () {
-        const actual = Address[test.args]
-        assert.strictEqual(actual, test.expected)
-      })
-    })
-  })
-
   describe('.fromBytes()', function () {
     it('ошибка если некорректная длина', function () {
       assert.throws(function () {
@@ -147,63 +133,17 @@ describe('Address', function () {
     })
   })
 
-  describe('version', function () {
-    describe('ошибка', function () {
-      const tests = [
-        { desc: 'строка', args: '1057' },
-        { desc: 'float', args: 1057.1 },
-        {
-          desc: 'некорректный первый символ (26)',
-          args: (27 << 10) + (1 << 5) + 1
-        },
-        {
-          desc: 'некорректный первый символ (0)',
-          args: (0 << 10) + (1 << 5) + 1
-        },
-        {
-          desc: 'некорректный второй символ (26)',
-          args: (1 << 10) + (27 << 5) + 1
-        },
-        {
-          desc: 'некорректный второй символ (0)',
-          args: (1 << 10) + (0 << 5) + 1
-        },
-        {
-          desc: 'некорректный третий символ (26)',
-          args: (1 << 10) + (1 << 5) + 27
-        },
-        { desc: 'некорректная версию', args: 65534 }
-      ]
-
-      tests.forEach(function (test) {
-        it(test.desc, function () {
-          assert.throws(function () {
-            new Address().setVersion(test.args)
-          }, Error)
-        })
-      })
-    })
-
-    describe('версия', function () {
-      const tests = [
-        { desc: '0', args: 0, expected: 0 },
-        { desc: '1057', args: 1057, expected: 1057 },
-        { desc: '1091', args: 1091, expected: 1091 },
-        { desc: '21929', args: 21929, expected: 21929 },
-        { desc: '27482', args: 27482, expected: 27482 }
-      ]
-
-      tests.forEach(function (test) {
-        it(test.desc, function () {
-          const actual = new Address().setVersion(test.args).getVersion()
-          assert.strictEqual(actual, test.expected)
-        })
-      })
-    })
-  })
-
   describe('prefix', function () {
     describe('ошибка', function () {
+      it('некорректная версия (bytes)', function () {
+        const bytes = new Uint8Array(34)
+        bytes[0] = 255
+        bytes[1] = 255
+        assert.throws(function () {
+          Address.fromBytes(bytes).getPrefix()
+        }, Error, 'bech32: incorrect version')
+      })
+
       const tests = [
         { desc: 'тип', args: {} },
         { desc: 'короткий', args: 'ab' },

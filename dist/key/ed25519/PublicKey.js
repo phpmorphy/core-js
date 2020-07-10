@@ -32,7 +32,7 @@ const index = require('../../util/ed25519/index.js')
  */
 class PublicKey {
   /**
-   * @param {number[]|Uint8Array|Buffer} bytes Публичный ключ в формате libsodium, 32 байта (256 бит).
+   * @param {ArrayLike<number>} bytes Публичный ключ в формате libsodium, 32 байта (256 бит).
    * @throws {Error}
    */
   constructor (bytes) {
@@ -59,6 +59,7 @@ class PublicKey {
   /**
    * Публичный ключ.
    * @returns {PublicKey}
+   * @private
    */
   getPublicKey () {
     return this
@@ -66,8 +67,8 @@ class PublicKey {
 
   /**
    * Проверяет цифровую подпись.
-   * @param {number[]|Uint8Array|Buffer} signature Подпись, 64 байта.
-   * @param {number[]|Uint8Array|Buffer} message Сообщение
+   * @param {ArrayLike<number>} signature Подпись, 64 байта.
+   * @param {ArrayLike<number>} message Сообщение.
    * @returns {boolean}
    * @throws {Error}
    * @example

@@ -41,27 +41,7 @@ class Address {
      * @private
      */
     this._bytes = array.arrayNew(34)
-    this.setVersion(Address.Umi)
-  }
-
-  /**
-   * Версия адреса, префикс в числовом виде.
-   * @returns {number}
-   */
-  getVersion () {
-    return integer.bytesToUint16(this._bytes.slice(0, 2))
-  }
-
-  /**
-   * Устанавливает версию адреса и возвращает this.
-   * @param {number} version Версия адреса.
-   * @returns {Address}
-   * @throws {Error}
-   */
-  setVersion (version) {
-    converter.versionToPrefix(version)
-    array.arraySet(this._bytes, integer.uint16ToBytes(version))
-    return this
+    this.setPrefix('umi')
   }
 
   /**
@@ -89,9 +69,10 @@ class Address {
   /**
    * Префикс адреса, три символа латиницы в нижнем регистре.
    * @returns {string}
+   * @throws {Error}
    */
   getPrefix () {
-    return converter.versionToPrefix(this.getVersion())
+    return converter.versionToPrefix(integer.bytesToUint16(this._bytes.slice(0, 2)))
   }
 
   /**
@@ -101,7 +82,8 @@ class Address {
    * @throws {Error}
    */
   setPrefix (prefix) {
-    return this.setVersion(converter.prefixToVersion(prefix))
+    array.arraySet(this._bytes, integer.uint16ToBytes(converter.prefixToVersion(prefix)))
+    return this
   }
 
   /**
@@ -121,7 +103,7 @@ class Address {
   }
 
   /**
-   * @param {number[]|Uint8Array|Buffer} bytes
+   * @param {ArrayLike<number>} bytes
    * @returns {Address}
    * @throws {Error}
    */
@@ -148,24 +130,12 @@ class Address {
 
   /**
    * Статический метод, создает объект из публичного или приватного ключа.
-   * @param {PublicKey|SecretKey} key Публичный или приватный ключ.
+   * @param {(PublicKey|SecretKey)} key Публичный или приватный ключ.
    * @returns {Address}
    */
   static fromKey (key) {
     return new Address().setPublicKey(key.getPublicKey())
   }
 }
-/**
- * Версия Genesis-адреса.
- * @type {number}
- * @constant
- */
-Address.Genesis = 0
-/**
- * Версия Umi-адреса.
- * @type {number}
- * @constant
- */
-Address.Umi = 21929
 
 exports.Address = Address

@@ -1,34 +1,9 @@
-/// <reference types="node" />
 /**
  * Базовый класс для работы с адресами.
  * @class
  */
 export declare class Address {
-    /**
-     * Версия Genesis-адреса.
-     * @type {number}
-     * @constant
-     */
-    static Genesis: number;
-    /**
-     * Версия Umi-адреса.
-     * @type {number}
-     * @constant
-     */
-    static Umi: number;
     constructor();
-    /**
-     * Версия адреса, префикс в числовом виде.
-     * @returns {number}
-     */
-    getVersion(): number;
-    /**
-     * Устанавливает версию адреса и возвращает this.
-     * @param {number} version Версия адреса.
-     * @returns {Address}
-     * @throws {Error}
-     */
-    setVersion(version: number): this;
     /**
      * Публичный ключ.
      * @returns {PublicKey}
@@ -40,10 +15,11 @@ export declare class Address {
      * @returns {Address}
      * @throws {Error}
      */
-    setPublicKey(publicKey: PublicKey): this;
+    setPublicKey(publicKey: PublicKey): Address;
     /**
      * Префикс адреса, три символа латиницы в нижнем регистре.
      * @returns {string}
+     * @throws {Error}
      */
     getPrefix(): string;
     /**
@@ -52,7 +28,7 @@ export declare class Address {
      * @returns {Address}
      * @throws {Error}
      */
-    setPrefix(prefix: string): this;
+    setPrefix(prefix: string): Address;
     /**
      * Адрес в формате Bech32, длина 62 символа.
      * @returns {string}
@@ -64,11 +40,11 @@ export declare class Address {
      */
     toBytes(): number[];
     /**
-     * @param {number[]|Uint8Array|Buffer} bytes
+     * @param {ArrayLike<number>} bytes
      * @returns {Address}
      * @throws {Error}
      */
-    static fromBytes(bytes: number[] | Uint8Array | Buffer): Address;
+    static fromBytes(bytes: ArrayLike<number>): Address;
     /**
      * Статический метод, создает объект из адреса в формате Bech32.
      * @param {string} bech32 Адрес в формате Bech32, длина 62 или 65 символов.
@@ -78,7 +54,7 @@ export declare class Address {
     static fromBech32(bech32: string): Address;
     /**
      * Статический метод, создает объект из публичного или приватного ключа.
-     * @param {PublicKey|SecretKey} key Публичный или приватный ключ.
+     * @param {(PublicKey|SecretKey)} key Публичный или приватный ключ.
      * @returns {Address}
      */
     static fromKey(key: PublicKey | SecretKey): Address;
@@ -101,24 +77,19 @@ export declare class BlockHeader {
  */
 export declare class PublicKey {
     /**
-     * @param {number[]|Uint8Array|Buffer} bytes Публичный ключ в формате libsodium, 32 байта (256 бит).
+     * @param {ArrayLike<number>} bytes Публичный ключ в формате libsodium, 32 байта (256 бит).
      * @throws {Error}
      */
-    constructor(bytes: number[] | Uint8Array | Buffer);
+    constructor(bytes: ArrayLike<number>);
     /**
      * Публичный ключ в формате libsodium, 32 байта (256 бит).
      * @returns {number[]}
      */
     toBytes(): number[];
     /**
-     * Публичный ключ.
-     * @returns {PublicKey}
-     */
-    getPublicKey(): this;
-    /**
      * Проверяет цифровую подпись.
-     * @param {number[]|Uint8Array|Buffer} signature Подпись, 64 байта.
-     * @param {number[]|Uint8Array|Buffer} message Сообщение
+     * @param {ArrayLike<number>} signature Подпись, 64 байта.
+     * @param {ArrayLike<number>} message Сообщение.
      * @returns {boolean}
      * @throws {Error}
      * @example
@@ -127,7 +98,7 @@ export declare class PublicKey {
      * let msg = new Uint8Array(1)
      * let ver = new PublicKey(key).verifySignature(sig, msg)
      */
-    verifySignature(signature: number[] | Uint8Array | Buffer, message: number[] | Uint8Array | Buffer): boolean;
+    verifySignature(signature: ArrayLike<number>, message: ArrayLike<number>): boolean;
 }
 /**
  * Базовый класс для работы с приватными ключами.
@@ -135,11 +106,11 @@ export declare class PublicKey {
  */
 export declare class SecretKey {
     /**
-     * @param {number[]|Uint8Array|Buffer} bytes Приватный ключ в бинарном виде.
+     * @param {ArrayLike<number>} bytes Приватный ключ в бинарном виде.
      * В формате libsodium, 64 байта (512 бит).
      * @throws {Error}
      */
-    constructor(bytes: number[] | Uint8Array | Buffer);
+    constructor(bytes: ArrayLike<number>);
     /**
      * Приватный ключ в бинарном виде. В формате libsodium, 64 байта (512 бит).
      * @returns {number[]}
@@ -152,36 +123,34 @@ export declare class SecretKey {
     getPublicKey(): PublicKey;
     /**
      * Создает цифровую подпись сообщения.
-     * @param {number[]|Uint8Array|Buffer} message Сообщение, которое необходимо подписать.
+     * @param {ArrayLike<number>} message Сообщение, которое необходимо подписать.
      * @returns {number[]} Цифровая подпись длиной 64 байта (512 бит).
      * @example
      * let seed = new Uint8Array(32)
      * let msg = new Uint8Array(1)
      * let sig = SecretKey.fromSeed(seed).sign(msg)
      */
-    sign(message: number[] | Uint8Array | Buffer): number[];
+    sign(message: ArrayLike<number>): number[];
     /**
      * Статический фабричный метод, создающий приватный ключ из seed.
-     * Libsodium принимает seed длиной 32 байта (256 бит), если длина
+     * Libsodium принимает seed длиной 32 байта (256 бит), поэтому если длина
      * отличается, то берется sha256 хэш.
-     * @param {number[]|Uint8Array|Buffer} seed Seed длиной от 0 до 128 байт.
+     * @param {ArrayLike<number>} seed Массив байтов любой длины.
      * @returns {SecretKey}
      * @example
      * let seed = new Uint8Array(32)
      * let key = SecretKey.fromSeed(seed)
      */
-    static fromSeed(seed: number[] | Uint8Array | Buffer): SecretKey;
+    static fromSeed(seed: ArrayLike<number>): SecretKey;
 }
 /**
  * Класс для работы с транзакциями.
  * @class
- * @param {number[]|Uint8Array|Buffer} [bytes] Транзакция в бинарном виде, 150 байт.
- * @throws {Error}
  */
 export declare class Transaction {
     /**
-     * Genesis-транзакция.
-     * Может быть добавлена только в Genesis-блок.
+     * Genesis-транзакция.\
+     * Может быть добавлена только в Genesis-блок.\
      * Адрес отправителя должен иметь префикс genesis, адрес получателя - umi.
      * @type {number}
      * @constant
@@ -189,12 +158,12 @@ export declare class Transaction {
      * let secKey = SecretKey.fromSeed(new Uint8Array(32))
      * let sender = Address.fromKey(secKey).setPrefix('genesis')
      * let recipient = Address.fromKey(secKey).setPrefix('umi')
-     * let tx = new Transaction().
-     *   setVersion(Transaction.Genesis).
-     *   setSender(sender).
-     *   setRecipient(recipient).
-     *   setValue(42).
-     *   sign(secKey)
+     * let tx = new Transaction()
+     *   .setVersion(Transaction.Genesis)
+     *   .setSender(sender)
+     *   .setRecipient(recipient)
+     *   .setValue(42)
+     *   .sign(secKey)
      */
     static Genesis: number;
     /**
@@ -205,12 +174,12 @@ export declare class Transaction {
      * let secKey = SecretKey.fromSeed(new Uint8Array(32))
      * let sender = Address.fromKey(secKey).setPrefix('umi')
      * let recipient = Address.fromKey(secKey).setPrefix('aaa')
-     * let tx = new Transaction().
-     *   setVersion(Transaction.Basic).
-     *   setSender(sender).
-     *   setRecipient(recipient).
-     *   setValue(42).
-     *   sign(secKey)
+     * let tx = new Transaction()
+     *   .setVersion(Transaction.Basic)
+     *   .setSender(sender)
+     *   .setRecipient(recipient)
+     *   .setValue(42)
+     *   .sign(secKey)
      */
     static Basic: number;
     /**
@@ -220,14 +189,14 @@ export declare class Transaction {
      * @example
      * let secKey = SecretKey.fromSeed(new Uint8Array(32))
      * let sender = Address.fromKey(secKey).setPrefix('umi')
-     * let tx = new Transaction().
-     *   setVersion(Transaction.CreateStructure).
-     *   setSender(sender).
-     *   setPrefix('aaa').
-     *   setName('🙂').
-     *   setProfitPercent(100).
-     *   setFeePercent(0).
-     *   sign(secKey)
+     * let tx = new Transaction()
+     *   .setVersion(Transaction.CreateStructure)
+     *   .setSender(sender)
+     *   .setPrefix('aaa')
+     *   .setName('🙂')
+     *   .setProfitPercent(100)
+     *   .setFeePercent(0)
+     *   .sign(secKey)
      */
     static CreateStructure: number;
     /**
@@ -237,14 +206,14 @@ export declare class Transaction {
      * @example
      * let secKey = SecretKey.fromSeed(new Uint8Array(32))
      * let sender = Address.fromKey(secKey).setPrefix('umi')
-     * let tx = new Transaction().
-     *   setVersion(Transaction.UpdateStructure).
-     *   setSender(sender).
-     *   setPrefix('aaa').
-     *   setName('🙂').
-     *   setProfitPercent(500).
-     *   setFeePercent(2000).
-     *   sign(secKey)
+     * let tx = new Transaction()
+     *   .setVersion(Transaction.UpdateStructure)
+     *   .setSender(sender)
+     *   .setPrefix('aaa')
+     *   .setName('🙂')
+     *   .setProfitPercent(500)
+     *   .setFeePercent(2000)
+     *   .sign(secKey)
      */
     static UpdateStructure: number;
     /**
@@ -255,11 +224,11 @@ export declare class Transaction {
      * let secKey = SecretKey.fromSeed(new Uint8Array(32))
      * let sender = Address.fromKey(secKey).setPrefix('umi')
      * let newPrf = Address.fromBech32('aaa18d4z00xwk6jz6c4r4rgz5mcdwdjny9thrh3y8f36cpy2rz6emg5svsuw66')
-     * let tx = new Transaction().
-     *   setVersion(Transaction.UpdateProfitAddress).
-     *   setSender(sender).
-     *   setRecipient(newPrf).
-     *   sign(secKey)
+     * let tx = new Transaction()
+     *   .setVersion(Transaction.UpdateProfitAddress)
+     *   .setSender(sender)
+     *   .setRecipient(newPrf)
+     *   .sign(secKey)
      */
     static UpdateProfitAddress: number;
     /**
@@ -270,11 +239,11 @@ export declare class Transaction {
      * let secKey = SecretKey.fromSeed(new Uint8Array(32))
      * let sender = Address.fromKey(secKey).setPrefix('umi')
      * let newFee = Address.fromBech32('aaa18d4z00xwk6jz6c4r4rgz5mcdwdjny9thrh3y8f36cpy2rz6emg5svsuw66')
-     * let tx = new Transaction().
-     *   setVersion(Transaction.UpdateFeeAddress).
-     *   setSender(sender).
-     *   setRecipient(newFee).
-     *   sign(secKey)
+     * let tx = new Transaction()
+     *   .setVersion(Transaction.UpdateFeeAddress)
+     *   .setSender(sender)
+     *   .setRecipient(newFee)
+     *   .sign(secKey)
      */
     static UpdateFeeAddress: number;
     /**
@@ -285,11 +254,11 @@ export declare class Transaction {
      * let secKey = SecretKey.fromSeed(new Uint8Array(32))
      * let sender = Address.fromKey(secKey).setPrefix('umi')
      * let transit = Address.fromBech32('aaa18d4z00xwk6jz6c4r4rgz5mcdwdjny9thrh3y8f36cpy2rz6emg5svsuw66')
-     * let tx = new Transaction().
-     *   setVersion(Transaction.CreateTransitAddress).
-     *   setSender(sender).
-     *   setRecipient(transit).
-     *   sign(secKey)
+     * let tx = new Transaction()
+     *   .setVersion(Transaction.CreateTransitAddress)
+     *   .setSender(sender)
+     *   .setRecipient(transit)
+     *   .sign(secKey)
      */
     static CreateTransitAddress: number;
     /**
@@ -300,11 +269,11 @@ export declare class Transaction {
      * let secKey = SecretKey.fromSeed(new Uint8Array(32))
      * let sender = Address.fromKey(secKey).setPrefix('umi')
      * let transit = Address.fromBech32('aaa18d4z00xwk6jz6c4r4rgz5mcdwdjny9thrh3y8f36cpy2rz6emg5svsuw66')
-     * let tx = new Transaction().
-     *   setVersion(Transaction.DeleteTransitAddress).
-     *   setSender(sender).
-     *   setRecipient(transit).
-     *   sign(secKey)
+     * let tx = new Transaction()
+     *   .setVersion(Transaction.DeleteTransitAddress)
+     *   .setSender(sender)
+     *   .setRecipient(transit)
+     *   .sign(secKey)
      */
     static DeleteTransitAddress: number;
     /**
@@ -324,17 +293,7 @@ export declare class Transaction {
     getHash(): number[];
     /**
      * Версия (тип) транзакции.
-     * Обязательное поле, необходимо задать сразу после создания новой транзакции.
-     * Изменять тип транзакции, после того как он был задан, нельзя.
      * @returns {number}
-     * @see Transaction.Genesis
-     * @see Transaction.Basic
-     * @see Transaction.CreateStructure
-     * @see Transaction.UpdateStructure
-     * @see Transaction.UpdateProfitAddress
-     * @see Transaction.UpdateFeeAddress
-     * @see Transaction.CreateTransitAddress
-     * @see Transaction.DeleteTransitAddress
      */
     getVersion(): number;
     /**
@@ -351,7 +310,7 @@ export declare class Transaction {
      * @see Transaction.CreateTransitAddress
      * @see Transaction.DeleteTransitAddress
      */
-    setVersion(version: number): this;
+    setVersion(version: number): Transaction;
     /**
      * Отправитель. Доступно для всех типов транзакций.
      * @returns {Address}
@@ -363,39 +322,38 @@ export declare class Transaction {
      * @returns {Transaction}
      * @throws {Error}
      */
-    setSender(address: Address): this;
+    setSender(address: Address): Transaction;
     /**
-     * Получатель.
+     * Получатель.\
      * Недоступно для транзакций CreateStructure и UpdateStructure.
      * @returns {Address}
      */
     getRecipient(): Address;
     /**
-     * Устанавливает получателя и возвращает this.
-     * Доступно для всех типов транзакций кроме CreateStructure и UpdateStructure.
+     * Устанавливает получателя и возвращает this.\
+     * Недоступно для транзакций CreateStructure и UpdateStructure.
      * @param {Address} address Адрес получателя.
      * @returns {Transaction}
      * @throws {Error}
      */
-    setRecipient(address: Address): this;
+    setRecipient(address: Address): Transaction;
     /**
-     * Сумма перевода в UMI-центах, цело число в промежутке от 1 до 18446744073709551615.
-     * Из-за ограничений JavaScript максимальное доступное значение 9007199254740991.
+     * Сумма перевода в UMI-центах, цело число в промежутке от 1 до 18446744073709551615.\
      * Доступно только для Genesis и Basic транзакций.
      * @returns {number}
      */
     getValue(): number;
     /**
-     * Устанавливает сумму и возвращает this.
-     * Принимает значения в промежутке от 1 до 18446744073709551615.
+     * Устанавливает сумму и возвращает this.\
+     * Принимает значения в промежутке от 1 до 18446744073709551615.\
      * Доступно только для Genesis и Basic транзакций.
      * @param {number} value
      * @returns {Transaction}
      * @throws {Error}
      */
-    setValue(value: number): this;
+    setValue(value: number): Transaction;
     /**
-     * Nonce, целое число в промежутке от 0 до 18446744073709551615.
+     * Nonce, целое число в промежутке от 0 до 18446744073709551615.\
      * Генерируется автоматически при вызове sign().
      * @returns {number}
      */
@@ -406,27 +364,26 @@ export declare class Transaction {
      * @returns {Transaction}
      * @throws {Error}
      */
-    setNonce(nonce: number): this;
+    setNonce(nonce: number): Transaction;
     /**
      * Цифровая подпись транзакции, длина 64 байта.
-     * Генерируется автоматически при вызове sign().
      * @returns {number[]}
      */
-    getSignature(): number[] | Uint8Array | Buffer;
+    getSignature(): number[];
     /**
      * Устанавливает цифровую подпись и возвращает this.
-     * @param {number[]|Uint8Array|Buffer} signature Подпись, длина 64 байта.
+     * @param {ArrayLike<number>} signature Подпись, длина 64 байта.
      * @returns {Transaction}
      * @throws {Error}
      */
-    setSignature(signature: number[] | Uint8Array | Buffer): this;
+    setSignature(signature: ArrayLike<number>): Transaction;
     /**
      * Подписать транзакцию приватным ключом.
      * @param {SecretKey} secretKey
      * @returns {Transaction}
      * @throws {Error}
      */
-    sign(secretKey: SecretKey): this;
+    sign(secretKey: SecretKey): Transaction;
     /**
      * Проверить транзакцию на соответствие формальным правилам.
      * @returns {boolean}
@@ -434,66 +391,66 @@ export declare class Transaction {
      */
     verify(): boolean;
     /**
-     * Префикс адресов, принадлежащих структуре.
+     * Префикс адресов, принадлежащих структуре.\
      * Доступно только для CreateStructure и UpdateStructure.
      * @returns {string}
      * @returns {Error}
      */
     getPrefix(): string;
     /**
-     * Устанавливает префикс и возвращает this.
+     * Устанавливает префикс и возвращает this.\
      * Доступно только для CreateStructure и UpdateStructure.
      * @param {string} prefix Префикс адресов, принадлежащих структуре.
      * @returns {Transaction}
      * @throws {Error}
      */
-    setPrefix(prefix: string): this;
+    setPrefix(prefix: string): Transaction;
     /**
-     * Название структуры в кодировке UTF-8.
+     * Название структуры в кодировке UTF-8.\
      * Доступно только для CreateStructure и UpdateStructure.
      * @returns {string}
      * @throws {Error}
      */
     getName(): string;
     /**
-     * Устанавливает название структуры.
+     * Устанавливает название структуры и возвращает this.\
      * Доступно только для CreateStructure и UpdateStructure.
      * @param {string} name Название структуры в кодировке UTF-8.
      * @returns {Transaction}
      * @throws {Error}
      */
-    setName(name: string): this;
+    setName(name: string): Transaction;
     /**
-     * Профита в сотых долях процента с шагом в 0.01%.
-     * Принимает значения от 100 до 500 (соответственно от 1% до 5%).
+     * Профита в сотых долях процента с шагом в 0.01%.\
+     * Принимает значения от 100 до 500 (соответственно от 1% до 5%).\
      * Доступно только для CreateStructure и UpdateStructure.
      * @returns {number}
      */
     getProfitPercent(): number;
     /**
-     * Устанавливает процент профита и возвращает this.
-     * Доступно только для CreateStructure и UpdateStructure.
+     * Устанавливает процент профита и возвращает this.\
+     * Доступно только для CreateStructure и UpdateStructure.\
      * @param {number} percent Профит в сотых долях процента с шагом в 0.01%.
      * Принимает значения от 100 до 500 (соответственно от 1% до 5%).
      * @returns {Transaction}
      * @throws {Error}
      */
-    setProfitPercent(percent: number): this;
+    setProfitPercent(percent: number): Transaction;
     /**
-     * Комиссия в сотых долях процента с шагом в 0.01%.
-     * Принимает значения от 0 до 2000 (соответственно от 0% до 20%).
+     * Комиссия в сотых долях процента с шагом в 0.01%.\
+     * Принимает значения от 0 до 2000 (соответственно от 0% до 20%).\
      * Доступно только для CreateStructure и UpdateStructure.
      * @returns {number}
      */
     getFeePercent(): number;
     /**
-     * Устанавливает размер комиссии и возвращает this.
+     * Устанавливает размер комиссии и возвращает this.\
      * Доступно только для CreateStructure и UpdateStructure.
      * @param {number} percent Комиссия в сотых долях процента с шагом в 0.01%. Принимает значения от 0 до 2000 (соответственно от 0% до 20%).
      * @returns {Transaction}
      * @throws {Error}
      */
-    setFeePercent(percent: number): this;
+    setFeePercent(percent: number): Transaction;
     /**
      * Статический метод, создает объект из Base64 строки.
      * @param {string} base64
@@ -502,9 +459,10 @@ export declare class Transaction {
      */
     static fromBase64(base64: string): Transaction;
     /**
-     * @param {number[]|Uint8Array|Buffer} bytes
+     * Статический метод, создает объект из массива байтов.
+     * @param {ArrayLike<number>} bytes
      * @returns {Transaction}
      * @throws {Error}
      */
-    static fromBytes(bytes: number[] | Uint8Array | Buffer): Transaction;
+    static fromBytes(bytes: ArrayLike<number>): Transaction;
 }

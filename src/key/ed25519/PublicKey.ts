@@ -35,10 +35,10 @@ export class PublicKey {
   private readonly _bytes: number[] = []
 
   /**
-   * @param {number[]|Uint8Array|Buffer} bytes Публичный ключ в формате libsodium, 32 байта (256 бит).
+   * @param {ArrayLike<number>} bytes Публичный ключ в формате libsodium, 32 байта (256 бит).
    * @throws {Error}
    */
-  constructor (bytes: number[] | Uint8Array | Buffer) {
+  constructor (bytes: ArrayLike<number>) {
     if (bytes.length !== 32) {
       throw new Error('invalid length')
     }
@@ -56,15 +56,17 @@ export class PublicKey {
   /**
    * Публичный ключ.
    * @returns {PublicKey}
+   * @private
+   * @internal
    */
-  getPublicKey (): this {
+  getPublicKey (): PublicKey {
     return this
   }
 
   /**
    * Проверяет цифровую подпись.
-   * @param {number[]|Uint8Array|Buffer} signature Подпись, 64 байта.
-   * @param {number[]|Uint8Array|Buffer} message Сообщение
+   * @param {ArrayLike<number>} signature Подпись, 64 байта.
+   * @param {ArrayLike<number>} message Сообщение.
    * @returns {boolean}
    * @throws {Error}
    * @example
@@ -74,8 +76,8 @@ export class PublicKey {
    * let ver = new PublicKey(key).verifySignature(sig, msg)
    */
   verifySignature (
-    signature: number[] | Uint8Array | Buffer,
-    message: number[] | Uint8Array | Buffer
+    signature: ArrayLike<number>,
+    message: ArrayLike<number>
   ): boolean {
     if (signature.length !== 64) {
       throw new Error('invalid length')

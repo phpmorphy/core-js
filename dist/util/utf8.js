@@ -51,7 +51,7 @@ function Utf8Encode (text) {
 }
 /**
  * Конвертер из типизированного массива UTF-8 байтов в строку.
- * @param {number[]|Uint8Array|Buffer} bytes
+ * @param {number[]} bytes
  * @returns {string}
  * @private
  */

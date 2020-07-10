@@ -39,7 +39,7 @@ function arrayFill (array: number[], length: number, value?: any) {
  * @internal
  */
 function arrayNew (length: number): number[] {
-  const a: number[] = []
+  const a = []
   for (let i = 0; i < length; i++) {
     a[i] = 0
   }
@@ -48,13 +48,13 @@ function arrayNew (length: number): number[] {
 
 /**
  * @param {number[]} a
- * @param {number[]|Uint8Array|Buffer} b
+ * @param {ArrayLike<number>} b
  * @param {number} [offset]
  * @param {number} [length]
  * @private
  * @internal
  */
-function arraySet (a: number[], b: number[] | Uint8Array | Buffer, offset?: number, length?: number) {
+function arraySet (a: number[], b: ArrayLike<number>, offset?: number, length?: number) {
   const o = offset || 0
   const l = length || b.length
   for (let i = 0; i < l; i++) {
@@ -62,4 +62,22 @@ function arraySet (a: number[], b: number[] | Uint8Array | Buffer, offset?: numb
   }
 }
 
-export { arrayFill, arraySet, arrayNew }
+/**
+ * @param {ArrayLike<number>} a
+ * @param {number} [begin]
+ * @param {number} [end]
+ * @returns {number[]}
+ * @private
+ * @internal
+ */
+function arraySlice (a: ArrayLike<number>, begin?: number, end?: number): number[] {
+  const b = begin || 0
+  const e = end || a.length
+  const r = []
+  for (let i = b; i < e; i++) {
+    r.push(a[i])
+  }
+  return r
+}
+
+export { arrayFill, arraySet, arrayNew, arraySlice }

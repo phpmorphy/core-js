@@ -21,41 +21,45 @@
 </p>
 
 ## Оглавление
--   Введение
+-   [Введение](#введение)
 
 -   [Установка](#установка)
-    - npm
-    - yarn
+    - [npm](#npm)
+    - [yarn](#yarn)
 
 -   [Подключение](#подключение)
-    - CommonJS
-    - ES Modules
-    - CDN
+    - [CommonJS](#commonjs)
+    - [ES Modules](#es-modules)
+    - [CDN](#cdn)
 
 -   [Примеры](#примеры)
-    -   [Ключи](#ключи)
+    -   [Мнемоники](#мнемоники)
+        - [Seed из мнемонической фразы](#seed-из-мнемонической-фразы)
 
-        - Приватный ключ из seed
-        - Приватный ключ из мнемонической фразы
-        - Создание и проверка цифровой подписи
+    -   [Ключи](#ключи)
+        - [Ключи из seed'а](#ключи-из-seed'а)
+        - [Подписать сообщение](#подписать-сообщение)
+        - [Проверить подпись](#проверить-подпись)
 
     -   [Адреса](#адреса)
-        - Адреса в формате Bech32
-        - Адрес из приватного или публичного ключа
-        - Установка и смена префикса адреса
+        - [Адрес в формате Bech32](#адрес-в-формате-bech32)
+        - [Адрес из приватного или публичного ключа](#адрес-из-приватного-или-публичного-ключа)
+        - [Установить префикс адреса](#установить-префикс-адреса)
 
     -   [Транзакции](#транзакции)
-        - Отправка монет
-        - Создание структуры
-        - Обновление настроек структуры
-        - Установка адреса для начисления профита
-        - Установка адреса для перевода комиссии
-        - Активация транзитного адреса
-        - Деактивация транзитного адреса
+        - [Отправить монеты](#отправить-монеты)
+        - [Создать структуру](#создать-структуру)
+        - [Обновить настройки структуры](#обновить-настройки-структуры)
+        - [Установить адрес для начисления профита](#установить-адрес-для-начисления-профита)
+        - [Установить адрес для перевода комиссии](#установить-адрес-для-перевода-комиссии)
+        - [Активировать транзитный адрес](#активировать-транзитный-адрес)
+        - [Деактивировать транзитный адрес](#деактивировать-транзитный-адрес)
 
     -   [Блоки](#блоки)
-        - Создание и подпись блоков
-        - Парсинг блоков
+        - Создать и подписать блок
+        - Распарсить блок
+
+-   [PGP](#pgp)
 
 -   [Лицензия](#лицензия)
 
@@ -75,142 +79,283 @@ yarn add @umi-top/umi-core-js
 ## Подключение
 
 ### CommonJS
-Node
-
-### ES Modules
-Webpack, Rollup, Parcel, Node
-
-### CDN
-Browser
-
-Import as CommonJS:
+Если вы используете [Node.js](https://nodejs.org/api/modules.html):
 ```javascript
 const umi = require('@umi-top/umi-core-js')
-const bip39 = require('bip39')
-```
-Import as ES6 / ES2015 Module
-```javascript
-import * as umi from '@umi-top/umi-core-js'
-import * as bip39 from 'bip39'
 ```
 
-Import as UMD in Browser
+### ES Modules
+
+Если вы используете [webpack](https://webpack.js.org/guides/getting-started/#modules),
+[Rollup](https://rollupjs.org/guide/en/#importing),
+[Parcel](https://parceljs.org/javascript.html) или [Node.js (>= v13)](https://nodejs.org/api/esm.html).
+
+Для более эффективной работы алгоритма [Tree shaking](https://webpack.js.org/guides/tree-shaking/)
+рекомендуем импортировать только используемые значения:
+
+```javascript
+import { Address, Block, BlockHeader, PublicKey, SecretKey, Transaction } from '@umi-top/umi-core-js'
+```
+
+Импортировать все содержимое модуля можно используя следующий синтаксис:
+
+```javascript
+import * as umi from '@umi-top/umi-core-js'
+```
+
+Последний вариант будет использоваться в примерах ниже.
+
+### CDN
+
+Библиотеку можно использовать напрямую в браузере.
+
+Если требуется максимальная совместимость, можно использовать
+[IIFE](https://developer.mozilla.org/en-US/docs/Glossary/IIFE) вариант:
 ```html
-<script src="bip39.browser.js"></script>
-<script src="lib/index.min.js"></script>
+<script src="https://unpkg.com/@umi-top/umi-core-js"></script>
+```
+В [современных](https://caniuse.com/#feat=es6-module) браузерах можно
+импортировать [модуль](https://v8.dev/features/modules):
+
+```html
+<script type="module">
+import * as umi from 'https://unpkg.com/@umi-top/umi-core-js/lib/index.mjs'
+</script>
 ```
 
 ## Примеры
 
+### Мнемоники
+
+UMI не накладывает никаких ограничений на способ генерации и хранения приватных
+ключей, предоставляя полную свободу действий разработчикам приложений.
+
+Использование [bip39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki)
+для генерации мнемонических фраз носит исключительно рекомендательный характер.
+
+#### Seed из мнемонической фразы
+
+Для примера будем использовать библиотеку [bip39](https://www.npmjs.com/package/bip39):
+
+```javascript
+// npm install bip39
+
+const bip39 = require('bip39')
+const mnemonic = bip39.generateMnemonic(256)
+const seed = bip39.mnemonicToSeedSync(mnemonic)
+```
+
 ### Ключи
 
-### Addresses
-Create Address from Mnemonic
+В UMI применяется Ed25519 ([rfc8032](https://tools.ietf.org/html/rfc8032)) —
+схема подписи [EdDSA](https://ru.wikipedia.org/wiki/EdDSA) использующая
+SHA-512 и Curve25519. 
+
+#### Ключи из seed'а
+
+Seed может быть любой длины, включая нулевую.
+Оптимальным вариантом является длина 32 байта (256 бит).
+
 ```javascript
-const mnemonic = 'mix tooth like stock powder emerge protect index magic'
-const seed = bip39.mnemonicToSeedSync(mnemonic)
-const secKey = umi.SecretKeyFactory.fromSeed(seed)
-const pubKey = secKey.publicKey
-const address = new umi.Address().setPublicKey(pubKey)
-
-console.log(address.bech32) // umi1u3dam33jaf64z4s008g7su62j4za72ljqff9dthsataq8k806nfsgrhdhg
-
-```
-Change Address Prefix
-```javascript
-const bech32 = 'umi1kzsn227tel8aj5p5upaecz7e72k3k8w0lel3lffrnvg3d5rkh5uq3a8598'
-
-const address = new umi.Address()
-address.bech32 = bech32
-address.prefix = 'sss'
-
-console.log(address.bech32) // sss1kzsn227tel8aj5p5upaecz7e72k3k8w0lel3lffrnvg3d5rkh5uqv9z0az
+const seed = new Uint8Array(32)
+const secretKey = umi.SecretKey.fromSeed(seed)
+const publicKey = secretKey.getPublicKey()
 ```
 
-### Transactions
-Basic Transaction
-```javascript
-const mnemonic = 'mix tooth like stock powder emerge protect index magic'
-const bech32 = 'xxx1hztcwh6rh63ftkw8y8cwt63n4256u3packsxh05wv5x5cpa79raqyf98d5'
+#### Подписать сообщение
 
-const seed = bip39.mnemonicToSeedSync(mnemonic)
-const secKey = umi.SecretKeyFactory.fromSeed(seed)
-const sender = new umi.Address().setPublicKey(secKey.publicKey)
-const recpient = new umi.Address().fromBech32(bech32).setPrefix('yyy')
-const tx1 = new umi.Transaction()
-  .setVersion(umi.TransactionVersions.Basic)
+В метод `SecretKey#sign()` необходимо передать массив байтов, поэтому если
+требуется подписать текстовое сообщение его нужно преобразовать: 
+```javascript
+const message = new TextEncoder().encode('Hello World')
+const signature = secretKey.sign(message)
+```
+
+#### Проверить подпись
+
+Метод `PublicKey#verifySignature()` принимает массив байтов, поэтому если
+подпись передается в текстовой кодировке ее необходимо декодировать.  
+Пример для Node.js:
+
+```javascript
+const address = 'umi18d4z00xwk6jz6c4r4rgz5mcdwdjny9thrh3y8f36cpy2rz6emg5s6rxnf6'
+const message = new TextEncoder().encode('Hello World')
+const signature = Buffer.from('Jbi9YfwLcxiTMednl/wTvnSzsPP9mV9Bf2vvZytP87oyg1p1c9ZBkn4gNv15ZHwEFv3bVYlowgyIKmMwJLjJCw==', 'base64')
+const ver = umi.Address.fromBech32(address).getPublicKey().verifySignature(signature, message)
+```
+
+### Адреса
+
+UMI использует адреса в формате Bech32
+([bip173](https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki))
+длиной 62 символа и трёхбуквенный префикс.  
+Специальным случаем являются Genesis-адреса, существующие только
+в Genesis-блоке, такие адреса имеют длину 65 символов
+и всегда имеют префикс `genesis`.
+
+#### Адрес в формате Bech32
+
+Создать адрес из строки Bech32 можно используя статический метод `Address.fromBech32()`
+и конвертировать обратно с помощью `Address#toBech32()`:
+
+```javascript
+const bech32 = 'umi18d4z00xwk6jz6c4r4rgz5mcdwdjny9thrh3y8f36cpy2rz6emg5s6rxnf6'
+const address = umi.Address.fromBech32(bech32)
+console.log(address.toBech32())
+```
+ 
+#### Адрес из приватного или публичного ключа
+
+Статический метод `Address.fromKey()` создает адрес из приватного
+или публичного ключа:
+
+```javascript
+const seed = new Uint8Array(32)
+const secKey = umi.SecretKey.fromSeed(seed)
+const pubKey = secKey.getPublicKey()
+const address1 = umi.Address.fromKey(secKey)
+const address2 = umi.Address.fromKey(pubKey)
+```
+
+#### Установить префикс адреса
+
+По умолчанию адреса имеют префикс `umi`.
+Изменить префикс можно при помощи метода `Address#setPrefix()`:
+
+```javascript
+const bech32 = 'umi18d4z00xwk6jz6c4r4rgz5mcdwdjny9thrh3y8f36cpy2rz6emg5s6rxnf6'
+const address = umi.Address.fromBech32(bech32).setPrefix('aaa')
+console.log(address.toBech32())
+```
+
+### Транзакции
+
+#### Отправить монеты
+
+```javascript
+const secKey = umi.SecretKey.fromSeed(new Uint8Array(32))
+const sender = umi.Address.fromKey(secKey).setPrefix('umi')
+const recipient = umi.Address.fromKey(secKey).setPrefix('aaa')
+const tx = new umi.Transaction()
+  .setVersion(umi.Transaction.Basic)
   .setSender(sender)
-  .setRecipient(recpient)
-  .setValue(9007199254740991)
+  .setRecipient(recipient)
+  .setValue(42)
   .sign(secKey)
 
-const tx2 = new umi.Transaction(tx1.bytes)
-
-console.log({
-  'version': tx2.version,
-  'sender': tx2.sender.bech32,
-  'recipient': tx2.recipient.bech32,
-  'value': tx2.value,
-  'signature': Buffer.from(tx2.signature).toString('hex'),
-  'verify': tx2.verify()
-})
+console.log(tx.verify())
+console.log(tx.toBase64())
 ```
-Create Structure
+
+#### Создать структуру
+
 ```javascript
-const mnemonic = 'mix tooth like stock powder emerge protect index magic'
-const seed = bip39.mnemonicToSeedSync(mnemonic)
-const secKey = umi.SecretKeyFactory.fromSeed(seed)
+const secKey = umi.SecretKey.fromSeed(new Uint8Array(32))
+const sender = umi.Address.fromKey(secKey).setPrefix('umi')
+const tx = new umi.Transaction()
+  .setVersion(umi.Transaction.UpdateStructure)
+  .setSender(sender)
+  .setPrefix('aaa')
+  .setName('🙂')
+  .setProfitPercent(500)
+  .setFeePercent(2000)
+  .sign(secKey)
 
-const tx1 = new umi.Transaction().
-  setVersion(umi.TransactionVersions.CreateStructure).
-  setSender(new umi.Address().setPublicKey(secKey.publicKey)).
-  setPrefix('www').
-  setName('World Wide Web').
-  setProfitPercent(456). // 4.56%
-  setFeePercent(1234).  // 12.34%
-  sign(secKey)
-
-const tx2 = new umi.Transaction(tx1.bytes)
-
-console.log({
-  'version': tx2.version,
-  'sender': tx2.sender.bech32,
-  'prefix': tx2.prefix,
-  'name': tx2.name,
-  'profit': tx2.profitPercent / 100,
-  'fee': tx2.feePercent / 100,
-  'verify': tx2.verify(),
-})
+console.log(tx.verify())
+console.log(tx.toBase64())
 ```
-Create Transit Address
+
+#### Обновить настройки структуры
+
+Необходимо задать все поля, даже если они не изменились:
+
 ```javascript
+const secKey = umi.SecretKey.fromSeed(new Uint8Array(32))
+const sender = umi.Address.fromKey(secKey).setPrefix('umi')
+const tx = new umi.Transaction()
+  .setVersion(umi.Transaction.UpdateStructure)
+  .setSender(sender)
+  .setPrefix('aaa')
+  .setName('🙂')
+  .setProfitPercent(500)
+  .setFeePercent(2000)
+  .sign(secKey)
 
-const mnemonic = 'mix tooth like stock powder emerge protect index magic'
-const seed = bip39.mnemonicToSeedSync(mnemonic)
-const secKey = umi.SecretKeyFactory.fromSeed(seed)
-
-const sender = new umi.Address()
-sender.publicKey = secKey.publicKey
-
-const address = new umi.Address()
-address.bech32 = 'www1hztcwh6rh63ftkw8y8cwt63n4256u3packsxh05wv5x5cpa79raq9g5cvs'
-
-const tx1 = new umi.Transaction()
-tx1.version = umi.TransactionVersions.CreateTransitAddress
-tx1.sender = sender
-tx1.recipient = address
-tx1.sign(secKey)
-
-const tx2 = new umi.Transaction(tx1.bytes)
-
-console.log({
-  'version': tx2.version,
-  'sender': tx2.sender.bech32,
-  'prefix': tx2.prefix,
-  'address': tx2.recipient.bech32,
-  'verify': tx2.verify(),
-})
+console.log(tx.verify())
+console.log(tx.toBase64())
 ```
+
+#### Установить адрес для начисления профита
+
+```javascript
+const secKey = umi.SecretKey.fromSeed(new Uint8Array(32))
+const sender = umi.Address.fromKey(secKey).setPrefix('umi')
+const newPrf = umi.Address.fromBech32('aaa18d4z00xwk6jz6c4r4rgz5mcdwdjny9thrh3y8f36cpy2rz6emg5svsuw66')
+const tx = new umi.Transaction()
+  .setVersion(umi.Transaction.UpdateProfitAddress)
+  .setSender(sender)
+  .setRecipient(newPrf)
+  .sign(secKey)
+
+console.log(tx.verify())
+console.log(tx.toBase64())
+```
+
+#### Установить адрес для перевода комиссии
+
+```javascript
+const secKey = umi.SecretKey.fromSeed(new Uint8Array(32))
+const sender = umi.Address.fromKey(secKey).setPrefix('umi')
+const newPrf = umi.Address.fromBech32('aaa18d4z00xwk6jz6c4r4rgz5mcdwdjny9thrh3y8f36cpy2rz6emg5svsuw66')
+const tx = new umi.Transaction()
+  .setVersion(umi.Transaction.UpdateProfitAddress)
+  .setSender(sender)
+  .setRecipient(newPrf)
+  .sign(secKey)
+
+console.log(tx.verify())
+console.log(tx.toBase64())
+```
+
+#### Активировать транзитный адрес
+
+```javascript
+const secKey = umi.SecretKey.fromSeed(new Uint8Array(32))
+const sender = umi.Address.fromKey(secKey).setPrefix('umi')
+const transit = umi.Address.fromBech32('aaa18d4z00xwk6jz6c4r4rgz5mcdwdjny9thrh3y8f36cpy2rz6emg5svsuw66')
+const tx = new umi.Transaction()
+  .setVersion(umi.Transaction.CreateTransitAddress)
+  .setSender(sender)
+  .setRecipient(transit)
+  .sign(secKey)
+
+console.log(tx.verify())
+console.log(tx.toBase64())
+```
+
+#### Деактивировать транзитный адрес
+
+```javascript
+const secKey = umi.SecretKey.fromSeed(new Uint8Array(32))
+const sender = umi.Address.fromKey(secKey).setPrefix('umi')
+const transit = umi.Address.fromBech32('aaa18d4z00xwk6jz6c4r4rgz5mcdwdjny9thrh3y8f36cpy2rz6emg5svsuw66')
+const tx = new umi.Transaction()
+  .setVersion(umi.Transaction.DeleteTransitAddress)
+  .setSender(sender)
+  .setRecipient(transit)
+  .sign(secKey)
+
+console.log(tx.verify())
+console.log(tx.toBase64())
+```
+
+### Блоки
+
+## PGP
+
+Все коммиты в git-репозиторий подписываются PGP-ключем:
+[24BA6A3987E78C47](https://keybase.io/umitop)
+(fingerprint: 7D4971661AD7E312F18DFB4424BA6A3987E78C47)
 
 ## Лицензия
 

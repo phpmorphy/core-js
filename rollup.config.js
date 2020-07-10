@@ -56,10 +56,7 @@ export default [
     ],
     plugins: [
       cleanup({ comments: 'jsdoc', compactComments: false })
-    ],
-    treeshake: {
-      moduleSideEffects: false
-    }
+    ]
   },
   {
     input: 'tmp/es5/index.js',
@@ -73,7 +70,6 @@ export default [
         ' * MIT Licensed\n' +
         ' */\n'
     },
-    context: 'this',
     plugins: [
       terser()
     ]

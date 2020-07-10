@@ -49,12 +49,12 @@ function Utf8Encode (text: string): number[] {
 
 /**
  * Конвертер из типизированного массива UTF-8 байтов в строку.
- * @param {number[]|Uint8Array|Buffer} bytes
+ * @param {number[]} bytes
  * @returns {string}
  * @private
  * @internal
  */
-function Utf8Decode (bytes: number[] | Uint8Array | Buffer): string {
+function Utf8Decode (bytes: number[]): string {
   let str = ''
   let i = 0
   while (i < bytes.length) {

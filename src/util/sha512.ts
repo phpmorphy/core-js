@@ -40,12 +40,12 @@ const sha512K: [number, number][] = [
 /**
  * Безопасный алгоритм хеширования, SHA2-512.
  * @see https://en.wikipedia.org/wiki/SHA-2
- * @param {number[]|Uint8Array|Buffer} message message
+ * @param {ArrayLike<number>} message message
  * @returns {number[]}
  * @private
  * @internal
  */
-function sha512 (message: number[] | Uint8Array | Buffer): number[] {
+function sha512 (message: ArrayLike<number>): number[] {
   // SHA-512 initial hash values.
   const h: [number, number][] = [
     [0x6a09e667, 0xf3bcc908], [0xbb67ae85, 0x84caa73b], [0x3c6ef372, 0xfe94f82b], [0xa54ff53a, 0x5f1d36f1],
@@ -77,12 +77,12 @@ function sha512 (message: number[] | Uint8Array | Buffer): number[] {
 }
 
 /**
- * @param {number[]|Uint8Array|Buffer} message
+ * @param {ArrayLike<number>} message
  * @returns {number[][][]}
  * @private
  * @internal
  */
-function sha512PreProcess (message: number[] | Uint8Array | Buffer): [number, number][][] {
+function sha512PreProcess (message: ArrayLike<number>): [number, number][][] {
   const bytez: number[] = []
   let i
   let l

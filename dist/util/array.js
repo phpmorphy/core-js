@@ -49,7 +49,7 @@ function arrayNew (length) {
 }
 /**
  * @param {number[]} a
- * @param {number[]|Uint8Array|Buffer} b
+ * @param {ArrayLike<number>} b
  * @param {number} [offset]
  * @param {number} [length]
  * @private
@@ -61,7 +61,24 @@ function arraySet (a, b, offset, length) {
     a[o + i] = b[i]
   }
 }
+/**
+ * @param {ArrayLike<number>} a
+ * @param {number} [begin]
+ * @param {number} [end]
+ * @returns {number[]}
+ * @private
+ */
+function arraySlice (a, begin, end) {
+  const b = begin || 0
+  const e = end || a.length
+  const r = []
+  for (let i = b; i < e; i++) {
+    r.push(a[i])
+  }
+  return r
+}
 
 exports.arrayFill = arrayFill
 exports.arrayNew = arrayNew
 exports.arraySet = arraySet
+exports.arraySlice = arraySlice
