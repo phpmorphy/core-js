@@ -54,19 +54,20 @@ function sha512 (message) {
     [0x510e527f, 0xade682d1], [0x9b05688c, 0x2b3e6c1f], [0x1f83d9ab, 0xfb41bd6b], [0x5be0cd19, 0x137e2179]
   ]
   const chunks = sha512PreProcess(message)
-  chunks.forEach(function (w) {
+  for (let j = 0, l = chunks.length; j < l; j++) {
+    const w = chunks[j]
     for (let i = 16; i < 80; i++) {
       const s0 = xor64(xor64(rotr64(w[i - 15], 1), rotr64(w[i - 15], 8)), shft64(w[i - 15], 7))
       const s1 = xor64(xor64(rotr64(w[i - 2], 19), rotr64(w[i - 2], 61)), shft64(w[i - 2], 6))
       w[i] = sum64(sum64(w[i - 16], s0), sum64(w[i - 7], s1))
     }
     sha512Block(h, w)
-  })
+  }
   const digest = []
-  h.forEach(function (v) {
-    digest.push((v[0] >>> 24 & 0xff), (v[0] >>> 16 & 0xff), (v[0] >>> 8 & 0xff), (v[0] & 0xff))
-    digest.push((v[1] >>> 24 & 0xff), (v[1] >>> 16 & 0xff), (v[1] >>> 8 & 0xff), (v[1] & 0xff))
-  })
+  for (let i = 0; i < 8; i++) {
+    digest.push((h[i][0] >>> 24 & 0xff), (h[i][0] >>> 16 & 0xff), (h[i][0] >>> 8 & 0xff), (h[i][0] & 0xff))
+    digest.push((h[i][1] >>> 24 & 0xff), (h[i][1] >>> 16 & 0xff), (h[i][1] >>> 8 & 0xff), (h[i][1] & 0xff))
+  }
   return digest
 }
 /**
@@ -106,10 +107,11 @@ function sha512PreProcess (message) {
  */
 function sha512Block (h, w) {
   const a = []
-  h.forEach(function (v, i) {
-    a[i] = [v[0], v[1]]
-  })
-  for (let i = 0; i < 80; i++) {
+  let i
+  for (i = 0; i < 8; i++) {
+    a[i] = [h[i][0], h[i][1]]
+  }
+  for (i = 0; i < 80; i++) {
     const S1 = xor64(xor64(rotr64(a[4], 14), rotr64(a[4], 18)), rotr64(a[4], 41))
     const ch = xor64(and64(a[4], a[5]), and64(not64(a[4]), a[6]))
     const t1 = sum64(sum64(sum64(a[7], S1), sum64(ch, sha512K[i])), w[i])
@@ -125,9 +127,9 @@ function sha512Block (h, w) {
     a[1] = a[0]
     a[0] = sum64(t1, t2)
   }
-  a.forEach(function (v, i) {
-    h[i] = sum64(h[i], v)
-  })
+  for (i = 0; i < 8; i++) {
+    h[i] = sum64(h[i], a[i])
+  }
 }
 /**
  * @param {number[]} n
@@ -195,3 +197,4 @@ function sum64 (a, b) {
 }
 
 exports.sha512 = sha512
+exports.sha512PreProcess = sha512PreProcess

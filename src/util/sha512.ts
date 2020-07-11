@@ -55,7 +55,9 @@ function sha512 (message: ArrayLike<number>): number[] {
   const chunks: [number, number][][] = sha512PreProcess(message)
 
   // Process the message in successive 1024-bit chunks / 16 64-bit words.
-  chunks.forEach(function (w: [number, number][]) {
+  for (let j = 0, l = chunks.length; j < l; j++) {
+    const w = chunks[j]
+
     // Extend the first 16 words into the remaining 48 words w[16..63] of the message schedule array.
     for (let i = 16; i < 80; i++) {
       const s0 = xor64(xor64(rotr64(w[i - 15], 1), rotr64(w[i - 15], 8)), shft64(w[i - 15], 7))
@@ -65,13 +67,13 @@ function sha512 (message: ArrayLike<number>): number[] {
 
     // Compression function main loop.
     sha512Block(h, w)
-  })
+  }
 
   const digest: number[] = []
-  h.forEach(function (v: [number, number]) {
-    digest.push((v[0] >>> 24 & 0xff), (v[0] >>> 16 & 0xff), (v[0] >>> 8 & 0xff), (v[0] & 0xff))
-    digest.push((v[1] >>> 24 & 0xff), (v[1] >>> 16 & 0xff), (v[1] >>> 8 & 0xff), (v[1] & 0xff))
-  })
+  for (let i = 0; i < 8; i++) {
+    digest.push((h[i][0] >>> 24 & 0xff), (h[i][0] >>> 16 & 0xff), (h[i][0] >>> 8 & 0xff), (h[i][0] & 0xff))
+    digest.push((h[i][1] >>> 24 & 0xff), (h[i][1] >>> 16 & 0xff), (h[i][1] >>> 8 & 0xff), (h[i][1] & 0xff))
+  }
 
   return digest
 }
@@ -82,7 +84,7 @@ function sha512 (message: ArrayLike<number>): number[] {
  * @private
  * @internal
  */
-function sha512PreProcess (message: ArrayLike<number>): [number, number][][] {
+export function sha512PreProcess (message: ArrayLike<number>): [number, number][][] {
   const bytez: number[] = []
   let i
   let l
@@ -124,12 +126,13 @@ function sha512PreProcess (message: ArrayLike<number>): [number, number][][] {
 function sha512Block (h: [number, number][], w: [number, number][]) {
   // Initialize working variables to current hash value.
   const a: [number, number][] = []
-  h.forEach(function (v: [number, number], i: number) {
-    a[i] = [v[0], v[1]] // deep copy
-  })
+  let i
+  for (i = 0; i < 8; i++) {
+    a[i] = [h[i][0], h[i][1]] // deep copy
+  }
 
   // Compression function main loop.
-  for (let i = 0; i < 80; i++) {
+  for (i = 0; i < 80; i++) {
     const S1 = xor64(xor64(rotr64(a[4], 14), rotr64(a[4], 18)), rotr64(a[4], 41))
     const ch = xor64(and64(a[4], a[5]), and64(not64(a[4]), a[6]))
     const t1 = sum64(sum64(sum64(a[7], S1), sum64(ch, sha512K[i])), w[i])
@@ -148,9 +151,9 @@ function sha512Block (h: [number, number][], w: [number, number][]) {
   }
 
   // Add the compressed chunk to the current hash value.
-  a.forEach(function (v: [number, number], i: number) {
-    h[i] = sum64(h[i], v)
-  })
+  for (i = 0; i < 8; i++) {
+    h[i] = sum64(h[i], a[i])
+  }
 }
 
 /**

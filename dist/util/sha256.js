@@ -43,18 +43,19 @@ const sha256K = [
 function sha256 (message) {
   const h = [0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A, 0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19]
   const chunks = sha256PreProcess(message)
-  chunks.forEach(function (w) {
+  for (let j = 0, l = chunks.length; j < l; j++) {
+    const w = chunks[j]
     for (let i = 16; i < 64; i++) {
       const s0 = rotr(w[i - 15], 7) ^ rotr(w[i - 15], 18) ^ (w[i - 15] >>> 3)
       const s1 = rotr(w[i - 2], 17) ^ rotr(w[i - 2], 19) ^ (w[i - 2] >>> 10)
       w[i] = w[i - 16] + s0 + w[i - 7] + s1
     }
     sha256Block(h, w)
-  })
+  }
   const digest = []
-  h.forEach(function (v) {
-    digest.push((v >>> 24 & 0xff), (v >>> 16 & 0xff), (v >>> 8 & 0xff), (v & 0xff))
-  })
+  for (let i = 0; i < 8; i++) {
+    digest.push((h[i] >>> 24 & 0xff), (h[i] >>> 16 & 0xff), (h[i] >>> 8 & 0xff), (h[i] & 0xff))
+  }
   return digest
 }
 /**
@@ -90,10 +91,11 @@ function sha256PreProcess (message) {
  */
 function sha256Block (h, w) {
   const a = []
-  h.forEach(function (v, i) {
-    a[i] = v
-  })
-  for (let i = 0; i < 64; i++) {
+  let i
+  for (i = 0; i < 8; i++) {
+    a[i] = h[i]
+  }
+  for (i = 0; i < 64; i++) {
     const S1 = rotr(a[4], 6) ^ rotr(a[4], 11) ^ rotr(a[4], 25)
     const ch = (a[4] & a[5]) ^ ((~a[4]) & a[6])
     const t1 = a[7] + S1 + ch + sha256K[i] + w[i]
@@ -109,9 +111,9 @@ function sha256Block (h, w) {
     a[1] = a[0]
     a[0] = t1 + t2
   }
-  a.forEach(function (v, i) {
-    h[i] = h[i] + v | 0
-  })
+  for (i = 0; i < 8; i++) {
+    h[i] = h[i] + a[i] | 0
+  }
 }
 /**
  * @param {number} n

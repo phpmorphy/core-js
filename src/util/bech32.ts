@@ -110,13 +110,13 @@ function convert8to5 (data: number[]): string {
 
     while (bits >= 5) {
       bits -= 5
-      result += bech32Alphabet[(value >> bits) & 0x1f]
+      result += bech32Alphabet.charAt((value >> bits) & 0x1f)
     }
   }
 
   /** @istanbul ignore else */
   if (bits > 0) {
-    result += bech32Alphabet[(value << (5 - bits)) & 0x1f]
+    result += bech32Alphabet.charAt((value << (5 - bits)) & 0x1f)
   }
 
   return result
@@ -140,7 +140,7 @@ function createChecksum (prefix: string, data: string): string {
 
   let checksum = ''
   for (let i = 0; i < 6; i++) {
-    checksum += bech32Alphabet[(poly >> 5 * (5 - i)) & 31]
+    checksum += bech32Alphabet.charAt((poly >> 5 * (5 - i)) & 31)
   }
 
   return checksum
@@ -197,7 +197,7 @@ function prefixExpand (prefix: string): number[] {
 function strToBytes (str: string): number[] {
   const bytes: number[] = []
   for (let i = 0, l = str.length; i < l; i++) {
-    bytes.push(bech32Alphabet.indexOf(str[i]))
+    bytes.push(bech32Alphabet.indexOf(str.charAt(i)))
   }
 
   return bytes
@@ -231,7 +231,7 @@ function verifyChecksum (prefix: string, data: string): void {
  */
 function checkAlphabet (chars: string): void {
   for (let i = 0, l = chars.length; i < l; i++) {
-    if (bech32Alphabet.indexOf(chars[i]) === -1) {
+    if (bech32Alphabet.indexOf(chars.charAt(i)) === -1) {
       throw new Error('bech32: invalid character')
     }
   }

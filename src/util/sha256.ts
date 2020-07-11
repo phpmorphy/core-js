@@ -45,7 +45,9 @@ function sha256 (message: ArrayLike<number>): number[] {
   const chunks: number[][] = sha256PreProcess(message)
 
   // Process the message in successive 512-bit chunks / 16 32-bit words.
-  chunks.forEach(function (w: number[]) {
+  for (let j = 0, l = chunks.length; j < l; j++) {
+    const w = chunks[j]
+
     // Extend the first 16 words into the remaining 48 words w[16..63] of the message schedule array.
     for (let i = 16; i < 64; i++) {
       const s0 = rotr(w[i - 15], 7) ^ rotr(w[i - 15], 18) ^ (w[i - 15] >>> 3)
@@ -55,13 +57,12 @@ function sha256 (message: ArrayLike<number>): number[] {
 
     // Compression function main loop.
     sha256Block(h, w)
-  })
+  }
 
   const digest: number[] = []
-  h.forEach(function (v: number) {
-    digest.push((v >>> 24 & 0xff), (v >>> 16 & 0xff), (v >>> 8 & 0xff), (v & 0xff))
-  })
-
+  for (let i = 0; i < 8; i++) {
+    digest.push((h[i] >>> 24 & 0xff), (h[i] >>> 16 & 0xff), (h[i] >>> 8 & 0xff), (h[i] & 0xff))
+  }
   return digest
 }
 
@@ -111,11 +112,12 @@ function sha256PreProcess (message: ArrayLike<number>): number[][] {
 function sha256Block (h: number[], w: number[]) {
   // Initialize working variables to current hash value.
   const a: number[] = []
-  h.forEach(function (v: number, i: number) {
-    a[i] = v // deep copy
-  })
+  let i
+  for (i = 0; i < 8; i++) {
+    a[i] = h[i] // deep copy
+  }
 
-  for (let i = 0; i < 64; i++) {
+  for (i = 0; i < 64; i++) {
     const S1 = rotr(a[4], 6) ^ rotr(a[4], 11) ^ rotr(a[4], 25)
     const ch = (a[4] & a[5]) ^ ((~a[4]) & a[6])
     const t1 = a[7] + S1 + ch + sha256K[i] + w[i]
@@ -133,9 +135,9 @@ function sha256Block (h: number[], w: number[]) {
   }
 
   // Add the compressed chunk to the current hash value.
-  a.forEach(function (v: number, i: number) {
-    h[i] = h[i] + v | 0 // clamp 32bit
-  })
+  for (i = 0; i < 8; i++) {
+    h[i] = h[i] + a[i] | 0 // clamp 32bit
+  }
 }
 
 /**

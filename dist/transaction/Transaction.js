@@ -445,14 +445,11 @@ class Transaction {
   }
 
   /**
-   * @param {number[]} vers
+   * @param {number[]} versions
    * @throws {Error}
    * @private
    */
-  checkVersion (vers) {
-    if (vers.indexOf(this.getVersion()) === -1) {
-      throw new Error('incorrect version')
-    }
+  checkVersion (versions) {
   }
 }
 /**
