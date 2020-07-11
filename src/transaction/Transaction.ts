@@ -584,8 +584,11 @@ export class Transaction {
    * @internal
    */
   private checkVersion (versions: number[]): void {
-    // if (versions.indexOf(this.getVersion()) === -1) {
-    //   throw new Error('incorrect version')
-    // }
+    for (let i = 0, l = versions.length; i < l; i++) {
+      if (versions[i] === this.getVersion()) {
+        return
+      }
+    }
+    throw new Error('incorrect version')
   }
 }
