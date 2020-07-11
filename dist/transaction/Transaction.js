@@ -28,7 +28,6 @@ const sha256 = require('../util/sha256.js')
 const SecretKey = require('../key/ed25519/SecretKey.js')
 const validator = require('../util/validator.js')
 const converter = require('../util/converter.js')
-const integer = require('../util/integer.js')
 const Address = require('../address/Address.js')
 const utf8 = require('../util/utf8.js')
 const base64 = require('../util/base64.js')
@@ -84,6 +83,26 @@ class Transaction {
     const tx = new Transaction()
     array.arraySet(tx._bytes, bytes)
     return tx
+  }
+
+  /**
+   * Транзакция в виде строки в формате Base64.
+   * @returns {string}
+   * @example
+   * let base64 = new Transaction().getBase64()
+   */
+  getBase64 () {
+    return base64.base64Encode(this._bytes)
+  }
+
+  /**
+   * Транзакция в бинарном виде, 150 байт.
+   * @returns {number[]}
+   * @example
+   * let bytes = new Transaction().getBytes()
+   */
+  getBytes () {
+    return this._bytes.slice(0)
   }
 
   /**
@@ -149,7 +168,7 @@ class Transaction {
     if (!(address instanceof Address.Address)) {
       throw new Error('address type must be Address')
     }
-    array.arraySet(this._bytes, address.toBytes(), 1)
+    array.arraySet(this._bytes, address.getBytes(), 1)
     return this
   }
 
@@ -180,7 +199,7 @@ class Transaction {
     if (!(address instanceof Address.Address)) {
       throw new Error('recipient type must be Address')
     }
-    array.arraySet(this._bytes, address.toBytes(), 35)
+    array.arraySet(this._bytes, address.getBytes(), 35)
     return this
   }
 
@@ -193,7 +212,7 @@ class Transaction {
    */
   getValue () {
     this.checkVersion([0, 1])
-    return integer.bytesToUint64(this._bytes.slice(69, 77))
+    return converter.bytesToUint64(this._bytes.slice(69, 77))
   }
 
   /**
@@ -209,7 +228,7 @@ class Transaction {
   setValue (value) {
     this.checkVersion([0, 1])
     validator.validateInt(value, 1, 18446744073709551615)
-    array.arraySet(this._bytes, integer.uint64ToBytes(value), 69)
+    array.arraySet(this._bytes, converter.uint64ToBytes(value), 69)
     return this
   }
 
@@ -221,7 +240,7 @@ class Transaction {
    * let nonce = new Transaction().getNonce()
    */
   getNonce () {
-    return integer.bytesToUint64(this._bytes.slice(77, 85))
+    return converter.bytesToUint64(this._bytes.slice(77, 85))
   }
 
   /**
@@ -235,7 +254,7 @@ class Transaction {
    */
   setNonce (nonce) {
     validator.validateInt(nonce, 0, 18446744073709551615)
-    array.arraySet(this._bytes, integer.uint64ToBytes(nonce), 77)
+    array.arraySet(this._bytes, converter.uint64ToBytes(nonce), 77)
     return this
   }
 
@@ -293,7 +312,7 @@ class Transaction {
    */
   getPrefix () {
     this.checkVersion([2, 3])
-    return converter.versionToPrefix(integer.bytesToUint16(this._bytes.slice(35, 37)))
+    return converter.versionToPrefix(converter.bytesToUint16(this._bytes.slice(35, 37)))
   }
 
   /**
@@ -308,7 +327,7 @@ class Transaction {
    */
   setPrefix (prefix) {
     this.checkVersion([2, 3])
-    array.arraySet(this._bytes, integer.uint16ToBytes(converter.prefixToVersion(prefix)), 35)
+    array.arraySet(this._bytes, converter.uint16ToBytes(converter.prefixToVersion(prefix)), 35)
     return this
   }
 
@@ -362,7 +381,7 @@ class Transaction {
    */
   getProfitPercent () {
     this.checkVersion([2, 3])
-    return integer.bytesToUint16(this._bytes.slice(37, 39))
+    return converter.bytesToUint16(this._bytes.slice(37, 39))
   }
 
   /**
@@ -379,7 +398,7 @@ class Transaction {
   setProfitPercent (percent) {
     this.checkVersion([2, 3])
     validator.validateInt(percent, 100, 500)
-    array.arraySet(this._bytes, integer.uint16ToBytes(percent), 37)
+    array.arraySet(this._bytes, converter.uint16ToBytes(percent), 37)
     return this
   }
 
@@ -394,7 +413,7 @@ class Transaction {
    */
   getFeePercent () {
     this.checkVersion([2, 3])
-    return integer.bytesToUint16(this._bytes.slice(39, 41))
+    return converter.bytesToUint16(this._bytes.slice(39, 41))
   }
 
   /**
@@ -410,28 +429,8 @@ class Transaction {
   setFeePercent (percent) {
     this.checkVersion([2, 3])
     validator.validateInt(percent, 0, 2000)
-    array.arraySet(this._bytes, integer.uint16ToBytes(percent), 39)
+    array.arraySet(this._bytes, converter.uint16ToBytes(percent), 39)
     return this
-  }
-
-  /**
-   * Транзакция в бинарном виде, 150 байт.
-   * @returns {number[]}
-   * @example
-   * let bytes = new Transaction().toBytes()
-   */
-  toBytes () {
-    return this._bytes.slice(0)
-  }
-
-  /**
-   * Транзакция в виде строки в формате Base64.
-   * @returns {string}
-   * @example
-   * let base64 = new Transaction().toBase64()
-   */
-  toBase64 () {
-    return base64.base64Encode(this._bytes)
   }
 
   /**

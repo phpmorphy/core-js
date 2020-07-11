@@ -20,10 +20,9 @@
 
 import { PublicKey } from '../key/ed25519/PublicKey'
 import { SecretKey } from '../key/ed25519/SecretKey' // eslint-disable-line
-import { prefixToVersion, versionToPrefix } from '../util/converter'
+import { prefixToVersion, versionToPrefix, uint16ToBytes, bytesToUint16 } from '../util/converter'
 import { bech32Decode, bech32Encode } from '../util/bech32'
 import { arrayNew, arraySet } from '../util/array'
-import { uint16ToBytes, bytesToUint16 } from '../util/integer'
 
 /**
  * Класс для работы с адресами.
@@ -90,6 +89,26 @@ export class Address {
   }
 
   /**
+   * Адрес в формате Bech32, длина 62 или 65 символов.
+   * @returns {string}
+   * @example
+   * let bech32 = new Address().getBech32()
+   */
+  getBech32 (): string {
+    return bech32Encode(this._bytes)
+  }
+
+  /**
+   * Адрес в бинарном виде, длина 34 байта.
+   * @returns {number[]}
+   * @example
+   * let bytes = new Address().getBytes()
+   */
+  getBytes (): number[] {
+    return this._bytes.slice(0)
+  }
+
+  /**
    * Префикс адреса, три символа латиницы в нижнем регистре.
    * @returns {string}
    * @throws {Error}
@@ -136,27 +155,7 @@ export class Address {
     if (!(publicKey instanceof PublicKey)) {
       throw new Error('publicKey type must be PublicKey')
     }
-    arraySet(this._bytes, publicKey.toBytes(), 2)
+    arraySet(this._bytes, publicKey.getBytes(), 2)
     return this
-  }
-
-  /**
-   * Адрес в формате Bech32, длина 62 или 65 символов.
-   * @returns {string}
-   * @example
-   * let bech32 = new Address().toBech32()
-   */
-  toBech32 (): string {
-    return bech32Encode(this._bytes)
-  }
-
-  /**
-   * Адрес в бинарном виде, длина 34 байта.
-   * @returns {number[]}
-   * @example
-   * let bytes = new Address().toBytes()
-   */
-  toBytes (): number[] {
-    return this._bytes.slice(0)
   }
 }

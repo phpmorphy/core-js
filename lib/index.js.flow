@@ -10,18 +10,18 @@ declare export class Address {
   static fromBech32(bech32: string): Address;
   static fromBytes(bytes: ArrayLike<number>): Address;
   static fromKey(key: PublicKey | SecretKey): Address;
+  getBech32(): string;
+  getBytes(): number[];
   getPrefix(): string;
   setPrefix(prefix: string): Address;
   getPublicKey(): PublicKey;
   setPublicKey(publicKey: PublicKey): Address;
-  toBech32(): string;
-  toBytes(): number[];
 }
 declare export class Block {}
 declare export class BlockHeader {}
 declare export class PublicKey {
   constructor(bytes: ArrayLike<number>): this;
-  toBytes(): number[];
+  getBytes(): number[];
   verifySignature(
     signature: ArrayLike<number>,
     message: ArrayLike<number>
@@ -30,9 +30,9 @@ declare export class PublicKey {
 declare export class SecretKey {
   constructor(bytes: ArrayLike<number>): this;
   static fromSeed(seed: ArrayLike<number>): SecretKey;
+  getBytes(): number[];
   getPublicKey(): PublicKey;
   sign(message: ArrayLike<number>): number[];
-  toBytes(): number[];
 }
 declare export class Transaction {
   static Genesis: number;
@@ -46,6 +46,8 @@ declare export class Transaction {
   constructor(): this;
   static fromBase64(base64: string): Transaction;
   static fromBytes(bytes: ArrayLike<number>): Transaction;
+  getBase64(): string;
+  getBytes(): number[];
   getHash(): number[];
   getVersion(): number;
   setVersion(version: number): Transaction;
@@ -68,7 +70,5 @@ declare export class Transaction {
   setProfitPercent(percent: number): Transaction;
   getFeePercent(): number;
   setFeePercent(percent: number): Transaction;
-  toBytes(): number[];
-  toBase64(): string;
   verify(): boolean;
 }

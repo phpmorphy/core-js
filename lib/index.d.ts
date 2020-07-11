@@ -36,6 +36,20 @@ export declare class Address {
      */
     static fromKey(key: PublicKey | SecretKey): Address;
     /**
+     * Адрес в формате Bech32, длина 62 или 65 символов.
+     * @returns {string}
+     * @example
+     * let bech32 = new Address().getBech32()
+     */
+    getBech32(): string;
+    /**
+     * Адрес в бинарном виде, длина 34 байта.
+     * @returns {number[]}
+     * @example
+     * let bytes = new Address().getBytes()
+     */
+    getBytes(): number[];
+    /**
      * Префикс адреса, три символа латиницы в нижнем регистре.
      * @returns {string}
      * @throws {Error}
@@ -69,20 +83,6 @@ export declare class Address {
      * let address = new Address().setPublicKey(pubKey)
      */
     setPublicKey(publicKey: PublicKey): Address;
-    /**
-     * Адрес в формате Bech32, длина 62 или 65 символов.
-     * @returns {string}
-     * @example
-     * let bech32 = new Address().toBech32()
-     */
-    toBech32(): string;
-    /**
-     * Адрес в бинарном виде, длина 34 байта.
-     * @returns {number[]}
-     * @example
-     * let bytes = new Address().toBytes()
-     */
-    toBytes(): number[];
 }
 /**
  * Базовый класс для работы с блоками.
@@ -113,9 +113,9 @@ export declare class PublicKey {
      * Публичный ключ в формате libsodium, 32 байта (256 бит).
      * @returns {number[]}
      * @example
-     * let bytes = new PublicKey(new Uint8Array(32)).toBytes()
+     * let bytes = new PublicKey(new Uint8Array(32)).getBytes()
      */
-    toBytes(): number[];
+    getBytes(): number[];
     /**
      * Проверяет цифровую подпись.
      * @param {ArrayLike<number>} signature Подпись, 64 байта.
@@ -140,7 +140,7 @@ export declare class SecretKey {
      * В формате libsodium, 64 байта (512 бит).
      * @throws {Error}
      * @example
-     * let bytes = SecretKey.fromSeed(new Uint8Array(32)).toBytes()
+     * let bytes = SecretKey.fromSeed(new Uint8Array(32)).getBytes()
      * let secKey = new SecretKey(bytes)
      */
     constructor(bytes: ArrayLike<number>);
@@ -155,6 +155,14 @@ export declare class SecretKey {
      * let secKey = SecretKey.fromSeed(seed)
      */
     static fromSeed(seed: ArrayLike<number>): SecretKey;
+    /**
+     * Приватный ключ в бинарном виде. В формате libsodium, 64 байта (512 бит).
+     * @returns {number[]}
+     * @example
+     * let secKey = SecretKey.fromSeed(new Uint8Array(32))
+     * let bytes = secKey.getBytes()
+     */
+    getBytes(): number[];
     /**
      * Публичный ключ, соответствующий приватному ключу.
      * @returns {PublicKey}
@@ -173,14 +181,6 @@ export declare class SecretKey {
      * let signature = secKey.sign(message)
      */
     sign(message: ArrayLike<number>): number[];
-    /**
-     * Приватный ключ в бинарном виде. В формате libsodium, 64 байта (512 бит).
-     * @returns {number[]}
-     * @example
-     * let secKey = SecretKey.fromSeed(new Uint8Array(32))
-     * let bytes = secKey.toBytes()
-     */
-    toBytes(): number[];
 }
 /**
  * Класс для работы с транзакциями.
@@ -340,6 +340,20 @@ export declare class Transaction {
      * let trx = Transaction.fromBytes(bytes)
      */
     static fromBytes(bytes: ArrayLike<number>): Transaction;
+    /**
+     * Транзакция в виде строки в формате Base64.
+     * @returns {string}
+     * @example
+     * let base64 = new Transaction().getBase64()
+     */
+    getBase64(): string;
+    /**
+     * Транзакция в бинарном виде, 150 байт.
+     * @returns {number[]}
+     * @example
+     * let bytes = new Transaction().getBytes()
+     */
+    getBytes(): number[];
     /**
      * Хэш транзакции, sha256 от всех 150 байт.
      * @returns {number[]}
@@ -554,20 +568,6 @@ export declare class Transaction {
      * trx.setFeePercent(100)
      */
     setFeePercent(percent: number): Transaction;
-    /**
-     * Транзакция в бинарном виде, 150 байт.
-     * @returns {number[]}
-     * @example
-     * let bytes = new Transaction().toBytes()
-     */
-    toBytes(): number[];
-    /**
-     * Транзакция в виде строки в формате Base64.
-     * @returns {string}
-     * @example
-     * let base64 = new Transaction().toBase64()
-     */
-    toBase64(): string;
     /**
      * Проверить транзакцию на соответствие формальным правилам.
      * @returns {boolean}

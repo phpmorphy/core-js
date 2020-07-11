@@ -26,7 +26,6 @@
 const array = require('../util/array.js')
 const PublicKey = require('../key/ed25519/PublicKey.js')
 const converter = require('../util/converter.js')
-const integer = require('../util/integer.js')
 const bech32 = require('../util/bech32.js')
 
 /**
@@ -92,6 +91,26 @@ class Address {
   }
 
   /**
+   * Адрес в формате Bech32, длина 62 или 65 символов.
+   * @returns {string}
+   * @example
+   * let bech32 = new Address().getBech32()
+   */
+  getBech32 () {
+    return bech32.bech32Encode(this._bytes)
+  }
+
+  /**
+   * Адрес в бинарном виде, длина 34 байта.
+   * @returns {number[]}
+   * @example
+   * let bytes = new Address().getBytes()
+   */
+  getBytes () {
+    return this._bytes.slice(0)
+  }
+
+  /**
    * Префикс адреса, три символа латиницы в нижнем регистре.
    * @returns {string}
    * @throws {Error}
@@ -99,7 +118,7 @@ class Address {
    * let prefix = new Address().getPrefix()
    */
   getPrefix () {
-    return converter.versionToPrefix(integer.bytesToUint16(this._bytes.slice(0, 2)))
+    return converter.versionToPrefix(converter.bytesToUint16(this._bytes.slice(0, 2)))
   }
 
   /**
@@ -111,7 +130,7 @@ class Address {
    * let address = new Address().setPrefix('umi')
    */
   setPrefix (prefix) {
-    array.arraySet(this._bytes, integer.uint16ToBytes(converter.prefixToVersion(prefix)))
+    array.arraySet(this._bytes, converter.uint16ToBytes(converter.prefixToVersion(prefix)))
     return this
   }
 
@@ -138,28 +157,8 @@ class Address {
     if (!(publicKey instanceof PublicKey.PublicKey)) {
       throw new Error('publicKey type must be PublicKey')
     }
-    array.arraySet(this._bytes, publicKey.toBytes(), 2)
+    array.arraySet(this._bytes, publicKey.getBytes(), 2)
     return this
-  }
-
-  /**
-   * Адрес в формате Bech32, длина 62 или 65 символов.
-   * @returns {string}
-   * @example
-   * let bech32 = new Address().toBech32()
-   */
-  toBech32 () {
-    return bech32.bech32Encode(this._bytes)
-  }
-
-  /**
-   * Адрес в бинарном виде, длина 34 байта.
-   * @returns {number[]}
-   * @example
-   * let bytes = new Address().toBytes()
-   */
-  toBytes () {
-    return this._bytes.slice(0)
   }
 }
 

@@ -12,7 +12,7 @@ describe('SecretKey', function () {
     it('bytes', function () {
       const expected = new Uint8Array(64)
       expected[1] = 255
-      const actual = new Uint8Array(new SecretKey(expected).toBytes())
+      const actual = new Uint8Array(new SecretKey(expected).getBytes())
       assert.deepEqual(actual, expected)
     })
   })
@@ -72,7 +72,7 @@ describe('SecretKey', function () {
 
     tests.forEach(function (test) {
       it(test.desc, function () {
-        const actual = SecretKey.fromSeed(test.seed).getPublicKey().toBytes()
+        const actual = SecretKey.fromSeed(test.seed).getPublicKey().getBytes()
         assert.deepEqual(actual, test.pub)
       })
     })

@@ -39,7 +39,7 @@ describe('Address', function () {
 
       tests.forEach(function (test) {
         it(test.desc, function () {
-          const actual = Address.fromBech32(test.args).toBech32()
+          const actual = Address.fromBech32(test.args).getBech32()
           assert.equal(test.args, actual)
         })
       })
@@ -104,7 +104,7 @@ describe('Address', function () {
     it('из публичного ключа', function () {
       const pubKey = new PublicKey(new Uint8Array(32))
       const expected = 'umi1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqr5zcpj'
-      const actual = Address.fromKey(pubKey).toBech32()
+      const actual = Address.fromKey(pubKey).getBech32()
 
       assert.strictEqual(actual, expected)
     })
@@ -112,7 +112,7 @@ describe('Address', function () {
     it('из секретного ключа', function () {
       const secKey = SecretKey.fromSeed(new Uint8Array(32))
       const expected = 'umi18d4z00xwk6jz6c4r4rgz5mcdwdjny9thrh3y8f36cpy2rz6emg5s6rxnf6'
-      const actual = Address.fromKey(secKey).toBech32()
+      const actual = Address.fromKey(secKey).getBech32()
 
       assert.strictEqual(actual, expected)
     })
@@ -128,7 +128,7 @@ describe('Address', function () {
       expected[0] = 128
       expected[31] = 255
       const pubKey = new PublicKey(expected)
-      const actual = new Address().setPublicKey(pubKey).getPublicKey().toBytes()
+      const actual = new Address().setPublicKey(pubKey).getPublicKey().getBytes()
       assert.deepEqual(new Uint8Array(actual), expected)
     })
   })

@@ -25,7 +25,6 @@
 
 const array = require('./array.js')
 const converter = require('./converter.js')
-const integer = require('./integer.js')
 
 const bech32Alphabet = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l'
 /**
@@ -58,7 +57,7 @@ function bech32Decode (bech32) {
   const data = str.slice(sepPos + 1)
   checkAlphabet(data)
   verifyChecksum(pfx, data)
-  return integer.uint16ToBytes(ver).concat(convert5to8(data.slice(0, -6)))
+  return converter.uint16ToBytes(ver).concat(convert5to8(data.slice(0, -6)))
 }
 /**
  * @param {string} data

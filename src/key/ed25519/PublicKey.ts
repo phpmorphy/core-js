@@ -49,6 +49,16 @@ export class PublicKey {
   }
 
   /**
+   * Публичный ключ в формате libsodium, 32 байта (256 бит).
+   * @returns {number[]}
+   * @example
+   * let bytes = new PublicKey(new Uint8Array(32)).getBytes()
+   */
+  getBytes (): number[] {
+    return this._bytes.slice(0)
+  }
+
+  /**
    * Публичный ключ.
    * @returns {PublicKey}
    * @private
@@ -56,16 +66,6 @@ export class PublicKey {
    */
   getPublicKey (): PublicKey {
     return this
-  }
-
-  /**
-   * Публичный ключ в формате libsodium, 32 байта (256 бит).
-   * @returns {number[]}
-   * @example
-   * let bytes = new PublicKey(new Uint8Array(32)).toBytes()
-   */
-  toBytes (): number[] {
-    return this._bytes.slice(0)
   }
 
   /**

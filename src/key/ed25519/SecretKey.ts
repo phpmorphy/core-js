@@ -41,7 +41,7 @@ export class SecretKey {
    * В формате libsodium, 64 байта (512 бит).
    * @throws {Error}
    * @example
-   * let bytes = SecretKey.fromSeed(new Uint8Array(32)).toBytes()
+   * let bytes = SecretKey.fromSeed(new Uint8Array(32)).getBytes()
    * let secKey = new SecretKey(bytes)
    */
   constructor (bytes: ArrayLike<number>) {
@@ -71,6 +71,17 @@ export class SecretKey {
   }
 
   /**
+   * Приватный ключ в бинарном виде. В формате libsodium, 64 байта (512 бит).
+   * @returns {number[]}
+   * @example
+   * let secKey = SecretKey.fromSeed(new Uint8Array(32))
+   * let bytes = secKey.getBytes()
+   */
+  getBytes (): number[] {
+    return this._bytes.slice(0)
+  }
+
+  /**
    * Публичный ключ, соответствующий приватному ключу.
    * @returns {PublicKey}
    * @example
@@ -92,16 +103,5 @@ export class SecretKey {
    */
   sign (message: ArrayLike<number>): number[] {
     return sign(message, this._bytes)
-  }
-
-  /**
-   * Приватный ключ в бинарном виде. В формате libsodium, 64 байта (512 бит).
-   * @returns {number[]}
-   * @example
-   * let secKey = SecretKey.fromSeed(new Uint8Array(32))
-   * let bytes = secKey.toBytes()
-   */
-  toBytes (): number[] {
-    return this._bytes.slice(0)
   }
 }

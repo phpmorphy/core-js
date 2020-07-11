@@ -199,7 +199,7 @@ UMI использует адреса в формате Bech32
 ```javascript
 const bech32 = 'umi18d4z00xwk6jz6c4r4rgz5mcdwdjny9thrh3y8f36cpy2rz6emg5s6rxnf6'
 const address = umi.Address.fromBech32(bech32)
-console.log(address.toBech32())
+console.log(address.getBech32())
 ```
  
 #### Адрес из приватного или публичного ключа
@@ -223,7 +223,7 @@ const address2 = umi.Address.fromKey(pubKey)
 ```javascript
 const bech32 = 'umi18d4z00xwk6jz6c4r4rgz5mcdwdjny9thrh3y8f36cpy2rz6emg5s6rxnf6'
 const address = umi.Address.fromBech32(bech32).setPrefix('aaa')
-console.log(address.toBech32())
+console.log(address.getBech32())
 ```
 
 ### Транзакции
@@ -242,7 +242,7 @@ const tx = new umi.Transaction()
   .sign(secKey)
 
 console.log(tx.verify())
-console.log(tx.toBase64())
+console.log(tx.getBase64())
 ```
 
 #### Создать структуру
@@ -260,7 +260,7 @@ const tx = new umi.Transaction()
   .sign(secKey)
 
 console.log(tx.verify())
-console.log(tx.toBase64())
+console.log(tx.getBase64())
 ```
 
 #### Обновить настройки структуры
@@ -280,7 +280,7 @@ const tx = new umi.Transaction()
   .sign(secKey)
 
 console.log(tx.verify())
-console.log(tx.toBase64())
+console.log(tx.getBase64())
 ```
 
 #### Установить адрес для начисления профита
@@ -296,7 +296,7 @@ const tx = new umi.Transaction()
   .sign(secKey)
 
 console.log(tx.verify())
-console.log(tx.toBase64())
+console.log(tx.getBase64())
 ```
 
 #### Установить адрес для перевода комиссии
@@ -312,7 +312,7 @@ const tx = new umi.Transaction()
   .sign(secKey)
 
 console.log(tx.verify())
-console.log(tx.toBase64())
+console.log(tx.getBase64())
 ```
 
 #### Активировать транзитный адрес
@@ -328,7 +328,7 @@ const tx = new umi.Transaction()
   .sign(secKey)
 
 console.log(tx.verify())
-console.log(tx.toBase64())
+console.log(tx.getBase64())
 ```
 
 #### Деактивировать транзитный адрес
@@ -344,7 +344,7 @@ const tx = new umi.Transaction()
   .sign(secKey)
 
 console.log(tx.verify())
-console.log(tx.toBase64())
+console.log(tx.getBase64())
 ```
 
 ### Блоки

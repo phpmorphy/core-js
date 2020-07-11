@@ -20,10 +20,9 @@
 
 import { Address } from '../address/Address'
 import { SecretKey } from '../key/ed25519/SecretKey'
-import { versionToPrefix, prefixToVersion } from '../util/converter'
+import { versionToPrefix, prefixToVersion, bytesToUint16, bytesToUint64, uint16ToBytes, uint64ToBytes } from '../util/converter'
 import { Utf8Decode, Utf8Encode } from '../util/utf8'
 import { validateInt } from '../util/validator'
-import { bytesToUint16, bytesToUint64, uint16ToBytes, uint64ToBytes } from '../util/integer'
 import { arrayNew, arraySet } from '../util/array'
 import { base64Decode, base64Encode } from '../util/base64'
 import { sha256 } from '../util/sha256'
@@ -220,6 +219,26 @@ export class Transaction {
   }
 
   /**
+   * Транзакция в виде строки в формате Base64.
+   * @returns {string}
+   * @example
+   * let base64 = new Transaction().getBase64()
+   */
+  getBase64 (): string {
+    return base64Encode(this._bytes)
+  }
+
+  /**
+   * Транзакция в бинарном виде, 150 байт.
+   * @returns {number[]}
+   * @example
+   * let bytes = new Transaction().getBytes()
+   */
+  getBytes (): number[] {
+    return this._bytes.slice(0)
+  }
+
+  /**
    * Хэш транзакции, sha256 от всех 150 байт.
    * @returns {number[]}
    * @example
@@ -282,7 +301,7 @@ export class Transaction {
     if (!(address instanceof Address)) {
       throw new Error('address type must be Address')
     }
-    arraySet(this._bytes, address.toBytes(), 1)
+    arraySet(this._bytes, address.getBytes(), 1)
     return this
   }
 
@@ -313,7 +332,7 @@ export class Transaction {
     if (!(address instanceof Address)) {
       throw new Error('recipient type must be Address')
     }
-    arraySet(this._bytes, address.toBytes(), 35)
+    arraySet(this._bytes, address.getBytes(), 35)
     return this
   }
 
@@ -545,26 +564,6 @@ export class Transaction {
     validateInt(percent, 0, 2000)
     arraySet(this._bytes, uint16ToBytes(percent), 39)
     return this
-  }
-
-  /**
-   * Транзакция в бинарном виде, 150 байт.
-   * @returns {number[]}
-   * @example
-   * let bytes = new Transaction().toBytes()
-   */
-  toBytes (): number[] {
-    return this._bytes.slice(0)
-  }
-
-  /**
-   * Транзакция в виде строки в формате Base64.
-   * @returns {string}
-   * @example
-   * let base64 = new Transaction().toBase64()
-   */
-  toBase64 (): string {
-    return base64Encode(this._bytes)
   }
 
   /**

@@ -35,14 +35,14 @@ describe('Transaction', function () {
       it('если вызвать без параметров', function () {
         const expected = new Uint8Array(150)
         expected[0] = 1
-        const actual = new Uint8Array(new Transaction().toBytes())
+        const actual = new Uint8Array(new Transaction().getBytes())
         assert.deepEqual(actual, expected)
       })
 
       it('передать Uint8Array длиной 150 байт', function () {
         const expected = new Uint8Array(150)
         expected[0] = 7
-        const actual = new Uint8Array(Transaction.fromBytes(expected).toBytes())
+        const actual = new Uint8Array(Transaction.fromBytes(expected).getBytes())
         assert.deepEqual(actual, expected)
       })
     })
@@ -82,7 +82,7 @@ describe('Transaction', function () {
     it('устанавливает отправителя', function () {
       const expected = new Address().setPrefix('zzz')
       const actual = new Transaction().setSender(expected).getSender()
-      assert.deepEqual(actual.toBytes(), expected.toBytes())
+      assert.deepEqual(actual.getBytes(), expected.getBytes())
     })
   })
 
@@ -175,11 +175,11 @@ describe('Transaction', function () {
     assert.strictEqual(actual, expected)
   })
 
-  it('#toBase64()', function () {
+  it('#getBase64()', function () {
     const expected = '' +
       'AQQhBNO+JWxYyqg/hwCNNTf+OSi4FPLvb+CdCgDNCQp0z6EIQk7qqt8TASDt45OWqVpIpGN34agVA7EWGndxFuVsnIF0AB//////' +
       '//8CAAAAAAAAAH9el6Akogt7CM0d1L8VBf2n436itp8C/lrd+4aksXn+XqGWBSCVxRVJSrICcuhwaO/xRaYwr4xAUyu0/5MYVQsA'
-    const actual = Transaction.fromBase64(expected).toBase64()
+    const actual = Transaction.fromBase64(expected).getBase64()
     assert.strictEqual(actual, expected)
   })
 

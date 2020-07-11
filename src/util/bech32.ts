@@ -18,9 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { prefixToVersion, versionToPrefix } from './converter'
+import { prefixToVersion, versionToPrefix, uint16ToBytes } from './converter'
 import { arrayNew, arraySet } from './array'
-import { uint16ToBytes } from './integer'
 
 const bech32Alphabet = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l'
 

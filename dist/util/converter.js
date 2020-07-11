@@ -43,7 +43,7 @@ function versionToPrefix (version) {
   const a = (version & 0x7C00) >> 10
   const b = (version & 0x03E0) >> 5
   const c = (version & 0x001F)
-  checkChars([a, b, c])
+  checkPrefixChars([a, b, c])
   return String.fromCharCode((a + 96), (b + 96), (c + 96))
 }
 /**
@@ -61,7 +61,7 @@ function prefixToVersion (prefix) {
   const a = prefix.charCodeAt(0) - 96
   const b = prefix.charCodeAt(1) - 96
   const c = prefix.charCodeAt(2) - 96
-  checkChars([a, b, c])
+  checkPrefixChars([a, b, c])
   return (a << 10) + (b << 5) + c
 }
 /**
@@ -69,13 +69,56 @@ function prefixToVersion (prefix) {
  * @throws {Error}
  * @private
  */
-function checkChars (chars) {
+function checkPrefixChars (chars) {
   for (let i = 0, l = chars.length; i < l; i++) {
     if (chars[i] < 1 || chars[i] > 26) {
       throw new Error('bech32: incorrect prefix character')
     }
   }
 }
+/**
+ * @param {number} value
+ * @returns {number[]}
+ * @private
+ */
+function uint64ToBytes (value) {
+  const l = ((value >>> 24) * 16777216) + (value & 0x00ffffff)
+  const h = (value - l) / 4294967296
+  return [
+    ((h >> 24) & 0xff), ((h >> 16) & 0xff), ((h >> 8) & 0xff), (h & 0xff),
+    ((l >> 24) & 0xff), ((l >> 16) & 0xff), ((l >> 8) & 0xff), (l & 0xff)
+  ]
+}
+/**
+ * @param {number[]} bytes
+ * @returns {number}
+ * @private
+ */
+function bytesToUint64 (bytes) {
+  const h = (bytes[0] * 16777216) + (bytes[1] << 16) + (bytes[2] << 8) + bytes[3]
+  const l = (bytes[4] * 16777216) + (bytes[5] << 16) + (bytes[6] << 8) + bytes[7]
+  return (h * 4294967296) + l
+}
+/**
+ * @param {number} value
+ * @returns {number[]}
+ * @private
+ */
+function uint16ToBytes (value) {
+  return [((value >> 8) & 0xff), (value & 0xff)]
+}
+/**
+ * @param {number[]} bytes
+ * @returns {number}
+ * @private
+ */
+function bytesToUint16 (bytes) {
+  return (bytes[0] << 8) | bytes[1]
+}
 
+exports.bytesToUint16 = bytesToUint16
+exports.bytesToUint64 = bytesToUint64
 exports.prefixToVersion = prefixToVersion
+exports.uint16ToBytes = uint16ToBytes
+exports.uint64ToBytes = uint64ToBytes
 exports.versionToPrefix = versionToPrefix
