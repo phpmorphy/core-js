@@ -175,28 +175,6 @@ describe('Transaction', function () {
     assert.strictEqual(actual, expected)
   })
 
-  it('#getBase64()', function () {
-    const expected = '' +
-      'AQQhBNO+JWxYyqg/hwCNNTf+OSi4FPLvb+CdCgDNCQp0z6EIQk7qqt8TASDt45OWqVpIpGN34agVA7EWGndxFuVsnIF0AB//////' +
-      '//8CAAAAAAAAAH9el6Akogt7CM0d1L8VBf2n436itp8C/lrd+4aksXn+XqGWBSCVxRVJSrICcuhwaO/xRaYwr4xAUyu0/5MYVQsA'
-    const actual = Transaction.fromBase64(expected).getBase64()
-    assert.strictEqual(actual, expected)
-  })
-
-  describe('.fromBase64()', function () {
-    it('ошибка если некорректная длина', function () {
-      assert.throws(function () {
-        return Transaction.fromBase64('A'.repeat(199))
-      }, Error)
-    })
-
-    it('ошибка если некорректные символы', function () {
-      assert.throws(function () {
-        return Transaction.fromBase64('('.repeat(200))
-      }, Error)
-    })
-  })
-
   describe('signature', function () {
     it('ошибка если некорректная длина', function () {
       assert.throws(function () {

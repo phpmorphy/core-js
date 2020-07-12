@@ -19,13 +19,36 @@
 // SOFTWARE.
 
 /**
- * Конвертер строки в типизированный массив UTF-8 байтов.
- * @param {string} text
- * @returns {number[]}
- * @private
- * @internal
+ * Декодирует массив байтов UTF-8 в строку в кодировке UTF-16.
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/TextDecoder
+ * @param {number[]} bytes Массив байтов UTF-8.
+ * @returns {string}
  */
-function Utf8Encode (text: string): number[] {
+export function textDecode (bytes: number[]): string {
+  let str = ''
+  let i = 0
+  while (i < bytes.length) {
+    if (bytes[i] < 0x80) { // ascii
+      str += String.fromCharCode(bytes[i++])
+    } else if ((bytes[i] > 0xBF) && (bytes[i] < 0xE0)) {
+      str += String.fromCharCode((bytes[i++] & 0x1F) << 6 | bytes[i++] & 0x3F)
+    } else if (bytes[i] > 0xDF && bytes[i] < 0xF0) {
+      str += String.fromCharCode(((bytes[i++] & 0x0F) << 12) | ((bytes[i++] & 0x3F) << 6) | (bytes[i++] & 0x3F))
+    } else { // surrogate pair
+      const code = (((bytes[i++] & 0x07) << 18) | ((bytes[i++] & 0x3F) << 12) | ((bytes[i++] & 0x3F) << 6) | (bytes[i++] & 0x3F)) - 0x010000
+      str += String.fromCharCode(code >> 10 | 0xD800, code & 0x03FF | 0xDC00)
+    }
+  }
+  return str
+}
+
+/**
+ * Кодирует UTF-16 строку в массив байтов UTF-8.
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/TextEncoder
+ * @param {string} text Текстовая строка в кодировке UTF-16.
+ * @returns {number[]}
+ */
+export function textEncode (text: string): number[] {
   const bytes: number[] = []
   let i = 0
   while (i < text.length) {
@@ -46,30 +69,3 @@ function Utf8Encode (text: string): number[] {
 
   return bytes
 }
-
-/**
- * Конвертер из типизированного массива UTF-8 байтов в строку.
- * @param {number[]} bytes
- * @returns {string}
- * @private
- * @internal
- */
-function Utf8Decode (bytes: number[]): string {
-  let str = ''
-  let i = 0
-  while (i < bytes.length) {
-    if (bytes[i] < 0x80) { // ascii
-      str += String.fromCharCode(bytes[i++])
-    } else if ((bytes[i] > 0xBF) && (bytes[i] < 0xE0)) {
-      str += String.fromCharCode((bytes[i++] & 0x1F) << 6 | bytes[i++] & 0x3F)
-    } else if (bytes[i] > 0xDF && bytes[i] < 0xF0) {
-      str += String.fromCharCode(((bytes[i++] & 0x0F) << 12) | ((bytes[i++] & 0x3F) << 6) | (bytes[i++] & 0x3F))
-    } else { // surrogate pair
-      const code = (((bytes[i++] & 0x07) << 18) | ((bytes[i++] & 0x3F) << 12) | ((bytes[i++] & 0x3F) << 6) | (bytes[i++] & 0x3F)) - 0x010000
-      str += String.fromCharCode(code >> 10 | 0xD800, code & 0x03FF | 0xDC00)
-    }
-  }
-  return str
-}
-
-export { Utf8Decode, Utf8Encode }

@@ -1,5 +1,5 @@
 <h1 align="center">
-  <a href="https://umi.top"><img src="../logo.svg" alt="UMI" width="200"></a>
+  <a href="https://umi.top"><img src="./logo.svg" alt="UMI" width="200"></a>
   <br>
   UMI Core - JavaScript Library
   <br>
@@ -26,6 +26,7 @@
 -   [Установка](#установка)
     - [npm](#npm)
     - [yarn](#yarn)
+    - [Отдельным файлом](#отдельным-файлом)
 
 -   [Подключение](#подключение)
     - [CommonJS](#commonjs)
@@ -44,26 +45,36 @@
     -   [Адреса](#адреса)
         - [Адрес в формате Bech32](#адрес-в-формате-bech32)
         - [Адрес из приватного или публичного ключа](#адрес-из-приватного-или-публичного-ключа)
-        - [Установить префикс адреса](#установить-префикс-адреса)
+        - [Префикс](#префикс)
 
     -   [Транзакции](#транзакции)
-        - [Отправить монеты](#отправить-монеты)
+        - [Перевести монеты](#перевести-монеты)
         - [Создать структуру](#создать-структуру)
         - [Обновить настройки структуры](#обновить-настройки-структуры)
         - [Установить адрес для начисления профита](#установить-адрес-для-начисления-профита)
         - [Установить адрес для перевода комиссии](#установить-адрес-для-перевода-комиссии)
         - [Активировать транзитный адрес](#активировать-транзитный-адрес)
         - [Деактивировать транзитный адрес](#деактивировать-транзитный-адрес)
+        - [Отправить транзакцию в сеть](#отправить-транзакцию-в-сеть)
 
     -   [Блоки](#блоки)
-        - Создать и подписать блок
-        - Распарсить блок
+        - [Создать и подписать блок](#cоздать-и-подписать-блок)
+        - [Распарсить блок](#распарсить-блок)
 
 -   [Лицензия](#лицензия)
 
 ## Введение
 
+Библиотека написана на [TypeScript](https://www.typescriptlang.org) и
+скомпилирована в модули CommonJS и ES Module по стандарту es6 и работает
+во всех актуальных браузерах и Node.js начиная с версии 4.0.
+Так же для совместимости с устаревшими браузерами скомпилирована iife версия
+по стандарту es3, поддерживается Internet Explorer 6 и старше.
+
 ## Установка
+
+Наиболее удобным вариантом установки является использование пакетного менеджера,
+например, [npm](https://docs.npmjs.com) и [Yarn](https://yarnpkg.com):
 
 ### npm
 ```bash
@@ -73,6 +84,16 @@ npm install @umi-top/umi-core-js
 ```bash
 yarn add @umi-top/umi-core-js
 ```
+
+### Отдельным файлом
+
+Если требуется, библиотеку можно скачать в виде отдельного файла:  
+CommonJS: [index.js](),
+ES Module: [index.mjs]()
+или IIFE [index.min.js]().  
+Так же можно скачать аннотации типов для
+[TypeScript](https://www.typescriptlang.org): [index.js.dt]()
+и [Flow](https://flow.org): [index.js.flow]().
 
 ## Подключение
 
@@ -88,11 +109,11 @@ const umi = require('@umi-top/umi-core-js')
 [Rollup](https://rollupjs.org/guide/en/#importing),
 [Parcel](https://parceljs.org/javascript.html) или [Node.js (>= v13)](https://nodejs.org/api/esm.html).
 
-Для более эффективной работы алгоритма [Tree shaking](https://webpack.js.org/guides/tree-shaking/)
+Для более эффективной работы алгоритма [tree shaking](https://webpack.js.org/guides/tree-shaking/)
 рекомендуем импортировать только используемые значения:
 
 ```javascript
-import { Address, Block, BlockHeader, PublicKey, SecretKey, Transaction } from '@umi-top/umi-core-js'
+import { Address, PublicKey, SecretKey, Transaction } from '@umi-top/umi-core-js'
 ```
 
 Импортировать все содержимое модуля можно используя следующий синтаксис:
@@ -145,9 +166,11 @@ const seed = bip39.mnemonicToSeedSync(mnemonic)
 
 ### Ключи
 
-В UMI применяется Ed25519 ([rfc8032](https://tools.ietf.org/html/rfc8032)) —
+В UMI применяется [Ed25519](https://ed25519.cr.yp.to)
+([RFC 8032](https://tools.ietf.org/html/rfc8032)) —
 схема подписи [EdDSA](https://ru.wikipedia.org/wiki/EdDSA) использующая
-SHA-512 и Curve25519. 
+[SHA-512](https://en.wikipedia.org/wiki/SHA-2)
+и [Curve25519](https://en.wikipedia.org/wiki/Curve25519). 
 
 #### Ключи из seed'а
 
@@ -163,23 +186,26 @@ const publicKey = secretKey.getPublicKey()
 #### Подписать сообщение
 
 В метод `SecretKey#sign()` необходимо передать массив байтов, поэтому если
-требуется подписать текстовое сообщение его нужно преобразовать: 
+требуется подписать текстовое сообщение его нужно преобразовать:
+
 ```javascript
-const message = new TextEncoder().encode('Hello World')
+const message = umi.textEncode('Hello World')
 const signature = secretKey.sign(message)
+
+console.log(umi.base64Encode(signature))
 ```
 
 #### Проверить подпись
 
 Метод `PublicKey#verifySignature()` принимает массив байтов, поэтому если
-подпись передается в текстовой кодировке ее необходимо декодировать.  
-Пример для Node.js:
+подпись передается в виде текста ее необходимо декодировать.
 
 ```javascript
 const address = 'umi18d4z00xwk6jz6c4r4rgz5mcdwdjny9thrh3y8f36cpy2rz6emg5s6rxnf6'
-const message = new TextEncoder().encode('Hello World')
-const signature = Buffer.from('Jbi9YfwLcxiTMednl/wTvnSzsPP9mV9Bf2vvZytP87oyg1p1c9ZBkn4gNv15ZHwEFv3bVYlowgyIKmMwJLjJCw==', 'base64')
-const ver = umi.Address.fromBech32(address).getPublicKey().verifySignature(signature, message)
+const message = umi.textEncode('Hello World')
+const signature = umi.base64Decode('Jbi9YfwLcxiTMednl/wTvnSzsPP9mV9Bf2vvZytP87oyg1p1c9ZBkn4gNv15ZHwEFv3bVYlowgyIKmMwJLjJCw==')
+const pubKey = umi.Address.fromBech32(address).getPublicKey()
+const isValid = pubKey.verifySignature(signature, message)
 ```
 
 ### Адреса
@@ -215,7 +241,7 @@ const address1 = umi.Address.fromKey(secKey)
 const address2 = umi.Address.fromKey(pubKey)
 ```
 
-#### Установить префикс адреса
+#### Префикс
 
 По умолчанию адреса имеют префикс `umi`.
 Изменить префикс можно при помощи метода `Address#setPrefix()`:
@@ -228,7 +254,7 @@ console.log(address.getBech32())
 
 ### Транзакции
 
-#### Отправить монеты
+#### Перевести монеты
 
 ```javascript
 const secKey = umi.SecretKey.fromSeed(new Uint8Array(32))
@@ -242,7 +268,7 @@ const tx = new umi.Transaction()
   .sign(secKey)
 
 console.log(tx.verify())
-console.log(tx.getBase64())
+console.log(umi.base64Encode(tx.getBytes()))
 ```
 
 #### Создать структуру
@@ -251,7 +277,7 @@ console.log(tx.getBase64())
 const secKey = umi.SecretKey.fromSeed(new Uint8Array(32))
 const sender = umi.Address.fromKey(secKey).setPrefix('umi')
 const tx = new umi.Transaction()
-  .setVersion(umi.Transaction.UpdateStructure)
+  .setVersion(umi.Transaction.CreateStructure)
   .setSender(sender)
   .setPrefix('aaa')
   .setName('🙂')
@@ -260,7 +286,7 @@ const tx = new umi.Transaction()
   .sign(secKey)
 
 console.log(tx.verify())
-console.log(tx.getBase64())
+console.log(umi.base64Encode(tx.getBytes()))
 ```
 
 #### Обновить настройки структуры
@@ -280,7 +306,7 @@ const tx = new umi.Transaction()
   .sign(secKey)
 
 console.log(tx.verify())
-console.log(tx.getBase64())
+console.log(umi.base64Encode(tx.getBytes()))
 ```
 
 #### Установить адрес для начисления профита
@@ -296,7 +322,7 @@ const tx = new umi.Transaction()
   .sign(secKey)
 
 console.log(tx.verify())
-console.log(tx.getBase64())
+console.log(umi.base64Encode(tx.getBytes()))
 ```
 
 #### Установить адрес для перевода комиссии
@@ -312,7 +338,7 @@ const tx = new umi.Transaction()
   .sign(secKey)
 
 console.log(tx.verify())
-console.log(tx.getBase64())
+console.log(umi.base64Encode(tx.getBytes()))
 ```
 
 #### Активировать транзитный адрес
@@ -328,7 +354,7 @@ const tx = new umi.Transaction()
   .sign(secKey)
 
 console.log(tx.verify())
-console.log(tx.getBase64())
+console.log(umi.base64Encode(tx.getBytes()))
 ```
 
 #### Деактивировать транзитный адрес
@@ -344,10 +370,99 @@ const tx = new umi.Transaction()
   .sign(secKey)
 
 console.log(tx.verify())
-console.log(tx.getBase64())
+console.log(umi.base64Encode(tx.getBytes()))
+```
+
+#### Отправить транзакцию в сеть
+
+Пример для браузера с использованием
+[Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API)
+([Fetch polyfill](https://github.com/github/fetch)):
+
+```javascript
+const tx = new umi.Transaction()
+
+fetch('https://testnet.umi.top/json-rpc', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    jsonrpc: '2.0',
+    id: '',
+    method: 'sendTransaction',
+    params: {
+      base64: umi.base64Encode(tx.getBytes())
+    }
+  })
+}).then(function(response) {
+  console.log(response.status)
+  console.log(response.statusText)
+  return response.json()
+}).then(function(json) {
+  console.log('parsed json', json)
+}).catch(function(ex) {
+  console.log('parsing failed', ex)
+})
+```
+
+Пример для Node.js с использованием модуля [https](https://nodejs.org/api/https.html):
+
+```javascript
+const umi = require('@umi-top/umi-core-js')
+const https = require('https')
+
+const tx = new umi.Transaction()
+
+const data = JSON.stringify({
+  jsonrpc: '2.0',
+  id: '',
+  method: 'sendTransaction',
+  params: {
+    base64: Buffer.from(tx.getBytes()).toString('base64')
+  }
+})
+
+const options = {
+  hostname: 'testnet.umi.top',
+  port: 443,
+  path: '/json-rpc',
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Content-Length': data.length
+  }
+}
+
+const req = https.request(options, (res) => {
+  console.log(`statusCode: ${res.statusCode}`)
+
+  res.on('data', (d) => {
+    process.stdout.write(d)
+  })
+})
+
+req.on('error', (error) => {
+  console.error(error)
+})
+
+req.write(data)
+req.end()
 ```
 
 ### Блоки
+
+#### Создать и подписать блок
+
+```javascript
+...
+```
+
+#### Распарсить блок
+
+```javascript
+...
+```
 
 ## Лицензия
 

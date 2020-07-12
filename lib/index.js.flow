@@ -44,9 +44,7 @@ declare export class Transaction {
   static CreateTransitAddress: number;
   static DeleteTransitAddress: number;
   constructor(): this;
-  static fromBase64(base64: string): Transaction;
   static fromBytes(bytes: ArrayLike<number>): Transaction;
-  getBase64(): string;
   getBytes(): number[];
   getHash(): number[];
   getVersion(): number;
@@ -72,3 +70,9 @@ declare export class Transaction {
   setFeePercent(percent: number): Transaction;
   verify(): boolean;
 }
+declare export function base64Decode(base64: string): number[];
+declare export function base64Encode(bytes: number[]): string;
+declare export function hexDecode(hex: string): number[];
+declare export function hexEncode(bytes: number[]): string;
+declare export function textDecode(bytes: number[]): string;
+declare export function textEncode(text: string): number[];

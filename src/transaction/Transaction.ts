@@ -21,10 +21,9 @@
 import { Address } from '../address/Address'
 import { SecretKey } from '../key/ed25519/SecretKey'
 import { versionToPrefix, prefixToVersion, bytesToUint16, bytesToUint64, uint16ToBytes, uint64ToBytes } from '../util/converter'
-import { Utf8Decode, Utf8Encode } from '../util/utf8'
+import { textDecode, textEncode } from '../util/text'
 import { validateInt } from '../util/validator'
 import { arrayNew, arraySet } from '../util/array'
-import { base64Decode, base64Encode } from '../util/base64'
 import { sha256 } from '../util/sha256'
 
 /**
@@ -185,22 +184,6 @@ export class Transaction {
   }
 
   /**
-   * Статический метод, создает объект из Base64 строки.
-   * @param {string} base64 Транзакция в формате Base64.
-   * @returns {Transaction}
-   * @throws {Error}
-   * @example
-   * let b64 = 'A'.repeat(200)
-   * let trx = Transaction.fromBase64(b64)
-   */
-  static fromBase64 (base64: string): Transaction {
-    if (base64.length !== 200) {
-      throw new Error('invalid length')
-    }
-    return Transaction.fromBytes(base64Decode(base64))
-  }
-
-  /**
    * Статический метод, создает объект из массива байтов.
    * @param {ArrayLike<number>} bytes Транзакция в бинарном виде.
    * @returns {Transaction}
@@ -216,16 +199,6 @@ export class Transaction {
     const tx = new Transaction()
     arraySet(tx._bytes, bytes)
     return tx
-  }
-
-  /**
-   * Транзакция в виде строки в формате Base64.
-   * @returns {string}
-   * @example
-   * let base64 = new Transaction().getBase64()
-   */
-  getBase64 (): string {
-    return base64Encode(this._bytes)
   }
 
   /**
@@ -478,7 +451,7 @@ export class Transaction {
     if (this._bytes[41] > 35) {
       throw new Error('invalid length')
     }
-    return Utf8Decode(this._bytes.slice(42, 42 + this._bytes[41]))
+    return textDecode(this._bytes.slice(42, 42 + this._bytes[41]))
   }
 
   /**
@@ -493,7 +466,7 @@ export class Transaction {
    */
   setName (name: string): Transaction {
     this.checkVersion([2, 3])
-    const bytes = Utf8Encode(name)
+    const bytes = textEncode(name)
     if (bytes.length > 35) {
       throw new Error('name is too long')
     }

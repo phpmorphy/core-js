@@ -29,8 +29,7 @@ const SecretKey = require('../key/ed25519/SecretKey.js')
 const validator = require('../util/validator.js')
 const converter = require('../util/converter.js')
 const Address = require('../address/Address.js')
-const utf8 = require('../util/utf8.js')
-const base64 = require('../util/base64.js')
+const text = require('../util/text.js')
 
 /**
  * Класс для работы с транзакциями.
@@ -52,22 +51,6 @@ class Transaction {
   }
 
   /**
-   * Статический метод, создает объект из Base64 строки.
-   * @param {string} base64 Транзакция в формате Base64.
-   * @returns {Transaction}
-   * @throws {Error}
-   * @example
-   * let b64 = 'A'.repeat(200)
-   * let trx = Transaction.fromBase64(b64)
-   */
-  static fromBase64 (base64$1) {
-    if (base64$1.length !== 200) {
-      throw new Error('invalid length')
-    }
-    return Transaction.fromBytes(base64.base64Decode(base64$1))
-  }
-
-  /**
    * Статический метод, создает объект из массива байтов.
    * @param {ArrayLike<number>} bytes Транзакция в бинарном виде.
    * @returns {Transaction}
@@ -83,16 +66,6 @@ class Transaction {
     const tx = new Transaction()
     array.arraySet(tx._bytes, bytes)
     return tx
-  }
-
-  /**
-   * Транзакция в виде строки в формате Base64.
-   * @returns {string}
-   * @example
-   * let base64 = new Transaction().getBase64()
-   */
-  getBase64 () {
-    return base64.base64Encode(this._bytes)
   }
 
   /**
@@ -345,7 +318,7 @@ class Transaction {
     if (this._bytes[41] > 35) {
       throw new Error('invalid length')
     }
-    return utf8.Utf8Decode(this._bytes.slice(42, 42 + this._bytes[41]))
+    return text.textDecode(this._bytes.slice(42, 42 + this._bytes[41]))
   }
 
   /**
@@ -360,7 +333,7 @@ class Transaction {
    */
   setName (name) {
     this.checkVersion([2, 3])
-    const bytes = utf8.Utf8Encode(name)
+    const bytes = text.textEncode(name)
     if (bytes.length > 35) {
       throw new Error('name is too long')
     }

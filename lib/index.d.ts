@@ -321,16 +321,6 @@ export declare class Transaction {
      */
     constructor();
     /**
-     * Статический метод, создает объект из Base64 строки.
-     * @param {string} base64 Транзакция в формате Base64.
-     * @returns {Transaction}
-     * @throws {Error}
-     * @example
-     * let b64 = 'A'.repeat(200)
-     * let trx = Transaction.fromBase64(b64)
-     */
-    static fromBase64(base64: string): Transaction;
-    /**
      * Статический метод, создает объект из массива байтов.
      * @param {ArrayLike<number>} bytes Транзакция в бинарном виде.
      * @returns {Transaction}
@@ -340,13 +330,6 @@ export declare class Transaction {
      * let trx = Transaction.fromBytes(bytes)
      */
     static fromBytes(bytes: ArrayLike<number>): Transaction;
-    /**
-     * Транзакция в виде строки в формате Base64.
-     * @returns {string}
-     * @example
-     * let base64 = new Transaction().getBase64()
-     */
-    getBase64(): string;
     /**
      * Транзакция в бинарном виде, 150 байт.
      * @returns {number[]}
@@ -577,3 +560,43 @@ export declare class Transaction {
      */
     verify(): boolean;
 }
+/**
+ * Декодирует Base64 строку в массив байтов.
+ * @param {string} base64 Строка в кодировке Base64.
+ * @returns {number[]}
+ * @throws {Error}
+ */
+export declare function base64Decode(base64: string): number[];
+/**
+ * Кодирует массив байтов в Base64 строку.
+ * @param {number[]} bytes Массив байтов.
+ * @returns {string}
+ */
+export declare function base64Encode(bytes: number[]): string;
+/**
+ * Декодирует Base16 строку в массив байтов.
+ * @param {string} hex Строка в кодировке Base16.
+ * @returns {number[]}
+ * @throws {Error}
+ */
+export declare function hexDecode(hex: string): number[];
+/**
+ * Кодирует массив байтов в Base16 строку.
+ * @param {number[]} bytes Массив байтов.
+ * @returns {string}
+ */
+export declare function hexEncode(bytes: number[]): string;
+/**
+ * Декодирует массив байтов UTF-8 в строку в кодировке UTF-16.
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/TextDecoder
+ * @param {number[]} bytes Массив байтов UTF-8.
+ * @returns {string}
+ */
+export declare function textDecode(bytes: number[]): string;
+/**
+ * Кодирует UTF-16 строку в массив байтов UTF-8.
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/TextEncoder
+ * @param {string} text Текстовая строка в кодировке UTF-16.
+ * @returns {number[]}
+ */
+export declare function textEncode(text: string): number[];

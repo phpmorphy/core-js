@@ -22,3 +22,5 @@ export { SecretKey } from './key/ed25519/SecretKey'
 export { PublicKey } from './key/ed25519/PublicKey'
 export { Address } from './address/Address'
 export { Transaction } from './transaction/Transaction'
+
+export { base64Encode, base64Decode } from './util/base64'

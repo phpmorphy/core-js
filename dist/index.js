@@ -27,8 +27,11 @@ const PublicKey = require('./key/ed25519/PublicKey.js')
 const SecretKey = require('./key/ed25519/SecretKey.js')
 const Address = require('./address/Address.js')
 const Transaction = require('./transaction/Transaction.js')
+const base64 = require('./util/base64.js')
 
 exports.PublicKey = PublicKey.PublicKey
 exports.SecretKey = SecretKey.SecretKey
 exports.Address = Address.Address
 exports.Transaction = Transaction.Transaction
+exports.base64Decode = base64.base64Decode
+exports.base64Encode = base64.base64Encode

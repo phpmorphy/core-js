@@ -18,40 +18,26 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-const base64Alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+const hexAlphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
 
 /**
- * Декодирует Base64 строку в массив байтов.
- * @param {string} base64 Строка в кодировке Base64.
+ * Декодирует Base16 строку в массив байтов.
+ * @param {string} hex Строка в кодировке Base16.
  * @returns {number[]}
  * @throws {Error}
  */
-export function base64Decode (base64: string): number[] {
-  checkBase64Alphabet(base64)
-  const res: number[] = []
-  for (let i = 0, l = base64.length; i < l; i += 4) {
-    let x = (base64Alphabet.indexOf(base64.charAt(i)) << 18)
-    x |= (base64Alphabet.indexOf(base64.charAt(i + 1)) << 12)
-    x |= (base64Alphabet.indexOf(base64.charAt(i + 2)) << 6)
-    x |= base64Alphabet.indexOf(base64.charAt(i + 3))
-    res.push(((x >> 16) & 0xff), ((x >> 8) & 0xff), (x & 0xff))
-  }
-  return res
+export function hexDecode (hex: string): number[] {
+  checkHexAlphabet(hex)
+  return []
 }
 
 /**
- * Кодирует массив байтов в Base64 строку.
+ * Кодирует массив байтов в Base16 строку.
  * @param {number[]} bytes Массив байтов.
  * @returns {string}
  */
-export function base64Encode (bytes: number[]): string {
-  let res = ''
-  for (let i = 0, l = bytes.length; i < l; i += 3) {
-    const x = (bytes[i] << 16) | (bytes[i + 1] << 8) | bytes[i + 2]
-    res += base64Alphabet.charAt((x >> 18) & 0x3f) + base64Alphabet.charAt((x >> 12) & 0x3f)
-    res += base64Alphabet.charAt((x >> 6) & 0x3f) + base64Alphabet.charAt(x & 0x3f)
-  }
-  return res
+export function hexEncode (bytes: number[]): string {
+  return ''
 }
 
 /**
@@ -60,10 +46,10 @@ export function base64Encode (bytes: number[]): string {
  * @private
  * @internal
  */
-function checkBase64Alphabet (chars: string): void {
+function checkHexAlphabet (chars: string): void {
   for (let i = 0, l = chars.length; i < l; i++) {
-    if (base64Alphabet.indexOf(chars.charAt(i)) === -1) {
-      throw new Error('base64: invalid character')
+    if (hexAlphabet.indexOf(chars.charAt(i)) === -1) {
+      throw new Error('hex: invalid character')
     }
   }
 }

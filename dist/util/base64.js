@@ -25,24 +25,10 @@
 
 const base64Alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
 /**
- * @param {number[]} bytes
- * @returns {string}
- * @private
- */
-function base64Encode (bytes) {
-  let res = ''
-  for (let i = 0, l = bytes.length; i < l; i += 3) {
-    const x = (bytes[i] << 16) | (bytes[i + 1] << 8) | bytes[i + 2]
-    res += base64Alphabet.charAt((x >> 18) & 0x3f) + base64Alphabet.charAt((x >> 12) & 0x3f)
-    res += base64Alphabet.charAt((x >> 6) & 0x3f) + base64Alphabet.charAt(x & 0x3f)
-  }
-  return res
-}
-/**
- * @param {string} base64
+ * Декодирует Base64 строку в массив байтов.
+ * @param {string} base64 Строка в кодировке Base64.
  * @returns {number[]}
  * @throws {Error}
- * @private
  */
 function base64Decode (base64) {
   checkBase64Alphabet(base64)
@@ -53,6 +39,20 @@ function base64Decode (base64) {
     x |= (base64Alphabet.indexOf(base64.charAt(i + 2)) << 6)
     x |= base64Alphabet.indexOf(base64.charAt(i + 3))
     res.push(((x >> 16) & 0xff), ((x >> 8) & 0xff), (x & 0xff))
+  }
+  return res
+}
+/**
+ * Кодирует массив байтов в Base64 строку.
+ * @param {number[]} bytes Массив байтов.
+ * @returns {string}
+ */
+function base64Encode (bytes) {
+  let res = ''
+  for (let i = 0, l = bytes.length; i < l; i += 3) {
+    const x = (bytes[i] << 16) | (bytes[i + 1] << 8) | bytes[i + 2]
+    res += base64Alphabet.charAt((x >> 18) & 0x3f) + base64Alphabet.charAt((x >> 12) & 0x3f)
+    res += base64Alphabet.charAt((x >> 6) & 0x3f) + base64Alphabet.charAt(x & 0x3f)
   }
   return res
 }
