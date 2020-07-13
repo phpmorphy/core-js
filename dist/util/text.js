@@ -53,24 +53,28 @@ function textDecode (bytes) {
  * @returns {number[]}
  */
 function textEncode (text) {
-  const bytes = []
+  const b = []
   let i = 0
   while (i < text.length) {
     let code = text.charCodeAt(i++)
     if (code < 0x80) {
-      bytes.push(code)
+      b[b.length] = code
     } else if (code < 0x800) {
-      bytes.push(0xc0 | (code >> 6), 0x80 | (code & 0x3f))
+      b[b.length] = 0xc0 | (code >> 6)
+      b[b.length] = 0x80 | (code & 0x3f)
     } else if (code < 0xd800 || code >= 0xe000) {
-      bytes.push((0xe0 | (code >> 12)), (0x80 | ((code >> 6) & 0x3f)))
-      bytes.push(0x80 | (code & 0x3f))
+      b[b.length] = 0xe0 | (code >> 12)
+      b[b.length] = 0x80 | ((code >> 6) & 0x3f)
+      b[b.length] = 0x80 | (code & 0x3f)
     } else {
       code = 0x10000 + ((code & 0x3ff) << 10) + (text.charCodeAt(i++) & 0x3ff)
-      bytes.push((0xf0 | (code >> 18)), (0x80 | ((code >> 12) & 0x3f)))
-      bytes.push((0x80 | ((code >> 6) & 0x3f)), (0x80 | (code & 0x3f)))
+      b[b.length] = 0xf0 | (code >> 18)
+      b[b.length] = 0x80 | ((code >> 12) & 0x3f)
+      b[b.length] = 0x80 | ((code >> 6) & 0x3f)
+      b[b.length] = 0x80 | (code & 0x3f)
     }
   }
-  return bytes
+  return b
 }
 
 exports.textDecode = textDecode

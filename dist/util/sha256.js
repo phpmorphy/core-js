@@ -67,21 +67,21 @@ function sha256 (message) {
  * @private
  */
 function sha256PreProcess (message) {
-  const bytes = []
+  const bytez = []
   let i
   let l
   for (i = 0, l = message.length + 8 + (64 - ((message.length + 8) % 64)); i < l; i++) {
-    bytes[i] = message[i] || 0
+    bytez[i] = message[i] || 0
   }
-  bytes[message.length] = 0x80
-  bytes[bytes.length - 2] = ((message.length * 8) >>> 8) & 0xff
-  bytes[bytes.length - 1] = (message.length * 8) & 0xff
+  bytez[message.length] = 0x80
+  bytez[bytez.length - 2] = ((message.length * 8) >>> 8) & 0xff
+  bytez[bytez.length - 1] = (message.length * 8) & 0xff
   const chunks = []
-  for (i = 0, l = bytes.length; i < l; i += 64) {
+  for (i = 0, l = bytez.length; i < l; i += 64) {
     const chunk = []
     for (let j = 0; j < 64; j += 4) {
       let n = i + j
-      chunk[chunk.length] = (bytes[n] << 24) + (bytes[++n] << 16) + (bytes[++n] << 8) + bytes[++n]
+      chunk[chunk.length] = (bytez[n] << 24) + (bytez[++n] << 16) + (bytez[++n] << 8) + bytez[++n]
     }
     chunks[chunks.length] = chunk
   }

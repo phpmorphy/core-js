@@ -76,27 +76,27 @@ function sha256 (message: ArrayLike<number>): number[] {
  * @internal
  */
 function sha256PreProcess (message: ArrayLike<number>): number[][] {
-  const bytes: number[] = []
+  const bytez: number[] = []
   let i
   let l
 
   // Length a multiple of 512 bits
   for (i = 0, l = message.length + 8 + (64 - ((message.length + 8) % 64)); i < l; i++) {
-    bytes[i] = message[i] || 0
+    bytez[i] = message[i] || 0
   }
 
-  bytes[message.length] = 0x80 // Append a single '1' bit
+  bytez[message.length] = 0x80 // Append a single '1' bit
   // Append message length in bits as a 64-bit big-endian integer
-  bytes[bytes.length - 2] = ((message.length * 8) >>> 8) & 0xff
-  bytes[bytes.length - 1] = (message.length * 8) & 0xff
+  bytez[bytez.length - 2] = ((message.length * 8) >>> 8) & 0xff
+  bytez[bytez.length - 1] = (message.length * 8) & 0xff
 
   const chunks: number[][] = []
 
-  for (i = 0, l = bytes.length; i < l; i += 64) {
+  for (i = 0, l = bytez.length; i < l; i += 64) {
     const chunk: number[] = []
     for (let j = 0; j < 64; j += 4) {
       let n = i + j
-      chunk[chunk.length] = (bytes[n] << 24) + (bytes[++n] << 16) + (bytes[++n] << 8) + bytes[++n]
+      chunk[chunk.length] = (bytez[n] << 24) + (bytez[++n] << 16) + (bytez[++n] << 8) + bytez[++n]
     }
     chunks[chunks.length] = chunk
   }
