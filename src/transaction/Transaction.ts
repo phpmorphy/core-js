@@ -252,7 +252,8 @@ export class Transaction {
   }
 
   /**
-   * Отправитель. Доступно для всех типов транзакций.
+   * Отправитель.\
+   * Доступно для всех типов транзакций.
    * @returns {Address}
    * @example
    * let sender = new Transaction().getSender()
@@ -263,7 +264,7 @@ export class Transaction {
 
   /**
    * Устанавливает отправителя и возвращает this.
-   * @param {Address} address Адрес получателя.
+   * @param {Address} address Адрес отправителя.
    * @returns {Transaction}
    * @throws {Error}
    * @example
@@ -319,7 +320,7 @@ export class Transaction {
    * Устанавливает сумму и возвращает this.\
    * Принимает значения в промежутке от 1 до 18446744073709551615.\
    * Доступно только для Genesis и Basic транзакций.
-   * @param {number} value Целом число от 1 до 18446744073709551615.
+   * @param {number} value Целое число от 1 до 18446744073709551615.
    * @returns {Transaction}
    * @throws {Error}
    * @example
@@ -483,7 +484,7 @@ export class Transaction {
 
   /**
    * Устанавливает процент профита и возвращает this.\
-   * Доступно только для CreateStructure и UpdateStructure.\
+   * Доступно только для CreateStructure и UpdateStructure.
    * @param {number} percent Профит в сотых долях процента с шагом в 0.01%.
    * Принимает значения от 100 до 500 (соответственно от 1% до 5%).
    * @returns {Transaction}
