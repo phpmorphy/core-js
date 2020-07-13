@@ -52,7 +52,7 @@ export function textEncode (text: string): number[] {
   const b: number[] = []
   let i = 0
   while (i < text.length) {
-    let code = text.charCodeAt(i++)
+    const code = text.charCodeAt(i++)
     if (code < 0x80) { // ascii
       b[b.length] = code
     } else if (code < 0x800) {
@@ -63,13 +63,20 @@ export function textEncode (text: string): number[] {
       b[b.length] = 0x80 | ((code >> 6) & 0x3f)
       b[b.length] = 0x80 | (code & 0x3f)
     } else { // surrogate pair
-      code = 0x10000 + ((code & 0x3ff) << 10) + (text.charCodeAt(i++) & 0x3ff)
-      b[b.length] = 0xf0 | (code >> 18)
-      b[b.length] = 0x80 | ((code >> 12) & 0x3f)
-      b[b.length] = 0x80 | ((code >> 6) & 0x3f)
-      b[b.length] = 0x80 | (code & 0x3f)
+      encodeUtf8Mb4(b, 0x10000 + ((code & 0x3ff) << 10) + (text.charCodeAt(i++) & 0x3ff))
     }
   }
 
   return b
+}
+
+/**
+ * @param {number[]} b
+ * @param {number} code
+ */
+function encodeUtf8Mb4 (b: number[], code: number) {
+  b[b.length] = 0xf0 | (code >> 18)
+  b[b.length] = 0x80 | ((code >> 12) & 0x3f)
+  b[b.length] = 0x80 | ((code >> 6) & 0x3f)
+  b[b.length] = 0x80 | (code & 0x3f)
 }
