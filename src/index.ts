@@ -24,3 +24,4 @@ export { Address } from './address/Address'
 export { Transaction } from './transaction/Transaction'
 
 export { base64Encode, base64Decode } from './util/base64'
+export { hexEncode, hexDecode } from './util/hex'

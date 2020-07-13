@@ -154,9 +154,6 @@ class Address {
    * let address = new Address().setPublicKey(pubKey)
    */
   setPublicKey (publicKey) {
-    if (!(publicKey instanceof PublicKey.PublicKey)) {
-      throw new Error('publicKey type must be PublicKey')
-    }
     array.arraySet(this._bytes, publicKey.getBytes(), 2)
     return this
   }

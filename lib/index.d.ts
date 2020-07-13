@@ -85,18 +85,6 @@ export declare class Address {
     setPublicKey(publicKey: PublicKey): Address;
 }
 /**
- * Базовый класс для работы с блоками.
- * @class
- */
-export declare class Block {
-}
-/**
- * Базовый класс для работы с заголовками блоков.
- * @class
- */
-export declare class BlockHeader {
-}
-/**
  * Базовый класс для работы с публичными ключами.
  * @class
  */

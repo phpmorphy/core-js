@@ -19,7 +19,7 @@
 // SOFTWARE.
 
 import { prefixToVersion, versionToPrefix, uint16ToBytes } from './converter'
-import { arrayNew, arraySet } from './array'
+import { arrayNew, arraySet, arrayConcat } from './array'
 
 const bech32Alphabet = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l'
 
@@ -61,7 +61,7 @@ function bech32Decode (bech32: string): number[] {
   checkAlphabet(data)
   verifyChecksum(pfx, data)
 
-  return uint16ToBytes(ver).concat(convert5to8(data.slice(0, -6)))
+  return arrayConcat(uint16ToBytes(ver), convert5to8(data.slice(0, -6)))
 }
 
 /**
@@ -82,7 +82,7 @@ function convert5to8 (data: string): number[] {
 
     while (bits >= 8) {
       bits -= 8
-      result.push((value >> bits) & 0xff)
+      result[result.length] = (value >> bits) & 0xff
     }
   }
 
@@ -197,7 +197,7 @@ function prefixExpand (prefix: string): number[] {
 function strToBytes (str: string): number[] {
   const bytes: number[] = []
   for (let i = 0, l = str.length; i < l; i++) {
-    bytes.push(bech32Alphabet.indexOf(str.charAt(i)))
+    bytes[bytes.length] = bech32Alphabet.indexOf(str.charAt(i))
   }
 
   return bytes

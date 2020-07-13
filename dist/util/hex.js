@@ -23,38 +23,49 @@
 
 'use strict'
 
+const hexAlphabet = '0123456789abcdef'
 /**
- * @param arg
- * @param {number} min
- * @param {number} max
+ * Декодирует Base16 строку в массив байтов.
+ * @param {string} hex Строка в кодировке Base16.
+ * @returns {number[]}
  * @throws {Error}
- * @private
  */
-function validateInt (arg, min, max) {
-  if (typeof arg !== 'number') {
-    throw new Error('incorrect type')
+function hexDecode (hex) {
+  const h = hex.toLowerCase()
+  checkHexAlphabet(h)
+  const res = []
+  for (let i = 0, l = h.length; i < l; i += 2) {
+    res[res.length] = (hexAlphabet.indexOf(h.charAt(i)) << 4) | hexAlphabet.indexOf(h.charAt(i + 1))
   }
-  if (Math.floor(arg) !== arg) {
-    throw new Error('not integer')
-  }
-  if (arg < min || arg > max) {
-    throw new Error('incorrect value')
-  }
+  return res
 }
 /**
- * @param arg
- * @param {number} [len]
+ * Кодирует массив байтов в Base16 строку.
+ * @param {number[]} bytes Массив байтов.
+ * @returns {string}
+ */
+function hexEncode (bytes) {
+  let res = ''
+  for (let i = 0, l = bytes.length; i < l; i++) {
+    res += hexAlphabet.charAt((bytes[i] >> 4) & 0xf) + hexAlphabet.charAt(bytes[i] & 0xf)
+  }
+  return res
+}
+/**
+ * @param {string} chars
  * @throws {Error}
  * @private
  */
-function validateStr (arg, len) {
-  if (typeof arg !== 'string') {
-    throw new Error('incorrect type')
+function checkHexAlphabet (chars) {
+  if (chars.length % 2) {
+    throw new Error('hex: invalid length')
   }
-  if (typeof len !== 'undefined' && arg.length !== len) {
-    throw new Error('incorrect length')
+  for (let i = 0, l = chars.length; i < l; i++) {
+    if (hexAlphabet.indexOf(chars.charAt(i)) === -1) {
+      throw new Error('hex: invalid character')
+    }
   }
 }
 
-exports.validateInt = validateInt
-exports.validateStr = validateStr
+exports.hexDecode = hexDecode
+exports.hexEncode = hexEncode

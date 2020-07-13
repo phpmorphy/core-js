@@ -75,9 +75,24 @@ function arraySlice (a: ArrayLike<number>, begin?: number, end?: number): number
   const e = end || a.length
   const r = []
   for (let i = b; i < e; i++) {
-    r.push(a[i])
+    r[r.length] = a[i]
   }
   return r
 }
 
-export { arrayFill, arraySet, arrayNew, arraySlice }
+/**
+ * @param {ArrayLike<number>} a
+ * @param {number[]} b
+ * @returns {number[]}
+ * @private
+ * @internal
+ */
+function arrayConcat (a: ArrayLike<number>, b: number[]): number[] {
+  const r = arraySlice(a)
+  for (let i = 0, l = b.length; i < l; i++) {
+    r[r.length] = b[i]
+  }
+  return r
+}
+
+export { arrayFill, arraySet, arrayNew, arraySlice, arrayConcat }

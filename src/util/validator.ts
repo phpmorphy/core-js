@@ -52,7 +52,7 @@ function validateStr (arg: any, len?: number): void {
     throw new Error('incorrect type')
   }
 
-  if (len !== undefined && arg.length !== len) {
+  if (typeof len !== 'undefined' && arg.length !== len) {
     throw new Error('incorrect length')
   }
 }

@@ -222,14 +222,13 @@ function scalarbase (p, s) {
  * @private
  */
 function car25519 (o) {
-  let v
-  let c = 1
+  let c
   for (let i = 0; i < 16; i++) {
-    v = o[i] + c + 65535
-    c = Math.floor(v / 65536)
-    o[i] = v - c * 65536
+    o[i] += 65536
+    c = (o[i] - (o[i] & 0xffff)) / 65536
+    o[(i + 1) * (i < 15 ? 1 : 0)] += c - 1 + 37 * (c - 1) * (i === 15 ? 1 : 0)
+    o[i] -= c * 65536
   }
-  o[0] += c - 1 + 37 * (c - 1)
 }
 /**
  * @param {number[]} r
@@ -315,7 +314,6 @@ function pack25519 (o, n) {
   }
 }
 
-exports.arraySet = array.arraySet
 exports.add = add
 exports.car25519 = car25519
 exports.fnA = fnA

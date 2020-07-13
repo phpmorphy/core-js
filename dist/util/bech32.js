@@ -57,7 +57,7 @@ function bech32Decode (bech32) {
   const data = str.slice(sepPos + 1)
   checkAlphabet(data)
   verifyChecksum(pfx, data)
-  return converter.uint16ToBytes(ver).concat(convert5to8(data.slice(0, -6)))
+  return array.arrayConcat(converter.uint16ToBytes(ver), convert5to8(data.slice(0, -6)))
 }
 /**
  * @param {string} data
@@ -74,7 +74,7 @@ function convert5to8 (data) {
     bits += 5
     while (bits >= 8) {
       bits -= 8
-      result.push((value >> bits) & 0xff)
+      result[result.length] = (value >> bits) & 0xff
     }
   }
   if ((bits >= 5) || (value << (8 - bits)) & 0xff) {
@@ -166,7 +166,7 @@ function prefixExpand (prefix) {
 function strToBytes (str) {
   const bytes = []
   for (let i = 0, l = str.length; i < l; i++) {
-    bytes.push(bech32Alphabet.indexOf(str.charAt(i)))
+    bytes[bytes.length] = bech32Alphabet.indexOf(str.charAt(i))
   }
   return bytes
 }

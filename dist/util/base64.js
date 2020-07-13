@@ -31,16 +31,19 @@ const base64Alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123
  * @throws {Error}
  */
 function base64Decode (base64) {
-  checkBase64Alphabet(base64)
+  const len = checkBase64Alphabet(base64)
+  const b64 = base64.replace('=', 'A').replace('=', 'A')
   const res = []
   for (let i = 0, l = base64.length; i < l; i += 4) {
-    let x = (base64Alphabet.indexOf(base64.charAt(i)) << 18)
-    x |= (base64Alphabet.indexOf(base64.charAt(i + 1)) << 12)
-    x |= (base64Alphabet.indexOf(base64.charAt(i + 2)) << 6)
-    x |= base64Alphabet.indexOf(base64.charAt(i + 3))
-    res.push(((x >> 16) & 0xff), ((x >> 8) & 0xff), (x & 0xff))
+    let x = (base64Alphabet.indexOf(b64.charAt(i)) << 18)
+    x |= (base64Alphabet.indexOf(b64.charAt(i + 1)) << 12)
+    x |= (base64Alphabet.indexOf(b64.charAt(i + 2)) << 6)
+    x |= base64Alphabet.indexOf(b64.charAt(i + 3))
+    res[res.length] = (x >> 16) & 0xff
+    res[res.length] = (x >> 8) & 0xff
+    res[res.length] = x & 0xff
   }
-  return res
+  return res.slice(0, len)
 }
 /**
  * Кодирует массив байтов в Base64 строку.
@@ -48,25 +51,37 @@ function base64Decode (base64) {
  * @returns {string}
  */
 function base64Encode (bytes) {
+  const b = bytes.slice(0)
+  let pad = ''
+  while (b.length % 3) {
+    b[b.length] = 0
+    pad += '='
+  }
   let res = ''
-  for (let i = 0, l = bytes.length; i < l; i += 3) {
-    const x = (bytes[i] << 16) | (bytes[i + 1] << 8) | bytes[i + 2]
+  for (let i = 0, l = b.length; i < l; i += 3) {
+    const x = (b[i] << 16) | (b[i + 1] << 8) | b[i + 2]
     res += base64Alphabet.charAt((x >> 18) & 0x3f) + base64Alphabet.charAt((x >> 12) & 0x3f)
     res += base64Alphabet.charAt((x >> 6) & 0x3f) + base64Alphabet.charAt(x & 0x3f)
   }
-  return res
+  return res.slice(0, res.length - pad.length) + pad
 }
 /**
  * @param {string} chars
+ * @return number
  * @throws {Error}
  * @private
  */
 function checkBase64Alphabet (chars) {
-  for (let i = 0, l = chars.length; i < l; i++) {
-    if (base64Alphabet.indexOf(chars.charAt(i)) === -1) {
+  if (chars.length % 4) {
+    throw new Error('base64: invalid length')
+  }
+  const charz = chars.replace('=', '').replace('=', '')
+  for (let i = 0, l = charz.length; i < l; i++) {
+    if (base64Alphabet.indexOf(charz.charAt(i)) === -1) {
       throw new Error('base64: invalid character')
     }
   }
+  return (chars.length / 4 * 3) - (chars.length - charz.length)
 }
 
 exports.base64Decode = base64Decode

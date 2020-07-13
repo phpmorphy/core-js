@@ -36,6 +36,22 @@ const I = [
   0xd7a7, 0x3dfb, 0x0099, 0x2b4d, 0xdf0b, 0x4fc1, 0x2480, 0x2b83
 ]
 /**
+ * @param {ArrayLike<number>} seed
+ * @returns {number[]}
+ * @private
+ */
+function secretKeyFromSeed (seed) {
+  const pk = []
+  const p = [[], [], [], []]
+  const d = sha512.sha512(seed)
+  d[0] &= 248
+  d[31] &= 127
+  d[31] |= 64
+  common.scalarbase(p, d)
+  common.pack(pk, p)
+  return array.arrayConcat(seed, pk)
+}
+/**
  * @param {ArrayLike<number>} message
  * @param {ArrayLike<number>} secretKey
  * @returns {number[]}
@@ -61,7 +77,7 @@ function sign (message, secretKey) {
       r[i + j] += h[i] * d[j]
     }
   }
-  return sm.slice(0, 32).concat(common.modL(sm.slice(32), r).slice(0, 32))
+  return array.arrayConcat(sm.slice(0, 32), common.modL(sm.slice(32), r).slice(0, 32))
 }
 /**
  * @param {ArrayLike<number>} signature
@@ -195,24 +211,6 @@ function neq25519 (a, b) {
   common.pack25519(c, a)
   common.pack25519(d, b)
   return cryptoVerify32(c, d)
-}
-/**
- * @param {ArrayLike<number>} seed
- * @returns {number[]}
- * @private
- */
-function secretKeyFromSeed (seed) {
-  const sk = []
-  const pk = []
-  const p = [[], [], [], []]
-  array.arraySet(sk, seed)
-  const d = sha512.sha512(sk)
-  d[0] &= 248
-  d[31] &= 127
-  d[31] |= 64
-  common.scalarbase(p, d)
-  common.pack(pk, p)
-  return sk.concat(pk)
 }
 
 exports.secretKeyFromSeed = secretKeyFromSeed

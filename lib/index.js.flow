@@ -17,8 +17,6 @@ declare export class Address {
   getPublicKey(): PublicKey;
   setPublicKey(publicKey: PublicKey): Address;
 }
-declare export class Block {}
-declare export class BlockHeader {}
 declare export class PublicKey {
   constructor(bytes: ArrayLike<number>): this;
   getBytes(): number[];

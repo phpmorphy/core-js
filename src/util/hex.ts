@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-const hexAlphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+const hexAlphabet = '0123456789abcdef'
 
 /**
  * Декодирует Base16 строку в массив байтов.
@@ -27,8 +27,13 @@ const hexAlphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456
  * @throws {Error}
  */
 export function hexDecode (hex: string): number[] {
-  checkHexAlphabet(hex)
-  return []
+  const h = hex.toLowerCase()
+  checkHexAlphabet(h)
+  const res: number[] = []
+  for (let i = 0, l = h.length; i < l; i += 2) {
+    res[res.length] = (hexAlphabet.indexOf(h.charAt(i)) << 4) | hexAlphabet.indexOf(h.charAt(i + 1))
+  }
+  return res
 }
 
 /**
@@ -37,7 +42,11 @@ export function hexDecode (hex: string): number[] {
  * @returns {string}
  */
 export function hexEncode (bytes: number[]): string {
-  return ''
+  let res = ''
+  for (let i = 0, l = bytes.length; i < l; i++) {
+    res += hexAlphabet.charAt((bytes[i] >> 4) & 0xf) + hexAlphabet.charAt(bytes[i] & 0xf)
+  }
+  return res
 }
 
 /**
@@ -47,6 +56,9 @@ export function hexEncode (bytes: number[]): string {
  * @internal
  */
 function checkHexAlphabet (chars: string): void {
+  if (chars.length % 2) {
+    throw new Error('hex: invalid length')
+  }
   for (let i = 0, l = chars.length; i < l; i++) {
     if (hexAlphabet.indexOf(chars.charAt(i)) === -1) {
       throw new Error('hex: invalid character')

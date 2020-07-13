@@ -71,8 +71,14 @@ function sha512 (message: ArrayLike<number>): number[] {
 
   const digest: number[] = []
   for (let i = 0; i < 8; i++) {
-    digest.push((h[i][0] >>> 24 & 0xff), (h[i][0] >>> 16 & 0xff), (h[i][0] >>> 8 & 0xff), (h[i][0] & 0xff))
-    digest.push((h[i][1] >>> 24 & 0xff), (h[i][1] >>> 16 & 0xff), (h[i][1] >>> 8 & 0xff), (h[i][1] & 0xff))
+    digest[digest.length] = h[i][0] >>> 24 & 0xff
+    digest[digest.length] = h[i][0] >>> 16 & 0xff
+    digest[digest.length] = h[i][0] >>> 8 & 0xff
+    digest[digest.length] = h[i][0] & 0xff
+    digest[digest.length] = h[i][1] >>> 24 & 0xff
+    digest[digest.length] = h[i][1] >>> 16 & 0xff
+    digest[digest.length] = h[i][1] >>> 8 & 0xff
+    digest[digest.length] = h[i][1] & 0xff
   }
 
   return digest
@@ -85,32 +91,32 @@ function sha512 (message: ArrayLike<number>): number[] {
  * @internal
  */
 export function sha512PreProcess (message: ArrayLike<number>): [number, number][][] {
-  const bytez: number[] = []
+  const bytes: number[] = []
   let i
   let l
 
   // Length a multiple of 1024 bits
   for (i = 0, l = message.length + 16 + (128 - ((message.length + 16) % 128)); i < l; i++) {
-    bytez[i] = message[i] || 0
+    bytes[i] = message[i] || 0
   }
 
-  bytez[message.length] = 0x80 // Append a single '1' bit
+  bytes[message.length] = 0x80 // Append a single '1' bit
   // Append message length in bits as a 128-bit big-endian integer
-  bytez[bytez.length - 2] = ((message.length * 8) >>> 8) & 0xff
-  bytez[bytez.length - 1] = (message.length * 8) & 0xff
+  bytes[bytes.length - 2] = ((message.length * 8) >>> 8) & 0xff
+  bytes[bytes.length - 1] = (message.length * 8) & 0xff
 
   const chunks: [number, number][][] = []
 
-  for (i = 0, l = bytez.length; i < l; i += 128) {
+  for (i = 0, l = bytes.length; i < l; i += 128) {
     const chunk: [number, number][] = []
     for (let j = 0; j < 128; j += 8) {
       let n = i + j
-      chunk.push([
-        (bytez[n] << 24) + (bytez[++n] << 16) + (bytez[++n] << 8) + bytez[++n],
-        (bytez[++n] << 24) + (bytez[++n] << 16) + (bytez[++n] << 8) + bytez[++n]
-      ])
+      chunk[chunk.length] = [
+        (bytes[n] << 24) + (bytes[++n] << 16) + (bytes[++n] << 8) + bytes[++n],
+        (bytes[++n] << 24) + (bytes[++n] << 16) + (bytes[++n] << 8) + bytes[++n]
+      ]
     }
-    chunks.push(chunk)
+    chunks[chunks.length] = chunk
   }
 
   return chunks

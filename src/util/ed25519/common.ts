@@ -227,14 +227,13 @@ function scalarbase (p: number[][], s: number[]): void {
  * @internal
  */
 function car25519 (o: number[]): void {
-  let v
-  let c = 1
+  let c
   for (let i = 0; i < 16; i++) {
-    v = o[i] + c + 65535
-    c = Math.floor(v / 65536)
-    o[i] = v - c * 65536
+    o[i] += 65536
+    c = (o[i] - (o[i] & 0xffff)) / 65536 // o[i] >> 16
+    o[(i + 1) * (i < 15 ? 1 : 0)] += c - 1 + 37 * (c - 1) * (i === 15 ? 1 : 0)
+    o[i] -= c * 65536 // c << 16
   }
-  o[0] += c - 1 + 37 * (c - 1)
 }
 
 /**
@@ -335,4 +334,4 @@ function pack25519 (o: number[], n: number[]): void {
   }
 }
 
-export { gf0, gf1, arraySet, fnA, fnM, fnZ, modL, reduce, par25519, scalarmult, scalarbase, car25519, add, pack, pack25519 }
+export { gf0, gf1, fnA, fnM, fnZ, modL, reduce, par25519, scalarmult, scalarbase, car25519, add, pack, pack25519 }

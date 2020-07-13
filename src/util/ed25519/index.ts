@@ -1,5 +1,5 @@
 import { sha512 } from '../sha512'
-import { arraySet, arraySlice } from '../array'
+import { arrayConcat, arraySet, arraySlice } from '../array'
 import { gf0, gf1, reduce, modL, scalarbase, pack, scalarmult, add, fnA, fnM, fnZ, pack25519, par25519 } from './common'
 
 const D: number[] = [
@@ -9,6 +9,27 @@ const D: number[] = [
 const I: number[] = [
   0xa0b0, 0x4a0e, 0x1b27, 0xc4ee, 0xe478, 0xad2f, 0x1806, 0x2f43,
   0xd7a7, 0x3dfb, 0x0099, 0x2b4d, 0xdf0b, 0x4fc1, 0x2480, 0x2b83]
+
+/**
+ * @param {ArrayLike<number>} seed
+ * @returns {number[]}
+ * @private
+ * @internal
+ */
+function secretKeyFromSeed (seed: ArrayLike<number>): number[] {
+  const pk: number[] = []
+  const p: number[][] = [[], [], [], []]
+
+  const d = sha512(seed)
+  d[0] &= 248
+  d[31] &= 127
+  d[31] |= 64
+
+  scalarbase(p, d)
+  pack(pk, p)
+
+  return arrayConcat(seed, pk)
+}
 
 /**
  * @param {ArrayLike<number>} message
@@ -44,7 +65,7 @@ function sign (message: ArrayLike<number>, secretKey: ArrayLike<number>): number
     }
   }
 
-  return sm.slice(0, 32).concat(modL(sm.slice(32), r).slice(0, 32))
+  return arrayConcat(sm.slice(0, 32), modL(sm.slice(32), r).slice(0, 32))
 }
 
 /**
@@ -210,30 +231,6 @@ function neq25519 (a: number[], b: number[]): boolean {
   pack25519(d, b)
 
   return cryptoVerify32(c, d)
-}
-
-/**
- * @param {ArrayLike<number>} seed
- * @returns {number[]}
- * @private
- * @internal
- */
-function secretKeyFromSeed (seed: ArrayLike<number>): number[] {
-  const sk: number[] = []
-  const pk: number[] = []
-  const p: number[][] = [[], [], [], []]
-
-  arraySet(sk, seed)
-
-  const d = sha512(sk)
-  d[0] &= 248
-  d[31] &= 127
-  d[31] |= 64
-
-  scalarbase(p, d)
-  pack(pk, p)
-
-  return sk.concat(pk)
 }
 
 export { sign, verify, secretKeyFromSeed }

@@ -54,7 +54,10 @@ function sha256 (message) {
   }
   const digest = []
   for (let i = 0; i < 8; i++) {
-    digest.push((h[i] >>> 24 & 0xff), (h[i] >>> 16 & 0xff), (h[i] >>> 8 & 0xff), (h[i] & 0xff))
+    digest[digest.length] = h[i] >>> 24 & 0xff
+    digest[digest.length] = h[i] >>> 16 & 0xff
+    digest[digest.length] = h[i] >>> 8 & 0xff
+    digest[digest.length] = h[i] & 0xff
   }
   return digest
 }
@@ -78,9 +81,9 @@ function sha256PreProcess (message) {
     const chunk = []
     for (let j = 0; j < 64; j += 4) {
       let n = i + j
-      chunk.push((bytes[n] << 24) + (bytes[++n] << 16) + (bytes[++n] << 8) + bytes[++n])
+      chunk[chunk.length] = (bytes[n] << 24) + (bytes[++n] << 16) + (bytes[++n] << 8) + bytes[++n]
     }
-    chunks.push(chunk)
+    chunks[chunks.length] = chunk
   }
   return chunks
 }

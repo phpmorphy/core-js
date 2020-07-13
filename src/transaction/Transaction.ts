@@ -19,7 +19,7 @@
 // SOFTWARE.
 
 import { Address } from '../address/Address'
-import { SecretKey } from '../key/ed25519/SecretKey'
+import { SecretKey } from '../key/ed25519/SecretKey' // eslint-disable-line
 import { versionToPrefix, prefixToVersion, bytesToUint16, bytesToUint64, uint16ToBytes, uint64ToBytes } from '../util/converter'
 import { textDecode, textEncode } from '../util/text'
 import { validateInt } from '../util/validator'
@@ -271,10 +271,7 @@ export class Transaction {
    * let trx = new Transaction().setSender(sender)
    */
   setSender (address: Address): Transaction {
-    if (!(address instanceof Address)) {
-      throw new Error('address type must be Address')
-    }
-    arraySet(this._bytes, address.getBytes(), 1)
+    arraySet(this._bytes, address.getBytes(), 1, 34)
     return this
   }
 
@@ -302,9 +299,6 @@ export class Transaction {
    */
   setRecipient (address: Address): Transaction {
     this.checkVersion([0, 1, 4, 5, 6, 7])
-    if (!(address instanceof Address)) {
-      throw new Error('recipient type must be Address')
-    }
     arraySet(this._bytes, address.getBytes(), 35)
     return this
   }
@@ -401,10 +395,7 @@ export class Transaction {
    * let trx = new Transaction().sign(secKey)
    */
   sign (secretKey: SecretKey): Transaction {
-    if (!(secretKey instanceof SecretKey)) {
-      throw new Error('secretKey type must be SecretKey')
-    }
-    return this.setSignature(secretKey.sign(this._bytes.slice(0, 85)))
+    return this.setNonce(new Date().getTime()).setSignature(secretKey.sign(this._bytes.slice(0, 85)))
   }
 
   /**

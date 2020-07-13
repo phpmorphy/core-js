@@ -152,9 +152,6 @@ export class Address {
    * let address = new Address().setPublicKey(pubKey)
    */
   setPublicKey (publicKey: PublicKey): Address {
-    if (!(publicKey instanceof PublicKey)) {
-      throw new Error('publicKey type must be PublicKey')
-    }
     arraySet(this._bytes, publicKey.getBytes(), 2)
     return this
   }

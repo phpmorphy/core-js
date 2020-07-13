@@ -25,7 +25,6 @@
 
 const array = require('../util/array.js')
 const sha256 = require('../util/sha256.js')
-const SecretKey = require('../key/ed25519/SecretKey.js')
 const validator = require('../util/validator.js')
 const converter = require('../util/converter.js')
 const Address = require('../address/Address.js')
@@ -138,10 +137,7 @@ class Transaction {
    * let trx = new Transaction().setSender(sender)
    */
   setSender (address) {
-    if (!(address instanceof Address.Address)) {
-      throw new Error('address type must be Address')
-    }
-    array.arraySet(this._bytes, address.getBytes(), 1)
+    array.arraySet(this._bytes, address.getBytes(), 1, 34)
     return this
   }
 
@@ -169,9 +165,6 @@ class Transaction {
    */
   setRecipient (address) {
     this.checkVersion([0, 1, 4, 5, 6, 7])
-    if (!(address instanceof Address.Address)) {
-      throw new Error('recipient type must be Address')
-    }
     array.arraySet(this._bytes, address.getBytes(), 35)
     return this
   }
@@ -268,10 +261,7 @@ class Transaction {
    * let trx = new Transaction().sign(secKey)
    */
   sign (secretKey) {
-    if (!(secretKey instanceof SecretKey.SecretKey)) {
-      throw new Error('secretKey type must be SecretKey')
-    }
-    return this.setSignature(secretKey.sign(this._bytes.slice(0, 85)))
+    return this.setNonce(new Date().getTime()).setSignature(secretKey.sign(this._bytes.slice(0, 85)))
   }
 
   /**
