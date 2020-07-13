@@ -75,6 +75,7 @@ function textEncode (text) {
 /**
  * @param {number[]} b
  * @param {number} code
+ * @private
  */
 function encodeUtf8Mb4 (b, code) {
   b[b.length] = 0xf0 | (code >> 18)

@@ -22,7 +22,7 @@ import { verify } from '../../util/ed25519/index'
 import { arraySet } from '../../util/array'
 
 /**
- * Базовый класс для работы с публичными ключами.
+ * Класс для работы с публичными ключами.
  * @class
  */
 export class PublicKey {
@@ -35,7 +35,7 @@ export class PublicKey {
   private readonly _bytes: number[] = []
 
   /**
-   * @param {ArrayLike<number>} bytes Публичный ключ в формате libsodium, 32 байта (256 бит).
+   * @param {ArrayLike<number>} bytes Публичный ключ в формате libsodium, 32 байта.
    * @throws {Error}
    * @example
    * let bytes = new Uint8Array(32)
@@ -49,7 +49,7 @@ export class PublicKey {
   }
 
   /**
-   * Публичный ключ в формате libsodium, 32 байта (256 бит).
+   * Публичный ключ в формате libsodium, 32 байта.
    * @returns {number[]}
    * @example
    * let bytes = new PublicKey(new Uint8Array(32)).getBytes()
@@ -78,7 +78,7 @@ export class PublicKey {
    * let pubKey = new PublicKey(new Uint8Array(32))
    * let signature = new Uint8Array(64)
    * let message = new TextEncoder().encode('Hello World')
-   * let ver = pubKey.verifySignature(signature, message)
+   * let isValid = pubKey.verifySignature(signature, message)
    */
   verifySignature (
     signature: ArrayLike<number>,

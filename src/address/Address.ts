@@ -69,7 +69,7 @@ export class Address {
    */
   static fromBytes (bytes: ArrayLike<number>): Address {
     if (bytes.length !== 34) {
-      throw new Error('bytes length must be 34 bytes')
+      throw new Error('length must be 34 bytes')
     }
     const adr = new Address()
     arraySet(adr._bytes, bytes)
@@ -143,7 +143,7 @@ export class Address {
   }
 
   /**
-   * Устанавливает публичный ключи и возвращает this.
+   * Устанавливает публичный ключ и возвращает this.
    * @param {PublicKey} publicKey Публичный ключ.
    * @returns {Address}
    * @throws {Error}

@@ -104,7 +104,7 @@ describe('Transaction', function () {
     it('ошибка если некорректный тип', function () {
       assert.throws(function () {
         return new Transaction().setValue(1.23)
-      }, Error, 'not integer')
+      }, Error, 'invalid integer')
     })
 
     it('устанавливает сумму', function () {
@@ -158,7 +158,7 @@ describe('Transaction', function () {
       const trx = new Transaction().setVersion(Transaction.CreateStructure)
       assert.throws(function () {
         return trx.setProfitPercent('100')
-      }, Error, 'incorrect type')
+      }, Error, 'invalid type')
     })
   })
 

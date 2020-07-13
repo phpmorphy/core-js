@@ -27,12 +27,12 @@ const array = require('../../util/array.js')
 const index = require('../../util/ed25519/index.js')
 
 /**
- * Базовый класс для работы с публичными ключами.
+ * Класс для работы с публичными ключами.
  * @class
  */
 class PublicKey {
   /**
-   * @param {ArrayLike<number>} bytes Публичный ключ в формате libsodium, 32 байта (256 бит).
+   * @param {ArrayLike<number>} bytes Публичный ключ в формате libsodium, 32 байта.
    * @throws {Error}
    * @example
    * let bytes = new Uint8Array(32)
@@ -52,7 +52,7 @@ class PublicKey {
   }
 
   /**
-   * Публичный ключ в формате libsodium, 32 байта (256 бит).
+   * Публичный ключ в формате libsodium, 32 байта.
    * @returns {number[]}
    * @example
    * let bytes = new PublicKey(new Uint8Array(32)).getBytes()
@@ -80,7 +80,7 @@ class PublicKey {
    * let pubKey = new PublicKey(new Uint8Array(32))
    * let signature = new Uint8Array(64)
    * let message = new TextEncoder().encode('Hello World')
-   * let ver = pubKey.verifySignature(signature, message)
+   * let isValid = pubKey.verifySignature(signature, message)
    */
   verifySignature (signature, message) {
     if (signature.length !== 64) {

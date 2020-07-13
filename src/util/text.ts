@@ -73,6 +73,8 @@ export function textEncode (text: string): number[] {
 /**
  * @param {number[]} b
  * @param {number} code
+ * @private
+ * @internal
  */
 function encodeUtf8Mb4 (b: number[], code: number) {
   b[b.length] = 0xf0 | (code >> 18)

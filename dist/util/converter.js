@@ -38,7 +38,7 @@ function versionToPrefix (version) {
     return 'genesis'
   }
   if ((version & 0x8000) === 0x8000) {
-    throw new Error('bech32: incorrect version')
+    throw new Error('bech32: invalid version')
   }
   const a = (version & 0x7C00) >> 10
   const b = (version & 0x03E0) >> 5
@@ -72,7 +72,7 @@ function prefixToVersion (prefix) {
 function checkPrefixChars (chars) {
   for (let i = 0, l = chars.length; i < l; i++) {
     if (chars[i] < 1 || chars[i] > 26) {
-      throw new Error('bech32: incorrect prefix character')
+      throw new Error('bech32: invalid prefix character')
     }
   }
 }

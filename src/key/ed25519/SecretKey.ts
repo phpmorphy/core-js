@@ -24,7 +24,7 @@ import { sha256 } from '../../util/sha256'
 import { arraySet } from '../../util/array'
 
 /**
- * Базовый класс для работы с приватными ключами.
+ * Класс для работы с приватными ключами.
  * @class
  */
 export class SecretKey {
@@ -38,7 +38,7 @@ export class SecretKey {
 
   /**
    * @param {ArrayLike<number>} bytes Приватный ключ в бинарном виде.
-   * В формате libsodium, 64 байта (512 бит).
+   * В формате libsodium, 64 байта.
    * @throws {Error}
    * @example
    * let bytes = SecretKey.fromSeed(new Uint8Array(32)).getBytes()
@@ -52,8 +52,8 @@ export class SecretKey {
   }
 
   /**
-   * Статический фабричный метод, создающий приватный ключ из seed.\
-   * Libsodium принимает seed длиной 32 байта (256 бит), поэтому если длина
+   * Статический метод, создающий приватный ключ из seed.\
+   * Libsodium принимает seed длиной 32 байта, поэтому если длина
    * отличается, то берется sha256 хэш.
    * @param {ArrayLike<number>} seed Массив байтов любой длины.
    * @returns {SecretKey}
@@ -71,7 +71,7 @@ export class SecretKey {
   }
 
   /**
-   * Приватный ключ в бинарном виде. В формате libsodium, 64 байта (512 бит).
+   * Приватный ключ в бинарном виде. В формате libsodium, 64 байта.
    * @returns {number[]}
    * @example
    * let secKey = SecretKey.fromSeed(new Uint8Array(32))

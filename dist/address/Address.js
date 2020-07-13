@@ -71,7 +71,7 @@ class Address {
    */
   static fromBytes (bytes) {
     if (bytes.length !== 34) {
-      throw new Error('bytes length must be 34 bytes')
+      throw new Error('length must be 34 bytes')
     }
     const adr = new Address()
     array.arraySet(adr._bytes, bytes)
@@ -145,7 +145,7 @@ class Address {
   }
 
   /**
-   * Устанавливает публичный ключи и возвращает this.
+   * Устанавливает публичный ключ и возвращает this.
    * @param {PublicKey} publicKey Публичный ключ.
    * @returns {Address}
    * @throws {Error}

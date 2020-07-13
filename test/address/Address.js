@@ -141,7 +141,7 @@ describe('Address', function () {
         bytes[1] = 255
         assert.throws(function () {
           Address.fromBytes(bytes).getPrefix()
-        }, Error, 'bech32: incorrect version')
+        }, Error, 'bech32: invalid version')
       })
 
       const tests = [

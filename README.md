@@ -1,5 +1,5 @@
 <h1 align="center">
-  <a href="https://umi.top"><img src="./logo.svg" alt="UMI" width="200"></a>
+  <a href="https://umi.top"><img src="https://umi-top.github.io/umi-core-js/logo.svg" alt="UMI" width="200"></a>
   <br>
   UMI Core - JavaScript Library
   <br>
@@ -7,15 +7,15 @@
 </h1>
 
 <p align="center">
-  <!-- release    --><a href="https://github.com/umi-top/umi-core-js"><img alt="GitHub release (latest SemVer)" src="https://img.shields.io/github/v/release/umi-top/umi-core-js?sort=semver"></a>
   <!-- build      --><a href="https://travis-ci.org/umi-top/umi-core-js"><img alt="travis" src="https://img.shields.io/travis/umi-top/umi-core-js/master"></a>
   <!-- coverage   --><img alt="Coveralls github branch" src="https://img.shields.io/coveralls/github/umi-top/umi-core-js/master">
-  <!-- types      --><img alt="npm type definitions" src="https://img.shields.io/npm/types/@umi-top/umi-core-js">
   <!-- code style --><a href="https://standardjs.com"><img alt="Standard" src="https://img.shields.io/badge/code_style-standard-green"></a>
   <!-- license    --><a href="https://github.com/umi-top/umi-core-js/blob/master/LICENSE"><img alt="GitHub" src="https://img.shields.io/github/license/umi-top/umi-core-js"></a>
   <!-- PGP        --><a href="https://keybase.io/umitop"><img alt="Keybase PGP" src="https://img.shields.io/keybase/pgp/umitop"></a>
   <br/>
+  <!-- release    --><a href="https://github.com/umi-top/umi-core-js"><img alt="GitHub release (latest SemVer)" src="https://img.shields.io/github/v/release/umi-top/umi-core-js?sort=semver"></a>
   <!-- npm ver    --><a href="https://www.npmjs.com/package/@umi-top/umi-core-js"><img alt="npm version" src="https://img.shields.io/npm/v/@umi-top/umi-core-js"></a>
+  <!-- types      --><img alt="npm type definitions" src="https://img.shields.io/npm/types/@umi-top/umi-core-js">
   <!-- node       --><a href="https://www.npmjs.com/package/@umi-top/umi-core-js"><img alt="node-current (scoped)" src="https://img.shields.io/node/v/@umi-top/umi-core-js"></a>
   <!-- downloads  --><a href="https://www.npmjs.com/package/@umi-top/umi-core-js"><img alt="npm downloads" src="https://img.shields.io/npm/dm/@umi-top/umi-core-js"></a>
 </p>
@@ -55,16 +55,17 @@
 ## Введение
 
 Библиотека написана на [TypeScript](https://www.typescriptlang.org) и
-скомпилирована в модули CommonJS и ES Module по стандарту es6 и работает
-во всех актуальных браузерах и Node.js начиная с версии 4.0.  
-Для совместимости с устаревшими браузерами скомпилирована iife версия
-по стандарту es3, поддерживается Internet Explorer 5 и выше.
+скомпилирована в модули CommonJS и ES Module и работает
+во всех актуальных браузерах и Node.js.  
+Для совместимости с устаревшими браузерами скомпилирована iife версия,
+поддерживается Internet Explorer 5 и выше.
 
 ## Установка
 
-Библиотека опубликована в репозитории [npm](https://www.npmjs.com) и может быть
+Библиотека опубликована в репозитории
+[npm](https://www.npmjs.com/package/@umi-top/umi-core-js) и может быть
 установлена с помощью пакетного менеджера, например,
-[npm](https://docs.npmjs.com) и [Yarn](https://yarnpkg.com):
+[npm](https://docs.npmjs.com) или [Yarn](https://yarnpkg.com):
 
 ### npm
 ```bash
@@ -78,12 +79,12 @@ yarn add @umi-top/umi-core-js
 ### Отдельным файлом
 
 Если требуется, библиотеку можно скачать в виде отдельного файла:  
-CommonJS: [index.js](./lib/index.js),
-ES Module: [index.mjs](./lib/index.mjs)
-или IIFE [index.min.js](./lib/index.min.js).  
+CommonJS: [index.js](https://unpkg.com/@umi-top/umi-core-js/lib/index.js),
+ES Module: [index.mjs](https://unpkg.com/@umi-top/umi-core-js/lib/index.mjs)
+или IIFE [index.min.js](https://unpkg.com/@umi-top/umi-core-js/lib/index.min.js).  
 Так же можно скачать аннотации типов для
-TypeScript: [index.d.ts](./lib/index.d.ts)
-и Flow: [index.js.flow](./lib/index.js.flow).
+TypeScript: [index.d.ts](https://unpkg.com/@umi-top/umi-core-js/lib/index.d.ts)
+и Flow: [index.js.flow](https://unpkg.com/@umi-top/umi-core-js/lib/index.js.flow).
 
 ## Подключение
 
@@ -108,13 +109,12 @@ const umi = require('@umi-top/umi-core-js')
 import { Address, PublicKey, SecretKey, Transaction } from '@umi-top/umi-core-js'
 ```
 
-Импортировать все содержимое модуля можно используя следующий синтаксис:
+Импортировать все содержимое модуля.
+Этот вариант будет использоваться в примерах ниже.
 
 ```javascript
 import * as umi from '@umi-top/umi-core-js'
 ```
-
-Последний вариант будет использоваться в примерах ниже.
 
 ### CDN
 
@@ -128,7 +128,7 @@ import * as umi from '@umi-top/umi-core-js'
 ```
 
 В [современных](https://caniuse.com/#feat=es6-module) браузерах можно
-импортировать [модуль](https://v8.dev/features/modules):
+импортировать [es6 модуль](https://v8.dev/features/modules):
 
 ```html
 <script type="module">
@@ -141,14 +141,13 @@ import * as umi from 'https://unpkg.com/@umi-top/umi-core-js/lib/index.mjs'
 ### Мнемоники
 
 UMI не накладывает никаких ограничений на способ генерации и хранения приватных
-ключей, предоставляя полную свободу действий разработчикам приложений.
-
+ключей.  
 Для совместимости, рекомендуем использовать
 [bip39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki).
 
 #### Seed из мнемонической фразы
 
-Для примера будем использовать библиотеку [bip39](https://www.npmjs.com/package/bip39):
+Пример с использованием библиотеки [bip39](https://www.npmjs.com/package/bip39):
 
 ```javascript
 // npm install bip39
@@ -196,16 +195,20 @@ console.log(umi.base64Encode(signature))
 ```javascript
 const address = 'umi18d4z00xwk6jz6c4r4rgz5mcdwdjny9thrh3y8f36cpy2rz6emg5s6rxnf6'
 const message = umi.textEncode('Hello World')
-const signature = umi.base64Decode('Jbi9YfwLcxiTMednl/wTvnSzsPP9mV9Bf2vvZytP87oyg1p1c9ZBkn4gNv15ZHwEFv3bVYlowgyIKmMwJLjJCw==')
+const signature = umi.base64Decode(
+  'Jbi9YfwLcxiTMednl/wTvnSzsPP9mV9Bf2vvZytP87oyg1p1c9ZBkn4gNv15ZHwEFv3bVYlowgyIKmMwJLjJCw=='
+)
 const pubKey = umi.Address.fromBech32(address).getPublicKey()
 const isValid = pubKey.verifySignature(signature, message)
+
+console.log(isValid ? 'true' : 'false')
 ```
 
 ### Адреса
 
 UMI использует адреса в формате Bech32
 ([bip173](https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki))
-длиной 62 символа и трёхбуквенный префикс.  
+длиной 62 символа. Префикс имеет длину 3 символа.  
 Специальным случаем являются Genesis-адреса, существующие только
 в Genesis-блоке, такие адреса имеют длину 65 символов
 и всегда имеют префикс `genesis`.
@@ -218,6 +221,7 @@ UMI использует адреса в формате Bech32
 ```javascript
 const bech32 = 'umi18d4z00xwk6jz6c4r4rgz5mcdwdjny9thrh3y8f36cpy2rz6emg5s6rxnf6'
 const address = umi.Address.fromBech32(bech32)
+
 console.log(address.getBech32())
 ```
  
@@ -232,22 +236,28 @@ const secKey = umi.SecretKey.fromSeed(seed)
 const pubKey = secKey.getPublicKey()
 const address1 = umi.Address.fromKey(secKey)
 const address2 = umi.Address.fromKey(pubKey)
+
+console.log(address1.getBech32(), address2.getBech32())
 ```
 
 #### Префикс
 
 По умолчанию адреса имеют префикс `umi`.
-Изменить префикс можно при помощи метода `Address#setPrefix()`:
+Изменить префикс можно с помощью метода `Address#setPrefix()`:
 
 ```javascript
 const bech32 = 'umi18d4z00xwk6jz6c4r4rgz5mcdwdjny9thrh3y8f36cpy2rz6emg5s6rxnf6'
 const address = umi.Address.fromBech32(bech32).setPrefix('aaa')
+
 console.log(address.getBech32())
 ```
 
 ### Транзакции
 
 #### Перевести монеты
+
+Поля `sender`, `recipient` и `value` являются обязательными.  
+Сумма указывается в UMI-центах, т.е. 1.23 UMI = 123.
 
 ```javascript
 const secKey = umi.SecretKey.fromSeed(new Uint8Array(32))
@@ -260,11 +270,17 @@ const tx = new umi.Transaction()
   .setValue(42)
   .sign(secKey)
 
-console.log(tx.verify())
-console.log(umi.base64Encode(tx.getBytes()))
+console.log('txid:   ', umi.hexEncode(tx.getHash()))
+console.log('base64: ', umi.base64Encode(tx.getBytes()))
 ```
 
 #### Создать структуру
+
+Поля `sender`, `prefix`, `name`, `profitPercent` и `feePercent` являются
+обязательными.  
+Префикс имеет длину 3 символа. Название указывается в кодировке UTF-8 и может
+иметь длину до 35 байтов. Проценты указываются в сотых долях процента,
+т.е. 1.23% = 123.
 
 ```javascript
 const secKey = umi.SecretKey.fromSeed(new Uint8Array(32))
@@ -278,13 +294,15 @@ const tx = new umi.Transaction()
   .setFeePercent(2000)
   .sign(secKey)
 
-console.log(tx.verify())
-console.log(umi.base64Encode(tx.getBytes()))
+console.log('txid:   ', umi.hexEncode(tx.getHash()))
+console.log('base64: ', umi.base64Encode(tx.getBytes()))
 ```
 
 #### Обновить настройки структуры
 
-Необходимо задать все поля, даже если они не изменились:
+Поля `sender`, `prefix`, `name`, `profitPercent` и `feePercent` являются
+обязательными.  
+Необходимо задать все поля, даже если они не изменились.
 
 ```javascript
 const secKey = umi.SecretKey.fromSeed(new Uint8Array(32))
@@ -298,11 +316,14 @@ const tx = new umi.Transaction()
   .setFeePercent(2000)
   .sign(secKey)
 
-console.log(tx.verify())
-console.log(umi.base64Encode(tx.getBytes()))
+console.log('txid:   ', umi.hexEncode(tx.getHash()))
+console.log('base64: ', umi.base64Encode(tx.getBytes()))
 ```
 
 #### Установить адрес для начисления профита
+
+Поля `sender` и `recipient` являются обязательными.  
+Адрес для начисления профита должен принадлежать структуре.
 
 ```javascript
 const secKey = umi.SecretKey.fromSeed(new Uint8Array(32))
@@ -314,11 +335,14 @@ const tx = new umi.Transaction()
   .setRecipient(newPrf)
   .sign(secKey)
 
-console.log(tx.verify())
-console.log(umi.base64Encode(tx.getBytes()))
+console.log('txid:   ', umi.hexEncode(tx.getHash()))
+console.log('base64: ', umi.base64Encode(tx.getBytes()))
 ```
 
 #### Установить адрес для перевода комиссии
+
+Поля `sender` и `recipient` являются обязательными.  
+Адрес для перевода комиссии должен принадлежать структуре.
 
 ```javascript
 const secKey = umi.SecretKey.fromSeed(new Uint8Array(32))
@@ -330,11 +354,14 @@ const tx = new umi.Transaction()
   .setRecipient(newFee)
   .sign(secKey)
 
-console.log(tx.verify())
-console.log(umi.base64Encode(tx.getBytes()))
+console.log('txid:   ', umi.hexEncode(tx.getHash()))
+console.log('base64: ', umi.base64Encode(tx.getBytes()))
 ```
 
 #### Активировать транзитный адрес
+
+Поля `sender` и `recipient` являются обязательными.  
+Адрес должен принадлежать структуре.
 
 ```javascript
 const secKey = umi.SecretKey.fromSeed(new Uint8Array(32))
@@ -346,11 +373,14 @@ const tx = new umi.Transaction()
   .setRecipient(transit)
   .sign(secKey)
 
-console.log(tx.verify())
-console.log(umi.base64Encode(tx.getBytes()))
+console.log('txid:   ', umi.hexEncode(tx.getHash()))
+console.log('base64: ', umi.base64Encode(tx.getBytes()))
 ```
 
 #### Деактивировать транзитный адрес
+
+Поля `sender` и `recipient` являются обязательными.  
+Адрес должен принадлежать структуре.
 
 ```javascript
 const secKey = umi.SecretKey.fromSeed(new Uint8Array(32))
@@ -362,15 +392,15 @@ const tx = new umi.Transaction()
   .setRecipient(transit)
   .sign(secKey)
 
-console.log(tx.verify())
-console.log(umi.base64Encode(tx.getBytes()))
+console.log('txid:   ', umi.hexEncode(tx.getHash()))
+console.log('base64: ', umi.base64Encode(tx.getBytes()))
 ```
 
 #### Отправить транзакцию в сеть
 
 Пример для браузера с использованием
-[Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API)
-([Fetch polyfill](https://github.com/github/fetch)):
+[Fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) API
+([polyfill](https://github.com/github/fetch)):
 
 ```javascript
 const tx = new umi.Transaction()
@@ -389,8 +419,7 @@ fetch('https://testnet.umi.top/json-rpc', {
     }
   })
 }).then(function(response) {
-  console.log(response.status)
-  console.log(response.statusText)
+  console.log(response.status, response.statusText)
   return response.json()
 }).then(function(json) {
   console.log('parsed json', json)

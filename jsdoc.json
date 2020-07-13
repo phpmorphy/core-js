@@ -39,7 +39,7 @@
     "destination": "docs/",
     "template": "node_modules/better-docs",
     "readme": "README.md",
-    "tutorials": "examples",
+    "tutorials": false,
     "verbose": true
   },
   "plugins": [

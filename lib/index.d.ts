@@ -74,7 +74,7 @@ export declare class Address {
      */
     getPublicKey(): PublicKey;
     /**
-     * Устанавливает публичный ключи и возвращает this.
+     * Устанавливает публичный ключ и возвращает this.
      * @param {PublicKey} publicKey Публичный ключ.
      * @returns {Address}
      * @throws {Error}
@@ -85,12 +85,12 @@ export declare class Address {
     setPublicKey(publicKey: PublicKey): Address;
 }
 /**
- * Базовый класс для работы с публичными ключами.
+ * Класс для работы с публичными ключами.
  * @class
  */
 export declare class PublicKey {
     /**
-     * @param {ArrayLike<number>} bytes Публичный ключ в формате libsodium, 32 байта (256 бит).
+     * @param {ArrayLike<number>} bytes Публичный ключ в формате libsodium, 32 байта.
      * @throws {Error}
      * @example
      * let bytes = new Uint8Array(32)
@@ -98,7 +98,7 @@ export declare class PublicKey {
      */
     constructor(bytes: ArrayLike<number>);
     /**
-     * Публичный ключ в формате libsodium, 32 байта (256 бит).
+     * Публичный ключ в формате libsodium, 32 байта.
      * @returns {number[]}
      * @example
      * let bytes = new PublicKey(new Uint8Array(32)).getBytes()
@@ -114,18 +114,18 @@ export declare class PublicKey {
      * let pubKey = new PublicKey(new Uint8Array(32))
      * let signature = new Uint8Array(64)
      * let message = new TextEncoder().encode('Hello World')
-     * let ver = pubKey.verifySignature(signature, message)
+     * let isValid = pubKey.verifySignature(signature, message)
      */
     verifySignature(signature: ArrayLike<number>, message: ArrayLike<number>): boolean;
 }
 /**
- * Базовый класс для работы с приватными ключами.
+ * Класс для работы с приватными ключами.
  * @class
  */
 export declare class SecretKey {
     /**
      * @param {ArrayLike<number>} bytes Приватный ключ в бинарном виде.
-     * В формате libsodium, 64 байта (512 бит).
+     * В формате libsodium, 64 байта.
      * @throws {Error}
      * @example
      * let bytes = SecretKey.fromSeed(new Uint8Array(32)).getBytes()
@@ -133,8 +133,8 @@ export declare class SecretKey {
      */
     constructor(bytes: ArrayLike<number>);
     /**
-     * Статический фабричный метод, создающий приватный ключ из seed.\
-     * Libsodium принимает seed длиной 32 байта (256 бит), поэтому если длина
+     * Статический метод, создающий приватный ключ из seed.\
+     * Libsodium принимает seed длиной 32 байта, поэтому если длина
      * отличается, то берется sha256 хэш.
      * @param {ArrayLike<number>} seed Массив байтов любой длины.
      * @returns {SecretKey}
@@ -144,7 +144,7 @@ export declare class SecretKey {
      */
     static fromSeed(seed: ArrayLike<number>): SecretKey;
     /**
-     * Приватный ключ в бинарном виде. В формате libsodium, 64 байта (512 бит).
+     * Приватный ключ в бинарном виде. В формате libsodium, 64 байта.
      * @returns {number[]}
      * @example
      * let secKey = SecretKey.fromSeed(new Uint8Array(32))
@@ -220,7 +220,7 @@ export declare class Transaction {
      *   .setVersion(Transaction.CreateStructure)
      *   .setSender(sender)
      *   .setPrefix('aaa')
-     *   .setName('🙂')
+     *   .setName('My Struct 🙂')
      *   .setProfitPercent(100)
      *   .setFeePercent(0)
      *   .sign(secKey)
@@ -237,7 +237,7 @@ export declare class Transaction {
      *   .setVersion(Transaction.UpdateStructure)
      *   .setSender(sender)
      *   .setPrefix('aaa')
-     *   .setName('🙂')
+     *   .setName('My New Struct 😎')
      *   .setProfitPercent(500)
      *   .setFeePercent(2000)
      *   .sign(secKey)
@@ -326,7 +326,7 @@ export declare class Transaction {
      */
     getBytes(): number[];
     /**
-     * Хэш транзакции, sha256 от всех 150 байт.
+     * Хэш (txid) транзакции.
      * @returns {number[]}
      * @example
      * let hash = new Transaction().getHash()
@@ -458,7 +458,7 @@ export declare class Transaction {
      * Префикс адресов, принадлежащих структуре.\
      * Доступно только для CreateStructure и UpdateStructure.
      * @returns {string}
-     * @returns {Error}
+     * @throws {Error}
      * @example
      * let trx = new Transaction().setVersion(Transaction.CreateStructure)
      * let prefix = trx.getPrefix()

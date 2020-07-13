@@ -32,13 +32,13 @@
  */
 function validateInt (arg, min, max) {
   if (typeof arg !== 'number') {
-    throw new Error('incorrect type')
+    throw new Error('invalid type')
   }
   if (Math.floor(arg) !== arg) {
-    throw new Error('not integer')
+    throw new Error('invalid integer')
   }
   if (arg < min || arg > max) {
-    throw new Error('incorrect value')
+    throw new Error('invalid value')
   }
 }
 /**
@@ -49,10 +49,10 @@ function validateInt (arg, min, max) {
  */
 function validateStr (arg, len) {
   if (typeof arg !== 'string') {
-    throw new Error('incorrect type')
+    throw new Error('invalid type')
   }
   if (typeof len !== 'undefined' && arg.length !== len) {
-    throw new Error('incorrect length')
+    throw new Error('invalid length')
   }
 }
 

@@ -60,7 +60,7 @@ class Transaction {
    */
   static fromBytes (bytes) {
     if (bytes.length !== 150) {
-      throw new Error('incorrect length')
+      throw new Error('invalid length')
     }
     const tx = new Transaction()
     array.arraySet(tx._bytes, bytes)
@@ -78,7 +78,7 @@ class Transaction {
   }
 
   /**
-   * Хэш транзакции, sha256 от всех 150 байт.
+   * Хэш (txid) транзакции.
    * @returns {number[]}
    * @example
    * let hash = new Transaction().getHash()
@@ -268,7 +268,7 @@ class Transaction {
    * Префикс адресов, принадлежащих структуре.\
    * Доступно только для CreateStructure и UpdateStructure.
    * @returns {string}
-   * @returns {Error}
+   * @throws {Error}
    * @example
    * let trx = new Transaction().setVersion(Transaction.CreateStructure)
    * let prefix = trx.getPrefix()
@@ -418,7 +418,7 @@ class Transaction {
         return
       }
     }
-    throw new Error('incorrect version')
+    throw new Error('invalid version')
   }
 }
 /**
@@ -466,7 +466,7 @@ Transaction.Basic = 1
  *   .setVersion(Transaction.CreateStructure)
  *   .setSender(sender)
  *   .setPrefix('aaa')
- *   .setName('🙂')
+ *   .setName('My Struct 🙂')
  *   .setProfitPercent(100)
  *   .setFeePercent(0)
  *   .sign(secKey)
@@ -483,7 +483,7 @@ Transaction.CreateStructure = 2
  *   .setVersion(Transaction.UpdateStructure)
  *   .setSender(sender)
  *   .setPrefix('aaa')
- *   .setName('🙂')
+ *   .setName('My New Struct 😎')
  *   .setProfitPercent(500)
  *   .setFeePercent(2000)
  *   .sign(secKey)
